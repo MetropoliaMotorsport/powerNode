@@ -18,7 +18,14 @@ FDCAN_RxHeaderTypeDef RxHeader;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
 
-//global varaiables
+//definitions
+const pinPort DIO3 = { .PORT=GPIOB, .PIN=GPIO_PIN_3 };
+const pinPort DIO4 = { .PORT=GPIOB, .PIN=GPIO_PIN_4 };
+const pinPort DIO5 = { .PORT=GPIOB, .PIN=GPIO_PIN_5 };
+const pinPort DIO6 = { .PORT=GPIOB, .PIN=GPIO_PIN_6 };
+const pinPort DIO15 = { .PORT=GPIOA, .PIN=GPIO_PIN_15 };
+
+//global variables
 
 
 int main(void)
@@ -35,8 +42,10 @@ int main(void)
 
 	while (1)
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		HAL_Delay(100);
+		//example commands stored here
+		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
+
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
 	}
 }
 
@@ -316,10 +325,10 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 
-	GPIO_InitStruct.Pin = GPIO_PIN_5;
+	GPIO_InitStruct.Pin = DIO5.PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	HAL_GPIO_Init(DIO5.PORT, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 4 */
