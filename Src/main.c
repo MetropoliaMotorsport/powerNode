@@ -9,6 +9,9 @@ static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN1_Init(void);
 
+void Flash_Write(uint32_t, uint32_t, uint64_t[256], int);
+uint32_t Flash_Read(uint32_t);
+
 //type definitions
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
@@ -34,6 +37,15 @@ int main(void)
 
 	SystemClock_Config();
 
+	if(Flash_Read(FLASH_PAGE_63)==0xFFFFFFFF) //initialize the flash to avoid errors
+	{
+		uint64_t data[256] = {0};
+
+		data[TEMP_POS]=500;
+
+		Flash_Write(FLASH_PAGE_63, 63, data, 1);
+	}
+
 	MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_ADC1_Init();
@@ -45,7 +57,11 @@ int main(void)
 		//example commands stored here
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
 
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		volatile uint64_t address63=FLASH_PAGE_63+(0x04*TEMP_POS);
+		volatile uint32_t x63=Flash_Read(address63);
+		HAL_Delay(x63);
+		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
 	}
 }
 
@@ -335,16 +351,70 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
+
+void Flash_Write(uint32_t Flash_Address, uint32_t Page, uint64_t Flash_Data[256], int Data_Words)
+{
+	FLASH_EraseInitTypeDef pEraseInit;
+	uint32_t pError = 0;
+
+	pEraseInit.Page = Page;
+	pEraseInit.NbPages = 1;
+	pEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
+
+	__disable_irq();
+	if(HAL_FLASH_Unlock() != HAL_OK)
+	{
+		__enable_irq();
+		Error_Handler();
+	}
+
+	while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != 0) { }
+
+	if(HAL_FLASHEx_Erase(&pEraseInit, &pError) != HAL_OK)
+	{
+		__enable_irq();
+		while(1)
+		{
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+			HAL_Delay(33);
+		}
+	}
+
+	for(int i=0; i<Data_Words; i++)
+	{
+			if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Flash_Address+i*0x08, Flash_Data[i]) != HAL_OK)
+			{
+				__enable_irq();
+				Error_Handler();
+			}
+		while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != 0) { }
+	}
+
+	if(HAL_FLASH_Lock() != HAL_OK)
+	{
+		__enable_irq();
+		Error_Handler();
+	}
+	__enable_irq();
+}
+
+uint32_t Flash_Read(uint32_t Flash_Address)
+{
+	return *(uint32_t*)Flash_Address;
+}
+
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-
-  /* USER CODE END Error_Handler_Debug */
+	while(1)
+	{
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+		HAL_Delay(33);
+	}
 }
 
 #ifdef  USE_FULL_ASSERT
