@@ -29,6 +29,18 @@ const pinPort DIO5 = { .PORT=GPIOB, .PIN=GPIO_PIN_5 };
 const pinPort DIO6 = { .PORT=GPIOB, .PIN=GPIO_PIN_6 };
 const pinPort DIO15 = { .PORT=GPIOA, .PIN=GPIO_PIN_15 };
 
+const pinPort SEL0 = { .PORT=GPIOA, .PIN=GPIO_PIN_9 };
+const pinPort SEL1 = { .PORT=GPIOB, .PIN=GPIO_PIN_0 };
+const pinPort U5IN0 = { .PORT=GPIOA, .PIN=GPIO_PIN_10 };
+const pinPort U5IN1 = { .PORT=GPIOA, .PIN=GPIO_PIN_7 };
+const pinPort U5MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_2 };
+const pinPort U6IN0 = { .PORT=GPIOA, .PIN=GPIO_PIN_6 };
+const pinPort U6IN1 = { .PORT=GPIOA, .PIN=GPIO_PIN_5 };
+const pinPort U6MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_1 };
+const pinPort U7IN0 = { .PORT=GPIOA, .PIN=GPIO_PIN_4 };
+const pinPort U7IN1 = { .PORT=GPIOA, .PIN=GPIO_PIN_3 };
+const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
+
 //global configuration variables
 uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
 uint32_t Digital_In_Interrupt_EN;
@@ -88,7 +100,14 @@ int main(void)
 		volatile uint32_t d=HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN);
 		volatile uint32_t e=HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN);
 
+//TODO: test high side drivers with this, make sure they can handle at least two amps each and let pedro know
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		HAL_GPIO_TogglePin(U5IN0.Port, U5IN0.Pin);
+		HAL_GPIO_TogglePin(U5IN1.Port, U5IN1.Pin);
+		HAL_GPIO_TogglePin(U6IN0.Port, U6IN0.Pin);
+		HAL_GPIO_TogglePin(U6IN1.Port, U6IN1.Pin);
+		HAL_GPIO_TogglePin(U7IN0.Port, U7IN0.Pin);
+		HAL_GPIO_TogglePin(U7IN1.Port, U7IN1.Pin);
 		HAL_Delay((a+b+c+d+e)*100);
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
 	}
@@ -360,13 +379,31 @@ static void MX_GPIO_Init(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 
-	//led pin should always be an output
-	HAL_GPIO_WritePin(LED.PORT, LED.PIN, GPIO_PIN_RESET);
-	GPIO_InitStruct.Pin = LED.PIN;
+	//led pin, sel pins, and in pins should always be outputs
+	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
+	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
+	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
+	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
+	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
+	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, 0);
+	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
+	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
+//TODO: check that IN pins should start low, if they should start high then start them high here
+
+	//all outputs on portA assigned here
+	GPIO_InitStruct.Pin = LED.PIN|SEL0.Pin|U5IN0.Pin|U5IN1.Pin|U6IN0.Pin|U6IN1.Pin|U7IN0.Pin|U7IN1.Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(LED.PORT, &GPIO_InitStruct);
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	//all outputs on portB assigned here
+	GPIO_InitStruct.Pin = SEL1.Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitSctruct);
 
 
 	if(Digital_In_EN && (1<<0))
