@@ -22,11 +22,20 @@ DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
 
 //definitions
+const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
 const pinPort DIO3 = { .PORT=GPIOB, .PIN=GPIO_PIN_3 };
 const pinPort DIO4 = { .PORT=GPIOB, .PIN=GPIO_PIN_4 };
 const pinPort DIO5 = { .PORT=GPIOB, .PIN=GPIO_PIN_5 };
 const pinPort DIO6 = { .PORT=GPIOB, .PIN=GPIO_PIN_6 };
 const pinPort DIO15 = { .PORT=GPIOA, .PIN=GPIO_PIN_15 };
+
+//global configuration variables
+uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
+uint32_t Digital_In_Interrupt_EN;
+uint32_t Digital_In_Interrupt_Can_Id;
+uint32_t Digital_In_Interrupt_Switch_Power;
+uint32_t Digital_In_Interrupt_Change_PWM;
+//probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
 
@@ -41,9 +50,25 @@ int main(void)
 	{
 		uint64_t data[256] = {0};
 
-		data[TEMP_POS]=500;
+#if ID == 1
+//TODO: setup code for separate nodes
+#else //catch everything that is not a proper ID, give it settings that the debug board would get
+//TODO: this code should start as all digital inputs and all power outputs disabled by default
+
+		Digital_In_EN = 0b00011111;
+
+		//maybe create separate function for concatonating everything and writing it
+
+		data[DIGITAL_IN_POS]=0;
+#endif
 
 		Flash_Write(FLASH_PAGE_63, 63, data, 1);
+	}
+	else
+	{
+//TODO: this should read from flash, but for the moment I'll just write things here so I don't need to wipe the flash from st link utilty to test anything
+
+		Digital_In_EN = 0b00011111;
 	}
 
 	MX_GPIO_Init();
@@ -57,10 +82,14 @@ int main(void)
 		//example commands stored here
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
 
+		volatile uint32_t a=HAL_GPIO_ReadPin(DIO3.PORT, DIO3.PIN);
+		volatile uint32_t b=HAL_GPIO_ReadPin(DIO4.PORT, DIO4.PIN);
+		volatile uint32_t c=HAL_GPIO_ReadPin(DIO5.PORT, DIO5.PIN);
+		volatile uint32_t d=HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN);
+		volatile uint32_t e=HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN);
+
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		volatile uint64_t address63=FLASH_PAGE_63+(0x04*TEMP_POS);
-		volatile uint32_t x63=Flash_Read(address63);
-		HAL_Delay(x63);
+		HAL_Delay((a+b+c+d+e)*100);
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
 	}
 }
@@ -331,25 +360,80 @@ static void MX_GPIO_Init(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
-
-
-	GPIO_InitStruct.Pin = GPIO_PIN_8;
+	//led pin should always be an output
+	HAL_GPIO_WritePin(LED.PORT, LED.PIN, GPIO_PIN_RESET);
+	GPIO_InitStruct.Pin = LED.PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	HAL_GPIO_Init(LED.PORT, &GPIO_InitStruct);
 
 
-	GPIO_InitStruct.Pin = DIO5.PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(DIO5.PORT, &GPIO_InitStruct);
+	if(Digital_In_EN && (1<<0))
+	{
+		HAL_GPIO_WritePin(DIO3.PORT, DIO3.PIN, GPIO_PIN_RESET);
+		GPIO_InitStruct.Pin = DIO3.PIN;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(DIO3.PORT, &GPIO_InitStruct);
+	}
+	else if (1)
+	{
+		//here we configure pins intended for PWM purposes
+	}
+
+	if(Digital_In_EN && (1<<1))
+	{
+		HAL_GPIO_WritePin(DIO4.PORT, DIO4.PIN, GPIO_PIN_RESET);
+		GPIO_InitStruct.Pin = DIO4.PIN;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(DIO4.PORT, &GPIO_InitStruct);
+	}
+	else if (1)
+	{
+		//here we configure pins intended for PWM purposes
+	}
+
+	if(Digital_In_EN && (1<<2))
+	{
+		HAL_GPIO_WritePin(DIO5.PORT, DIO5.PIN, GPIO_PIN_RESET);
+		GPIO_InitStruct.Pin = DIO5.PIN;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(DIO5.PORT, &GPIO_InitStruct);
+	}
+	else if (1)
+	{
+		//here we configure pins intended for PWM purposes
+	}
+
+	if(Digital_In_EN && (1<<3))
+	{
+		HAL_GPIO_WritePin(DIO6.PORT, DIO6.PIN, GPIO_PIN_RESET);
+		GPIO_InitStruct.Pin = DIO6.PIN;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(DIO6.PORT, &GPIO_InitStruct);
+	}
+	else if (1)
+	{
+		//here we configure pins intended for PWM purposes
+	}
+
+	if(Digital_In_EN && (1<<4))
+	{
+		HAL_GPIO_WritePin(DIO15.PORT, DIO15.PIN, GPIO_PIN_RESET);
+		GPIO_InitStruct.Pin = DIO15.PIN;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(DIO15.PORT, &GPIO_InitStruct);
+	}
+	else if (1)
+	{
+		//here we configure pins intended for PWM purposes
+	}
 }
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
 
 
 void Flash_Write(uint32_t Flash_Address, uint32_t Page, uint64_t Flash_Data[256], int Data_Words)

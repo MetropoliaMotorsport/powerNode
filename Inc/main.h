@@ -11,6 +11,10 @@ extern "C" {
 void Error_Handler(void);
 
 
+//ID definition
+#define ID 0
+
+
 //structs
 typedef struct pinPort
 {
@@ -27,8 +31,9 @@ extern const pinPort DIO15;
 
 
 //flash address definitions
-#define TEMP_POS 0
-#define TEMP (*(uint32_t*)(FLASH_PAGE_63+0x8*TEMP_POS))
+#define DIGITAL_IN_POS 0 //bytes: interrupt (falling edge)->PWM DC, interrupt (rising edge)->PWM DC, interrupt (falling edge)->power switch, interrupt (rising edge)->power switch, interrupt->can id high, interrupt->can id low, interrupt EN, EN
+//TODO: add PWM DC (also to confirugation) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
+#define DIGITAL_IN (*(uint32_t*)(FLASH_PAGE_63+0x8*DIGITAL_IN_POS))
 
 //flash page definitions
 #define FLASH_PAGE_0 0x8000000
