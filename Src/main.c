@@ -24,7 +24,7 @@ DMA_HandleTypeDef hdma_adc2;
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
 const pinPort DIO3 = { .PORT=GPIOB, .PIN=GPIO_PIN_3 };
-const pinPort DIO4 = { .PORT=GPIOB, .PIN=GPIO_PIN_4 };
+const pinPort DIO4 = { .PORT=GPIOB, .PIN=GPIO_PIN_4 }; //DON'T USE THIS PIN AS AN INPUT AS MICROCONTROLLER SEEMS TO HAVE COUPLING TO PA10 WITH IT
 const pinPort DIO5 = { .PORT=GPIOB, .PIN=GPIO_PIN_5 };
 const pinPort DIO6 = { .PORT=GPIOB, .PIN=GPIO_PIN_6 };
 const pinPort DIO15 = { .PORT=GPIOA, .PIN=GPIO_PIN_15 };
@@ -63,16 +63,26 @@ int main(void)
 		uint64_t data[256] = {0};
 
 #if ID == 1
+
 //TODO: setup code for separate nodes
+
 #else //catch everything that is not a proper ID, give it settings that the debug board would get
-//TODO: this code should start as all digital inputs and all power outputs disabled by default
 
-		Digital_In_EN = 0b00011111;
+#if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
-		//maybe create separate function for concatonating everything and writing it
+		Digital_IN_EN = 0xb00000000;
 
-		data[DIGITAL_IN_POS]=0;
+#else //in this case we test digital inputs
+
+		Digital_In_EN = 0b00011101;
+
 #endif
+
+
+
+#endif
+
+		data[DIGITAL_IN_POS]=0; //TODO: set this to be the things it should be for digital_in
 
 		Flash_Write(FLASH_PAGE_63, 63, data, 1);
 	}
@@ -80,7 +90,7 @@ int main(void)
 	{
 //TODO: this should read from flash, but for the moment I'll just write things here so I don't need to wipe the flash from st link utilty to test anything
 
-		Digital_In_EN = 0b00011111;
+		Digital_In_EN = 0b00000000;
 	}
 
 	MX_GPIO_Init();
@@ -94,22 +104,15 @@ int main(void)
 		//example commands stored here
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
 
-		volatile uint32_t a=HAL_GPIO_ReadPin(DIO3.PORT, DIO3.PIN);
-		volatile uint32_t b=HAL_GPIO_ReadPin(DIO4.PORT, DIO4.PIN);
-		volatile uint32_t c=HAL_GPIO_ReadPin(DIO5.PORT, DIO5.PIN);
-		volatile uint32_t d=HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN);
-		volatile uint32_t e=HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN);
-
 //TODO: test high side drivers with this, make sure they can handle at least two amps each and let pedro know
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		HAL_GPIO_TogglePin(U5IN0.Port, U5IN0.Pin);
-		HAL_GPIO_TogglePin(U5IN1.Port, U5IN1.Pin);
-		HAL_GPIO_TogglePin(U6IN0.Port, U6IN0.Pin);
-		HAL_GPIO_TogglePin(U6IN1.Port, U6IN1.Pin);
-		HAL_GPIO_TogglePin(U7IN0.Port, U7IN0.Pin);
-		HAL_GPIO_TogglePin(U7IN1.Port, U7IN1.Pin);
-		HAL_Delay((a+b+c+d+e)*100);
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //lets setup and test all 5 inputs //then lets set it up to be configurable by flash, so we need to write flash already
+		HAL_GPIO_TogglePin(U5IN0.PORT, U5IN0.PIN);
+		HAL_GPIO_TogglePin(U5IN1.PORT, U5IN1.PIN);
+		HAL_GPIO_TogglePin(U6IN0.PORT, U6IN0.PIN);
+		HAL_GPIO_TogglePin(U6IN1.PORT, U6IN1.PIN);
+		HAL_GPIO_TogglePin(U7IN0.PORT, U7IN0.PIN);
+		HAL_GPIO_TogglePin(U7IN1.PORT, U7IN1.PIN);
+		HAL_Delay(100);
 	}
 }
 
@@ -392,18 +395,18 @@ static void MX_GPIO_Init(void)
 //TODO: check that IN pins should start low, if they should start high then start them high here
 
 	//all outputs on portA assigned here
-	GPIO_InitStruct.Pin = LED.PIN|SEL0.Pin|U5IN0.Pin|U5IN1.Pin|U6IN0.Pin|U6IN1.Pin|U7IN0.Pin|U7IN1.Pin;
+	GPIO_InitStruct.Pin = LED.PIN|SEL0.PIN|U5IN0.PIN|U5IN1.PIN|U6IN0.PIN|U6IN1.PIN|U7IN0.PIN|U7IN1.PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	//all outputs on portB assigned here
-	GPIO_InitStruct.Pin = SEL1.Pin;
+	GPIO_InitStruct.Pin = SEL1.PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitSctruct);
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 
 	if(Digital_In_EN && (1<<0))

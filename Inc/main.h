@@ -14,6 +14,9 @@ void Error_Handler(void);
 //ID definition
 #define ID 0
 
+//debugging definitions
+#define TEST_PWN_NOT_INPUT 1
+
 
 //structs
 typedef struct pinPort
@@ -29,10 +32,22 @@ extern const pinPort DIO5;
 extern const pinPort DIO6;
 extern const pinPort DIO15;
 
+extern const pinPort SEL0;
+const pinPort SEL1;
+const pinPort U5IN0;
+const pinPort U5IN1;
+const pinPort U5MULTI;
+const pinPort U6IN0;
+const pinPort U6IN1;
+const pinPort U6MULTI;
+const pinPort U7IN0;
+const pinPort U7IN1;
+const pinPort U7MULTI;
+
 
 //flash address definitions
 #define DIGITAL_IN_POS 0 //bytes: interrupt (falling edge)->PWM DC, interrupt (rising edge)->PWM DC, interrupt (falling edge)->power switch, interrupt (rising edge)->power switch, interrupt->can id high, interrupt->can id low, interrupt EN, EN
-//TODO: add PWM DC (also to confirugation) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
+//TODO: add PWM DC (also to configuration) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
 #define DIGITAL_IN (*(uint32_t*)(FLASH_PAGE_63+0x8*DIGITAL_IN_POS))
 
 //flash page definitions
