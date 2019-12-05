@@ -45,10 +45,13 @@ const pinPort U7IN1;
 const pinPort U7MULTI;
 
 
+//more details about what is stored in each word can be found in main before the while(1) loop
 //flash address definitions //don't use flash_read function, it is not needed if thing are defined as pointers
-#define DIGITAL_IN_POS 0 //bytes: interrupt (falling edge)->PWM DC, interrupt (rising edge)->PWM DC, interrupt (falling edge)->power switch, interrupt (rising edge)->power switch, interrupt->can id high, interrupt->can id low, interrupt EN, EN
+#define DIGITAL_IN_0_POS 0 //bytes: interrupt (falling edge)->PWM DC, interrupt (rising edge)->PWM DC, interrupt (falling edge)->power switch, interrupt (rising edge)->power switch, interrupt->can id high, interrupt->can id low, interrupt EN, EN
 //TODO: add PWM DC (also to configuration) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
-#define DIGITAL_IN (*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_POS))
+#define DIGITAL_IN_0 (*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
+#define DIGITAL_IN_1_POS 1
+#define DIGITAL_IN_1 (*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
 
 //flash page definitions
 #define FLASH_PAGE_0 0x8000000

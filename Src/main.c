@@ -45,8 +45,12 @@ const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
 uint32_t Digital_In_Interrupt_EN;
 uint32_t Digital_In_Interrupt_Can_Id;
-uint32_t Digital_In_Interrupt_Switch_Power;
-uint32_t Digital_In_Interrupt_Change_PWM;
+uint32_t Digital_In_Interrupt_Can_Rising;
+uint32_t Digital_In_Interrupt_Can_Falling;
+uint32_t Digital_In_Interrupt_Power_Rising;
+uint32_t Digital_In_Interrupt_Power_Falling;
+uint32_t Digital_In_Interrupt_PWM_Rising;
+uint32_t Digital_In_Interrupt_PWM_Falling;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -62,37 +66,37 @@ int main(void)
 	{
 		uint32_t data[512] = {0};
 
+
 #if ID == 1
 
 //TODO: setup code for separate nodes
 
 #else //catch everything that is not a proper ID, give it settings that the debug board would get
 
-#if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
+	#if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
 		Digital_In_EN = 0xb00000000;
 
-#else //in this case we test digital inputs
+	#else //in this case we test digital inputs
 
-		Digital_In_EN = 0b00011101;
+		Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 
-#endif
-
-
+	#endif
 
 #endif
 
-		data[DIGITAL_IN_POS]=500; //TODO: set this to be the things it should be for digital_in
-		data[1]=0xAA;
+		//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
+		data[DIGITAL_IN_0_POS]=Digital_In_EN+(Digital_In_Interrupt_EN<<8)+(Digital_In_Interrupt_Can_Rising<<16)+(Digital_In_Interrupt_Can_Falling<<24); //TODO: set this to be the things it should be for digital_in
+		//byte: [can ID low], [can ID high], [enable rising edge switch power], [enable falling edge switch power]
+		data[DIGITAL_IN_1_POS]=(0)+(0)+(Digital_In_Interrupt_Power_Rising<<16)+(Digital_In_Interrupt_Power_Falling<<24);
 
 		Flash_Write(FLASH_PAGE_63, 63, data, 1);
 	}
-	else
+	else //if flash is not blank read in values from flash
 	{
-//TODO: this should read from flash, but for the moment I'll just write things here so I don't need to wipe the flash from st link utilty to test anything
-
-		Digital_In_EN = 0b00000000;
+		Digital_In_EN = ((0b00011101<<0)&DIGITAL_IN_0)>>0; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	}
+
 
 	MX_GPIO_Init();
 	MX_DMA_Init();
@@ -107,13 +111,16 @@ int main(void)
 
 //TODO: test high side drivers with this, make sure they can handle at least two amps each and let pedro know
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		HAL_GPIO_TogglePin(U5IN0.PORT, U5IN0.PIN);
+		HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 1);
 		HAL_GPIO_TogglePin(U5IN1.PORT, U5IN1.PIN);
 		HAL_GPIO_TogglePin(U6IN0.PORT, U6IN0.PIN);
+		HAL_Delay(5);
 		HAL_GPIO_TogglePin(U6IN1.PORT, U6IN1.PIN);
+		HAL_Delay(5);
 		HAL_GPIO_TogglePin(U7IN0.PORT, U7IN0.PIN);
+		HAL_Delay(5);
 		HAL_GPIO_TogglePin(U7IN1.PORT, U7IN1.PIN);
-		HAL_Delay(DIGITAL_IN);
+		HAL_Delay(5);
 	}
 }
 
