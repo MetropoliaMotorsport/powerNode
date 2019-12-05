@@ -9,7 +9,7 @@ static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN1_Init(void);
 
-void Flash_Write(uint32_t, uint32_t, uint64_t[256], int);
+void Flash_Write(uint32_t, uint32_t, uint32_t[512], int);
 uint32_t Flash_Read(uint32_t);
 
 //type definitions
@@ -60,7 +60,7 @@ int main(void)
 
 	if(Flash_Read(FLASH_PAGE_63)==0xFFFFFFFF) //initialize the flash to avoid errors
 	{
-		uint64_t data[256] = {0};
+		uint32_t data[512] = {0};
 
 #if ID == 1
 
@@ -70,7 +70,7 @@ int main(void)
 
 #if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
-		Digital_IN_EN = 0xb00000000;
+		Digital_In_EN = 0xb00000000;
 
 #else //in this case we test digital inputs
 
@@ -82,7 +82,8 @@ int main(void)
 
 #endif
 
-		data[DIGITAL_IN_POS]=0; //TODO: set this to be the things it should be for digital_in
+		data[DIGITAL_IN_POS]=500; //TODO: set this to be the things it should be for digital_in
+		data[1]=0xAA;
 
 		Flash_Write(FLASH_PAGE_63, 63, data, 1);
 	}
@@ -112,7 +113,7 @@ int main(void)
 		HAL_GPIO_TogglePin(U6IN1.PORT, U6IN1.PIN);
 		HAL_GPIO_TogglePin(U7IN0.PORT, U7IN0.PIN);
 		HAL_GPIO_TogglePin(U7IN1.PORT, U7IN1.PIN);
-		HAL_Delay(100);
+		HAL_Delay(DIGITAL_IN);
 	}
 }
 
@@ -476,7 +477,7 @@ static void MX_GPIO_Init(void)
 }
 
 
-void Flash_Write(uint32_t Flash_Address, uint32_t Page, uint64_t Flash_Data[256], int Data_Words)
+void Flash_Write(uint32_t Flash_Address, uint32_t Page, uint32_t Flash_Data[512], int Data_Words)
 {
 	FLASH_EraseInitTypeDef pEraseInit;
 	uint32_t pError = 0;
@@ -504,9 +505,16 @@ void Flash_Write(uint32_t Flash_Address, uint32_t Page, uint64_t Flash_Data[256]
 		}
 	}
 
-	for(int i=0; i<Data_Words; i++)
+	uint64_t data;
+	for(int i=0; i<((Data_Words+1)/2); i++) //here we want integer division that rounds up instead of down
 	{
-			if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Flash_Address+i*0x08, Flash_Data[i]) != HAL_OK)
+		data=(uint64_t)Flash_Data[i*2];
+		if((i*2)+1<Data_Words)
+		{
+			data+=((uint64_t)Flash_Data[i*2+1]<<32);
+		}
+
+			if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, Flash_Address+i*0x08, data) != HAL_OK)
 			{
 				__enable_irq();
 				Error_Handler();
