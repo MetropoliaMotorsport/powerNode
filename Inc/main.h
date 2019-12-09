@@ -44,14 +44,33 @@ const pinPort U7IN0;
 const pinPort U7IN1;
 const pinPort U7MULTI;
 
+#define CANID_CONFIG 0x700;
+#define CANID_ERROR 0x600;
+
 
 //more details about what is stored in each word can be found in main before the while(1) loop
 //flash address definitions //don't use flash_read function, it is not needed if thing are defined as pointers
-#define DIGITAL_IN_0_POS 0 //bytes: interrupt (falling edge)->PWM DC, interrupt (rising edge)->PWM DC, interrupt (falling edge)->power switch, interrupt (rising edge)->power switch, interrupt->can id high, interrupt->can id low, interrupt EN, EN
+#define DIGITAL_IN_0_POS	0
 //TODO: add PWM DC (also to configuration) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
-#define DIGITAL_IN_0 (*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
-#define DIGITAL_IN_1_POS 1
-#define DIGITAL_IN_1 (*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
+#define DIGITAL_IN_0		(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
+#define DIGITAL_IN_1_POS	(DIGITAL_IN_0_POS+1)
+#define DIGITAL_IN_1		(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
+#define CAN_ID_0_POS		(DIGITAL_IN_1_POS+1)
+#define CAN_ID_0			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_0_POS))
+#define CAN_ID_1_POS		(CAN_ID_0_POS+1)
+#define CAN_ID_1			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_1_POS))
+#define CAN_ID_2_POS		(CAN_ID_1_POS+1)
+#define CAN_ID_2			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_2_POS))
+#define CAN_ID_3_POS		(CAN_ID_2_POS+1)
+#define CAN_ID_3			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_3_POS))
+#define CAN_ID_4_POS		(CAN_ID_3_POS+1)
+#define CAN_ID_4			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_4_POS))
+#define CAN_ID_5_POS		(CAN_ID_4_POS+1)
+#define CAN_ID_5			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_5_POS))
+#define CAN_ID_6_POS		(CAN_ID_5_POS+1)
+#define CAN_ID_6			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_6_POS))
+#define CAN_ID_7_POS		(CAN_ID_6_POS+1)
+#define CAN_ID_7			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_7_POS))
 
 //flash page definitions
 #define FLASH_PAGE_0 0x8000000

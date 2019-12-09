@@ -2,6 +2,8 @@
 #include "main.h"
 
 //function prototypes
+uint32_t CanSend(uint32_t);
+
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
@@ -12,11 +14,11 @@ static void MX_FDCAN1_Init(void);
 void Flash_Write(uint32_t, uint32_t, uint32_t[512], int);
 uint32_t Flash_Read(uint32_t);
 
-//type definitions
+//type handlers
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 FDCAN_HandleTypeDef hfdcan;
-FDCAN_TxHeaderTypeDef TxHeader;
+//FDCAN_TxHeaderTypeDef TxHeader; //only use this locally instead
 FDCAN_RxHeaderTypeDef RxHeader;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
@@ -43,14 +45,15 @@ const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 
 //global configuration variables
 uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-uint32_t Digital_In_Interrupt_EN;
-uint32_t Digital_In_Interrupt_Can_Id;
-uint32_t Digital_In_Interrupt_Can_Rising;
-uint32_t Digital_In_Interrupt_Can_Falling;
-uint32_t Digital_In_Interrupt_Power_Rising;
-uint32_t Digital_In_Interrupt_Power_Falling;
-uint32_t Digital_In_Interrupt_PWM_Rising;
-uint32_t Digital_In_Interrupt_PWM_Falling;
+uint32_t Digital_In_Interrupt_EN; //TODO
+uint32_t Digital_In_Interrupt_Can_Rising; //TODO
+uint32_t Digital_In_Interrupt_Can_Falling; //TODO
+uint32_t Digital_In_Interrupt_Power_Rising; //TODO
+uint32_t Digital_In_Interrupt_Power_Falling; //TODO
+uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
+uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
+uint32_t Can_IDs[8];
+uint32_t Can_DLCs[8];
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -83,18 +86,60 @@ int main(void)
 
 	#endif
 
+		Can_IDs[0] = 0x0F;
+		Can_DLCs[0] = 1;
+		Can_IDs[1] = 0xFF;
+		Can_DLCs[1] = 0;
+		Can_IDs[2] = -1;
+		Can_DLCs[2] = 4;
+		Can_IDs[3] = -1;
+		Can_DLCs[3] = 0;
+		Can_IDs[4] = -1;
+		Can_DLCs[4] = 0;
+		Can_IDs[5] = -1;
+		Can_DLCs[5] = 0;
+		Can_IDs[6] = -1;
+		Can_DLCs[6] = 0;
+		Can_IDs[7] = -1;
+		Can_DLCs[7] = 0;
 #endif
 
 		//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
 		data[DIGITAL_IN_0_POS]=Digital_In_EN+(Digital_In_Interrupt_EN<<8)+(Digital_In_Interrupt_Can_Rising<<16)+(Digital_In_Interrupt_Can_Falling<<24); //TODO: set this to be the things it should be for digital_in
-		//byte: [can ID low], [can ID high], [enable rising edge switch power], [enable falling edge switch power]
+		//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
 		data[DIGITAL_IN_1_POS]=(0)+(0)+(Digital_In_Interrupt_Power_Rising<<16)+(Digital_In_Interrupt_Power_Falling<<24);
+		//bytes: [unused], [can dlc], [can id high], [can id low] x8 //any can id outside the valid range of 0 to 2047 should be treated as disabled
+		data[CAN_ID_0_POS]=(0)+(Can_DLCs[0]<<16)+(Can_IDs[0]);
+		data[CAN_ID_1_POS]=(0)+(Can_DLCs[1]<<16)+(Can_IDs[1]);
+		data[CAN_ID_2_POS]=(0)+(Can_DLCs[2]<<16)+(Can_IDs[2]);
+		data[CAN_ID_3_POS]=(0)+(Can_DLCs[3]<<16)+(Can_IDs[3]);
+		data[CAN_ID_4_POS]=(0)+(Can_DLCs[4]<<16)+(Can_IDs[4]);
+		data[CAN_ID_5_POS]=(0)+(Can_DLCs[5]<<16)+(Can_IDs[5]);
+		data[CAN_ID_6_POS]=(0)+(Can_DLCs[6]<<16)+(Can_IDs[6]);
+		data[CAN_ID_7_POS]=(0)+(Can_DLCs[7]<<16)+(Can_IDs[7]);
 
 		Flash_Write(FLASH_PAGE_63, 63, data, 1);
 	}
 	else //if flash is not blank read in values from flash
 	{
-		Digital_In_EN = ((0b00011101<<0)&DIGITAL_IN_0)>>0; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+		Digital_In_EN = (0b00011101&(DIGITAL_IN_0>>0)); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+
+		Can_IDs[0] = ((CAN_ID_0>>0)&&0xFFFF);
+		Can_DLCs[0] = ((CAN_ID_0>>16)&0xFF);
+		Can_IDs[1] = ((CAN_ID_1>>0)&&0xFFFF);
+		Can_DLCs[1] = ((CAN_ID_1>>16)&0xFF);
+		Can_IDs[2] = ((CAN_ID_2>>0)&&0xFFFF);
+		Can_DLCs[2] = ((CAN_ID_2>>16)&0xFF);
+		Can_IDs[3] = ((CAN_ID_3>>0)&&0xFFFF);
+		Can_DLCs[3] = ((CAN_ID_3>>16)&0xFF);
+		Can_IDs[4] = ((CAN_ID_4>>0)&&0xFFFF);
+		Can_DLCs[4] = ((CAN_ID_4>>16)&0xFF);
+		Can_IDs[5] = ((CAN_ID_5>>0)&&0xFFFF);
+		Can_DLCs[5] = ((CAN_ID_5>>16)&0xFF);
+		Can_IDs[6] = ((CAN_ID_6>>0)&&0xFFFF);
+		Can_DLCs[6] = ((CAN_ID_6>>16)&0xFF);
+		Can_IDs[7] = ((CAN_ID_7>>0)&&0xFFFF);
+		Can_DLCs[7] = ((CAN_ID_7>>16)&0xFF);
 	}
 
 
@@ -104,23 +149,101 @@ int main(void)
 	MX_ADC2_Init();
 	MX_FDCAN1_Init();
 
-	while (1)
+	if(HAL_FDCAN_Start(&hfdcan) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if(HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	while(1)
 	{
 		//example commands stored here
 		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
 
-//TODO: test high side drivers with this, make sure they can handle at least two amps each and let pedro know
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 1);
-		HAL_GPIO_TogglePin(U5IN1.PORT, U5IN1.PIN);
-		HAL_GPIO_TogglePin(U6IN0.PORT, U6IN0.PIN);
-		HAL_Delay(5);
-		HAL_GPIO_TogglePin(U6IN1.PORT, U6IN1.PIN);
-		HAL_Delay(5);
-		HAL_GPIO_TogglePin(U7IN0.PORT, U7IN0.PIN);
-		HAL_Delay(5);
-		HAL_GPIO_TogglePin(U7IN1.PORT, U7IN1.PIN);
-		HAL_Delay(5);
+		for(int i=0; i<8; i++)
+			{
+			CanSend(i);
+			}
+		HAL_Delay(133);
+//TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
+	}
+}
+
+
+uint32_t CanSend(uint32_t message)
+{
+	//TODO: maybe have warning states based on these if statements
+	if(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
+	{
+		return -1;
+	}
+
+	if(Can_IDs[message]>2047)
+	{
+		return -1;
+		//TODO: for sure we want warning for trying to send disabled message
+	}
+	else if(Can_DLCs[message]==0)
+	{
+		return -1;
+		//TODO: set warning for trying to send message with 0 DLC
+	}
+	else if(Can_DLCs[message]>4)
+	{
+		return -1;
+		//TODO: set warning for trying to send too long message
+	}
+
+	FDCAN_TxHeaderTypeDef TxHeader;
+
+	TxHeader.Identifier = Can_IDs[message];
+	TxHeader.DataLength = Can_DLCs[message];
+	uint8_t CANTxData[8] = { 0x88, 0xFF, 0x00, 0x01, 0x12, 0x11, 0x22, 0x23 }; //TODO: tx data based on values from flash somehow
+
+	TxHeader.IdType = FDCAN_STANDARD_ID;
+	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+	TxHeader.MessageMarker = 0;
+
+	if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
+	{
+		return -1;
+		//Error_Handler();
+	}
+
+	return 0;
+}
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+// moved everything to one fifo.  consider using both for prioritisation
+{
+	FDCAN_RxHeaderTypeDef RxHeader;
+	uint8_t CANRxData[8];
+
+	if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0)
+	{
+		if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, CANRxData) != HAL_OK)
+		{
+			Error_Handler();
+			//TODO: move to error can message
+		}
+
+
+		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
+
+
+
+
+		/*if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+		{
+			Error_Handler();
+		}*/
 	}
 }
 
@@ -142,7 +265,7 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
 	RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -153,7 +276,7 @@ void SystemClock_Config(void)
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_8) != HAL_OK)
+	if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_8) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -161,7 +284,7 @@ void SystemClock_Config(void)
 	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC12|RCC_PERIPHCLK_FDCAN;
 	PeriphClkInit.FdcanClockSelection = RCC_FDCANCLKSOURCE_HSE;
 	PeriphClkInit.Adc12ClockSelection = RCC_ADC12CLKSOURCE_SYSCLK;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+	if(HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -319,47 +442,48 @@ static void MX_ADC2_Init(void)
 
 }
 
-/**
-  * @brief FDCAN1 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_FDCAN1_Init(void)
 {
+	FDCAN_FilterTypeDef	sFilterConfig;
 
-  /* USER CODE BEGIN FDCAN1_Init 0 */
+	hfdcan.Instance = FDCAN1;
+	hfdcan.Init.ClockDivider = FDCAN_CLOCK_DIV1;
+	hfdcan.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+	hfdcan.Init.Mode = FDCAN_MODE_NORMAL;
+	hfdcan.Init.AutoRetransmission = DISABLE;
+	hfdcan.Init.TransmitPause = DISABLE;
+	hfdcan.Init.ProtocolException = DISABLE;
+	hfdcan.Init.NominalPrescaler = 1;
+	hfdcan.Init.NominalSyncJumpWidth = 1;
+	hfdcan.Init.NominalTimeSeg1 = 13;
+	hfdcan.Init.NominalTimeSeg2 = 2;
+	hfdcan.Init.DataPrescaler = 1;
+	hfdcan.Init.DataSyncJumpWidth = 1;
+	hfdcan.Init.DataTimeSeg1 = 1;
+	hfdcan.Init.DataTimeSeg2 = 1;
+	hfdcan.Init.StdFiltersNbr = 0;
+	hfdcan.Init.ExtFiltersNbr = 0;
+	hfdcan.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+	if (HAL_FDCAN_Init(&hfdcan) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END FDCAN1_Init 0 */
+	HAL_FDCAN_ConfigRxFifoOverwrite(&hfdcan, FDCAN_RX_FIFO0, FDCAN_RX_FIFO_OVERWRITE);
 
-  /* USER CODE BEGIN FDCAN1_Init 1 */
-
-  /* USER CODE END FDCAN1_Init 1 */
-  hfdcan.Instance = FDCAN1;
-  hfdcan.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-  hfdcan.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan.Init.AutoRetransmission = DISABLE;
-  hfdcan.Init.TransmitPause = DISABLE;
-  hfdcan.Init.ProtocolException = DISABLE;
-  hfdcan.Init.NominalPrescaler = 1;
-  hfdcan.Init.NominalSyncJumpWidth = 1;
-  hfdcan.Init.NominalTimeSeg1 = 13;
-  hfdcan.Init.NominalTimeSeg2 = 2;
-  hfdcan.Init.DataPrescaler = 1;
-  hfdcan.Init.DataSyncJumpWidth = 1;
-  hfdcan.Init.DataTimeSeg1 = 1;
-  hfdcan.Init.DataTimeSeg2 = 1;
-  hfdcan.Init.StdFiltersNbr = 0;
-  hfdcan.Init.ExtFiltersNbr = 0;
-  hfdcan.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
-  if (HAL_FDCAN_Init(&hfdcan) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN FDCAN1_Init 2 */
-
-  /* USER CODE END FDCAN1_Init 2 */
-
+	HAL_FDCAN_ConfigGlobalFilter(&hfdcan, FDCAN_REJECT, FDCAN_REJECT, DISABLE, DISABLE);
+	//only accept config / request can messages right now
+	//TODO: add a filter to accept whatever sync message is
+	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+	sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	sFilterConfig.FilterIndex = 1;
+	sFilterConfig.FilterID1 = CANID_CONFIG;
+	sFilterConfig.FilterID2 = CANID_CONFIG;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 /** 
@@ -390,7 +514,9 @@ static void MX_GPIO_Init(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 
-	//led pin, sel pins, and in pins should always be outputs
+	//led pin, sel pins, and in pins should always be outputs and should always be low before main is running
+	//TODO: somewhere else check and set the default for IN pins
+	//TODO: in analog reading section use SEL0 and SEL1 for multisense multiplexing
 	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
 	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
@@ -400,7 +526,6 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, 0);
 	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
 	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
-//TODO: check that IN pins should start low, if they should start high then start them high here
 
 	//all outputs on portA assigned here
 	GPIO_InitStruct.Pin = LED.PIN|SEL0.PIN|U5IN0.PIN|U5IN1.PIN|U6IN0.PIN|U6IN1.PIN|U7IN0.PIN|U7IN1.PIN;
@@ -543,10 +668,6 @@ uint32_t Flash_Read(uint32_t Flash_Address)
 }
 
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 void Error_Handler(void)
 {
 	while(1)
@@ -557,20 +678,9 @@ void Error_Handler(void)
 }
 
 #ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+
 void assert_failed(uint8_t *file, uint32_t line)
 { 
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+}
+#endif
