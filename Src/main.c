@@ -9,7 +9,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
-static void MX_FDCAN1_Init(void);
+static void MX_FDCAN_Init(void);
 
 void Flash_Write(uint32_t, uint32_t, uint32_t[512], int);
 uint32_t Flash_Read(uint32_t);
@@ -19,7 +19,7 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 FDCAN_HandleTypeDef hfdcan;
 //FDCAN_TxHeaderTypeDef TxHeader; //only use this locally instead
-FDCAN_RxHeaderTypeDef RxHeader;
+//FDCAN_RxHeaderTypeDef RxHeader; //also only use this locally
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
 
@@ -103,7 +103,7 @@ int main(void)
 		Can_IDs[7] = -1;
 		Can_DLCs[7] = 0;
 #endif
-
+//TODO: move this code to separate file and some different functions
 		//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
 		data[DIGITAL_IN_0_POS]=Digital_In_EN+(Digital_In_Interrupt_EN<<8)+(Digital_In_Interrupt_Can_Rising<<16)+(Digital_In_Interrupt_Can_Falling<<24); //TODO: set this to be the things it should be for digital_in
 		//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
@@ -147,16 +147,7 @@ int main(void)
 	MX_DMA_Init();
 	MX_ADC1_Init();
 	MX_ADC2_Init();
-	MX_FDCAN1_Init();
-
-	if(HAL_FDCAN_Start(&hfdcan) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if(HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	MX_FDCAN_Init();
 
 	while(1)
 	{
@@ -168,6 +159,7 @@ int main(void)
 			CanSend(i);
 			}
 		HAL_Delay(133);
+
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
@@ -234,18 +226,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			//TODO: move to error can message
 		}
 
-
 		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
-
-
-
-
-		/*if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-		{
-			Error_Handler();
-		}*/
+		//TODO: double check that id is CANID_CONFIG or CANID_SYNC
+		//TODO: put logic here for toggling output pins and pwm frequencies
+		//TODO: logic for writing config to flash
+		//TODO: put logic for sync message here
 	}
 }
+
 
 
 void SystemClock_Config(void)
@@ -442,7 +430,7 @@ static void MX_ADC2_Init(void)
 
 }
 
-static void MX_FDCAN1_Init(void)
+static void MX_FDCAN_Init(void)
 {
 	FDCAN_FilterTypeDef	sFilterConfig;
 
@@ -461,7 +449,7 @@ static void MX_FDCAN1_Init(void)
 	hfdcan.Init.DataSyncJumpWidth = 1;
 	hfdcan.Init.DataTimeSeg1 = 1;
 	hfdcan.Init.DataTimeSeg2 = 1;
-	hfdcan.Init.StdFiltersNbr = 0;
+	hfdcan.Init.StdFiltersNbr = 2;
 	hfdcan.Init.ExtFiltersNbr = 0;
 	hfdcan.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
 	if (HAL_FDCAN_Init(&hfdcan) != HAL_OK)
@@ -469,18 +457,49 @@ static void MX_FDCAN1_Init(void)
 		Error_Handler();
 	}
 
-	HAL_FDCAN_ConfigRxFifoOverwrite(&hfdcan, FDCAN_RX_FIFO0, FDCAN_RX_FIFO_OVERWRITE);
+	if (HAL_FDCAN_ConfigRxFifoOverwrite(&hfdcan, FDCAN_RX_FIFO0, FDCAN_RX_FIFO_OVERWRITE) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_FDCAN_ConfigRxFifoOverwrite(&hfdcan, FDCAN_RX_FIFO1, FDCAN_RX_FIFO_OVERWRITE) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-	HAL_FDCAN_ConfigGlobalFilter(&hfdcan, FDCAN_REJECT, FDCAN_REJECT, DISABLE, DISABLE);
-	//only accept config / request can messages right now
+	//only accept config/request can messages right now
 	//TODO: add a filter to accept whatever sync message is
 	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-	sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+	sFilterConfig.FilterIndex = 0;
+	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
 	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-	sFilterConfig.FilterIndex = 1;
 	sFilterConfig.FilterID1 = CANID_CONFIG;
-	sFilterConfig.FilterID2 = CANID_CONFIG;
+	sFilterConfig.FilterID2 = 0x7FF;
 	if (HAL_FDCAN_ConfigFilter(&hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+	sFilterConfig.FilterIndex = 1;
+	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	sFilterConfig.FilterID1 = CANID_SYNC;
+	sFilterConfig.FilterID2 = 0x7FF;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan, &sFilterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	if(HAL_FDCAN_Start(&hfdcan) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if(HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -672,7 +691,7 @@ void Error_Handler(void)
 {
 	while(1)
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
 		HAL_Delay(33);
 	}
 }

@@ -45,6 +45,7 @@ const pinPort U7IN1;
 const pinPort U7MULTI;
 
 #define CANID_CONFIG 0x700;
+#define CANID_SYNC 0x80;
 #define CANID_ERROR 0x600;
 
 
