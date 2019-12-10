@@ -11,13 +11,6 @@ extern "C" {
 void Error_Handler(void);
 
 
-//ID definition
-#define ID 0
-
-//debugging definitions
-#define TEST_PWN_NOT_INPUT 1
-
-
 //structs
 typedef struct pinPort
 {
