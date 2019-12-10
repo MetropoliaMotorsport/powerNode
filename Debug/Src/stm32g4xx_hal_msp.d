@@ -28,7 +28,7 @@ Src/stm32g4xx_hal_msp.o: ../Src/stm32g4xx_hal_msp.c ../Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_flash_ramfunc.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
- ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h
+ ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h ../Inc/config.h
 
 ../Inc/main.h:
 
@@ -91,3 +91,5 @@ Src/stm32g4xx_hal_msp.o: ../Src/stm32g4xx_hal_msp.c ../Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h:
+
+../Inc/config.h:

@@ -1,35 +1,5 @@
 #include "main.h"
-
-//ID definition
-#define ID 0
-
-//debugging definitions
-#define TEST_PWN_NOT_INPUT 1
-
-//function prototypes
-void Config_Setup(void);
-
-void Config_0(void);
-void Config_1(void);
-
-void Config_Write_Flash(void);
-void Config_Read_Flash(void);
-
-void Flash_Write(uint32_t, uint32_t, uint32_t[512], int);
-uint32_t Flash_Read(uint32_t);
-
-
-//global configuration variables
-extern uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-extern uint32_t Digital_In_Interrupt_EN; //TODO
-extern uint32_t Digital_In_Interrupt_Can_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_Can_Falling; //TODO
-extern uint32_t Digital_In_Interrupt_Power_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_Power_Falling; //TODO
-extern uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
-extern uint32_t Can_IDs[8];
-extern uint32_t Can_DLCs[8];
+#include "config.h"
 
 
 void Config_Setup(void)
@@ -101,37 +71,37 @@ void Config_Write_Flash(void)
 	//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
 	data[DIGITAL_IN_1_POS]=(0)+(0)+(Digital_In_Interrupt_Power_Rising<<16)+(Digital_In_Interrupt_Power_Falling<<24);
 	//bytes: [unused], [can dlc], [can id high], [can id low] x8 //any can id outside the valid range of 0 to 2047 should be treated as disabled
-	data[CAN_ID_0_POS]=(0)+(Can_DLCs[0]<<16)+(Can_IDs[0]);
-	data[CAN_ID_1_POS]=(0)+(Can_DLCs[1]<<16)+(Can_IDs[1]);
-	data[CAN_ID_2_POS]=(0)+(Can_DLCs[2]<<16)+(Can_IDs[2]);
-	data[CAN_ID_3_POS]=(0)+(Can_DLCs[3]<<16)+(Can_IDs[3]);
-	data[CAN_ID_4_POS]=(0)+(Can_DLCs[4]<<16)+(Can_IDs[4]);
-	data[CAN_ID_5_POS]=(0)+(Can_DLCs[5]<<16)+(Can_IDs[5]);
-	data[CAN_ID_6_POS]=(0)+(Can_DLCs[6]<<16)+(Can_IDs[6]);
-	data[CAN_ID_7_POS]=(0)+(Can_DLCs[7]<<16)+(Can_IDs[7]);
+	data[CAN_ID_0_POS]=(0)+(Can_DLCs[0]<<16)+(Can_IDs[0]&0xFFFF);
+	data[CAN_ID_1_POS]=(0)+(Can_DLCs[1]<<16)+(Can_IDs[1]&0xFFFF);
+	data[CAN_ID_2_POS]=(0)+(Can_DLCs[2]<<16)+(Can_IDs[2]&0xFFFF);
+	data[CAN_ID_3_POS]=(0)+(Can_DLCs[3]<<16)+(Can_IDs[3]&0xFFFF);
+	data[CAN_ID_4_POS]=(0)+(Can_DLCs[4]<<16)+(Can_IDs[4]&0xFFFF);
+	data[CAN_ID_5_POS]=(0)+(Can_DLCs[5]<<16)+(Can_IDs[5]&0xFFFF);
+	data[CAN_ID_6_POS]=(0)+(Can_DLCs[6]<<16)+(Can_IDs[6]&0xFFFF);
+	data[CAN_ID_7_POS]=(0)+(Can_DLCs[7]<<16)+(Can_IDs[7]&0xFFFF);
 
-	Flash_Write(FLASH_PAGE_63, 63, data, 1);
+	Flash_Write(FLASH_PAGE_63, 63, data, 10);
 }
 
 void Config_Read_Flash(void)
 {
 	Digital_In_EN = (0b00011101&(DIGITAL_IN_0>>0)); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 
-	Can_IDs[0] = ((CAN_ID_0>>0)&&0xFFFF);
+	Can_IDs[0] = ((CAN_ID_0>>0)&0xFFFF);
 	Can_DLCs[0] = ((CAN_ID_0>>16)&0xFF);
-	Can_IDs[1] = ((CAN_ID_1>>0)&&0xFFFF);
+	Can_IDs[1] = ((CAN_ID_1>>0)&0xFFFF);
 	Can_DLCs[1] = ((CAN_ID_1>>16)&0xFF);
-	Can_IDs[2] = ((CAN_ID_2>>0)&&0xFFFF);
+	Can_IDs[2] = ((CAN_ID_2>>0)&0xFFFF);
 	Can_DLCs[2] = ((CAN_ID_2>>16)&0xFF);
-	Can_IDs[3] = ((CAN_ID_3>>0)&&0xFFFF);
+	Can_IDs[3] = ((CAN_ID_3>>0)&0xFFFF);
 	Can_DLCs[3] = ((CAN_ID_3>>16)&0xFF);
-	Can_IDs[4] = ((CAN_ID_4>>0)&&0xFFFF);
+	Can_IDs[4] = ((CAN_ID_4>>0)&0xFFFF);
 	Can_DLCs[4] = ((CAN_ID_4>>16)&0xFF);
-	Can_IDs[5] = ((CAN_ID_5>>0)&&0xFFFF);
+	Can_IDs[5] = ((CAN_ID_5>>0)&0xFFFF);
 	Can_DLCs[5] = ((CAN_ID_5>>16)&0xFF);
-	Can_IDs[6] = ((CAN_ID_6>>0)&&0xFFFF);
+	Can_IDs[6] = ((CAN_ID_6>>0)&0xFFFF);
 	Can_DLCs[6] = ((CAN_ID_6>>16)&0xFF);
-	Can_IDs[7] = ((CAN_ID_7>>0)&&0xFFFF);
+	Can_IDs[7] = ((CAN_ID_7>>0)&0xFFFF);
 	Can_DLCs[7] = ((CAN_ID_7>>16)&0xFF);
 }
 

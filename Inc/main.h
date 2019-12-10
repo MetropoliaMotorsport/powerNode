@@ -5,8 +5,10 @@
 extern "C" {
 #endif
 
+//includes
 #include "stm32g4xx_hal.h"
 #include "stm32g4xx_ll_pwr.h"
+#include "config.h"
 
 void Error_Handler(void);
 
@@ -26,20 +28,39 @@ extern const pinPort DIO6;
 extern const pinPort DIO15;
 
 extern const pinPort SEL0;
-const pinPort SEL1;
-const pinPort U5IN0;
-const pinPort U5IN1;
-const pinPort U5MULTI;
-const pinPort U6IN0;
-const pinPort U6IN1;
-const pinPort U6MULTI;
-const pinPort U7IN0;
-const pinPort U7IN1;
-const pinPort U7MULTI;
+extern const pinPort SEL1;
+extern const pinPort U5IN0;
+extern const pinPort U5IN1;
+extern const pinPort U5MULTI;
+extern const pinPort U6IN0;
+extern const pinPort U6IN1;
+extern const pinPort U6MULTI;
+extern const pinPort U7IN0;
+extern const pinPort U7IN1;
+extern const pinPort U7MULTI;
 
-#define CANID_CONFIG 0x700;
-#define CANID_SYNC 0x80;
-#define CANID_ERROR 0x600;
+//can id definitions
+#define CANID_CONFIG 0x700
+#define CANID_SYNC 0x80
+#define CANID_ERROR 0x600
+
+//config commands
+#define SWITCH_POWER	1
+#define CHANGE_DC		2
+#define something		255
+
+
+//global configuration variables
+extern uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
+extern uint32_t Digital_In_Interrupt_EN; //TODO
+extern uint32_t Digital_In_Interrupt_Can_Rising; //TODO
+extern uint32_t Digital_In_Interrupt_Can_Falling; //TODO
+extern uint32_t Digital_In_Interrupt_Power_Rising; //TODO
+extern uint32_t Digital_In_Interrupt_Power_Falling; //TODO
+extern uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
+extern uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
+extern uint32_t Can_IDs[8];
+extern uint32_t Can_DLCs[8];
 
 
 //more details about what is stored in each word can be found in main before the while(1) loop

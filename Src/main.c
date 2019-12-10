@@ -1,4 +1,3 @@
-//includes
 #include "main.h"
 
 //function prototypes
@@ -49,6 +48,7 @@ uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
 uint32_t Can_IDs[8];
 uint32_t Can_DLCs[8];
+
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -146,11 +146,34 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			//TODO: move to error can message
 		}
 
+		if (RxHeader.Identifier == CANID_SYNC)
+		{
+			//TODO: put logic for sync message here
+		}
+		else if (RxHeader.Identifier == CANID_CONFIG)
+		{
+			//TODO: put logic here for toggling output pins and pwm frequencies
+			//TODO: logic for writing config to flash
+			if(CANRxData[0] == ID)
+			{
+				switch(CANRxData[1])
+				{
+				case SWITCH_POWER:
+					Switch_Power(CANRxData[2], CANRxData[3]);
+					break;
+				default:
+					//TODO: warning to canbus for undefined configuration command
+					break;
+
+				}
+			}
+		}
+		else
+		{
+			Error_Handler();
+			//TODO: move to error can message
+		}
 		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
-		//TODO: double check that id is CANID_CONFIG or CANID_SYNC
-		//TODO: put logic here for toggling output pins and pwm frequencies
-		//TODO: logic for writing config to flash
-		//TODO: put logic for sync message here
 	}
 }
 
