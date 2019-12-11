@@ -10,7 +10,7 @@ void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 	{
 		if ((1<<i) & enableSwitching)
 		{
-			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)*newState)>>i);
+			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
 		}
 	}
 }
