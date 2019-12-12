@@ -80,8 +80,8 @@ int main(void)
 
 	MX_GPIO_Init();
 	MX_DMA_Init();
-	MX_ADC1_Init();
-	MX_ADC2_Init();
+	//MX_ADC1_Init();
+	//MX_ADC2_Init();
 	MX_FDCAN_Init();
 
 
@@ -137,7 +137,7 @@ uint32_t CanSend(uint32_t message)
 	FDCAN_TxHeaderTypeDef TxHeader;
 
 	TxHeader.Identifier = Can_IDs[message];
-	TxHeader.DataLength = Can_DLCs[message];
+	TxHeader.DataLength = (Can_DLCs[message]<<16);
 	uint8_t CANTxData[8] = { 0x88, 0xFF, 0x00, 0x01, 0x12, 0x11, 0x22, 0x23 }; //TODO: tx data based on values from flash somehow
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;
@@ -158,7 +158,6 @@ uint32_t CanSend(uint32_t message)
 }
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
-// moved everything to one fifo.  consider using both for prioritisation
 {
 	FDCAN_RxHeaderTypeDef RxHeader;
 	uint8_t CANRxData[8];
