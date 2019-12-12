@@ -48,10 +48,25 @@ uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
 uint32_t Can_IDs[8];
 uint32_t Can_DLCs[8];
-
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
+uint32_t adc_selection;
+uint32_t U5I0[ROLLING_AVERAGE];
+uint32_t U5I1[ROLLING_AVERAGE];
+uint32_t U5T[ROLLING_AVERAGE];
+uint32_t U5V[ROLLING_AVERAGE];
+uint32_t U6I0[ROLLING_AVERAGE];
+uint32_t U6I1[ROLLING_AVERAGE];
+uint32_t U6T[ROLLING_AVERAGE];
+uint32_t U6V[ROLLING_AVERAGE];
+uint32_t U7I0[ROLLING_AVERAGE];
+uint32_t U7I1[ROLLING_AVERAGE];
+uint32_t U7T[ROLLING_AVERAGE];
+uint32_t U7V[ROLLING_AVERAGE];
+
+uint32_t ADC1ConvertedValues[3];
+uint32_t ADC2ConvertedValues[3];
 
 
 int main(void)
@@ -69,6 +84,12 @@ int main(void)
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
 
+
+/*if( HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADC1ConvertedValues, 3) != HAL_OK)
+{
+	Error_Handler();
+}*/
+
 	while(1)
 	{
 		//example commands stored here
@@ -78,7 +99,11 @@ int main(void)
 			{
 			CanSend(i);
 			}
-		HAL_Delay(133);
+		HAL_Delay(100);
+			/*if( HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADC1ConvertedValues, 3) != HAL_OK)
+			{
+				Error_Handler();
+			}*/
 
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
@@ -103,7 +128,7 @@ uint32_t CanSend(uint32_t message)
 		return -1;
 		//TODO: set warning for trying to send message with 0 DLC
 	}
-	else if(Can_DLCs[message]>4)
+	else if(Can_DLCs[message]>8)
 	{
 		return -1;
 		//TODO: set warning for trying to send too long message
@@ -173,7 +198,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			Error_Handler();
 			//TODO: move to error can message
 		}
-		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
 	}
 }
 
@@ -221,156 +245,123 @@ void SystemClock_Config(void)
 	}
 }
 
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_ADC1_Init(void)
 {
+	ADC_MultiModeTypeDef multimode = {0};
+	ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC1_Init 0 */
+	hadc1.Instance = ADC1;
+	hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+	hadc1.Init.Resolution = ADC_RESOLUTION_10B;
+	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc1.Init.GainCompensation = 0;
+	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	hadc1.Init.LowPowerAutoWait = DISABLE;
+	hadc1.Init.ContinuousConvMode = DISABLE;
+	hadc1.Init.NbrOfConversion = 3;
+	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	hadc1.Init.DMAContinuousRequests = DISABLE;
+	hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+	hadc1.Init.OversamplingMode = DISABLE;
+	if (HAL_ADC_Init(&hadc1) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC1_Init 0 */
+	multimode.Mode = ADC_DUALMODE_REGSIMULT;
+	multimode.DMAAccessMode = ADC_DMAACCESSMODE_12_10_BITS;
+	multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
+	if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  ADC_MultiModeTypeDef multimode = {0};
-  ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC1_Init 1 */
+	sConfig.Channel = ADC_CHANNEL_1;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+	sConfig.SingleDiff = ADC_SINGLE_ENDED;
+	sConfig.OffsetNumber = ADC_OFFSET_NONE;
+	sConfig.Offset = 0;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC1_Init 1 */
-  /** Common config 
-  */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc1.Init.Resolution = ADC_RESOLUTION_10B;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.GainCompensation = 0;
-  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 3;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
-  hadc1.Init.OversamplingMode = DISABLE;
-  if (HAL_ADC_Init(&hadc1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure the ADC multi-mode 
-  */
-  multimode.Mode = ADC_DUALMODE_REGSIMULT;
-  multimode.DMAAccessMode = ADC_DMAACCESSMODE_12_10_BITS;
-  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
-  if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Channel = ADC_CHANNEL_1;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
-  sConfig.SingleDiff = ADC_SINGLE_ENDED;
-  sConfig.OffsetNumber = ADC_OFFSET_NONE;
-  sConfig.Offset = 0;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Channel = ADC_CHANNEL_2;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Channel = ADC_CHANNEL_3;
-  sConfig.Rank = ADC_REGULAR_RANK_3;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC1_Init 2 */
+	sConfig.Channel = ADC_CHANNEL_2;
+	sConfig.Rank = ADC_REGULAR_RANK_2;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC1_Init 2 */
+	sConfig.Channel = ADC_CHANNEL_3;
+	sConfig.Rank = ADC_REGULAR_RANK_3;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
+	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
-/**
-  * @brief ADC2 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_ADC2_Init(void)
 {
+	ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC2_Init 0 */
+	hadc2.Instance = ADC2;
+	hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+	hadc2.Init.Resolution = ADC_RESOLUTION_10B;
+	hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc2.Init.GainCompensation = 0;
+	hadc2.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	hadc2.Init.LowPowerAutoWait = DISABLE;
+	hadc2.Init.ContinuousConvMode = DISABLE;
+	hadc2.Init.NbrOfConversion = 3;
+	hadc2.Init.DiscontinuousConvMode = DISABLE;
+	hadc2.Init.DMAContinuousRequests = DISABLE;
+	hadc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+	hadc2.Init.OversamplingMode = DISABLE;
+	if (HAL_ADC_Init(&hadc2) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC2_Init 0 */
 
-  ADC_ChannelConfTypeDef sConfig = {0};
+	sConfig.Channel = ADC_CHANNEL_10;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+	sConfig.SingleDiff = ADC_SINGLE_ENDED;
+	sConfig.OffsetNumber = ADC_OFFSET_NONE;
+	sConfig.Offset = 0;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE BEGIN ADC2_Init 1 */
+	sConfig.Rank = ADC_REGULAR_RANK_2;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC2_Init 1 */
-  /** Common config 
-  */
-  hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc2.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc2.Init.GainCompensation = 0;
-  hadc2.Init.ScanConvMode = ADC_SCAN_ENABLE;
-  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc2.Init.LowPowerAutoWait = DISABLE;
-  hadc2.Init.ContinuousConvMode = ENABLE;
-  hadc2.Init.NbrOfConversion = 3;
-  hadc2.Init.DiscontinuousConvMode = DISABLE;
-  hadc2.Init.DMAContinuousRequests = DISABLE;
-  hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc2.Init.OversamplingMode = DISABLE;
-  if (HAL_ADC_Init(&hadc2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Channel = ADC_CHANNEL_10;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
-  sConfig.SingleDiff = ADC_SINGLE_ENDED;
-  sConfig.OffsetNumber = ADC_OFFSET_NONE;
-  sConfig.Offset = 0;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Regular Channel 
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_3;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC2_Init 2 */
+	sConfig.Rank = ADC_REGULAR_RANK_3;
+	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /* USER CODE END ADC2_Init 2 */
-
+	if (HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 static void MX_FDCAN_Init(void)
@@ -409,8 +400,7 @@ static void MX_FDCAN_Init(void)
 		Error_Handler();
 	}
 
-	//only accept config/request can messages right now
-	//TODO: add a filter to accept whatever sync message is
+	//only accept config/request can messages and sync can messages
 	sFilterConfig.IdType = FDCAN_STANDARD_ID;
 	sFilterConfig.FilterIndex = 0;
 	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
@@ -448,21 +438,13 @@ static void MX_FDCAN_Init(void)
 	}
 }
 
-/** 
-  * Enable DMA controller clock
-  */
 static void MX_DMA_Init(void) 
 {
-
-  /* DMA controller clock enable */
   __HAL_RCC_DMAMUX1_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
 
-  /* DMA interrupt init */
-  /* DMA1_Channel1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
@@ -476,15 +458,16 @@ static void MX_GPIO_Init(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 
-	//led pin, sel pins, and in pins should always be outputs and should always be low before main is running
+	//led pin, sel pins, and in pins should always be outputs
+	//led pin and sel pins should always start low, in pins should start based on configuration
 	//TODO: somewhere else check and set the default for IN pins
 	//TODO: in analog reading section use SEL0 and SEL1 for multisense multiplexing
 	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
 	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
-	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
-	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
+	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 1);
+	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 1);
+	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 1);
 	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, 0);
 	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
 	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
