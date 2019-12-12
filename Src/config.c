@@ -39,7 +39,7 @@ void Config_0(void)
 #endif
 
 	Can_IDs[0] = 0x0F;
-	Can_DLCs[0] = 1;
+	Can_DLCs[0] = 8;
 	Can_IDs[1] = 0xFF;
 	Can_DLCs[1] = 0;
 	Can_IDs[2] = -1;

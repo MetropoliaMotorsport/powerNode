@@ -9,6 +9,7 @@ extern "C" {
 #include "stm32g4xx_hal.h"
 #include "stm32g4xx_ll_pwr.h"
 #include "config.h"
+#include "commands.h"
 
 void Error_Handler(void);
 

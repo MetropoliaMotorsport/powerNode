@@ -51,7 +51,6 @@ uint32_t Can_DLCs[8];
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
-uint32_t adc_selection;
 uint32_t U5I0[ROLLING_AVERAGE];
 uint32_t U5I1[ROLLING_AVERAGE];
 uint32_t U5T[ROLLING_AVERAGE];
@@ -65,8 +64,9 @@ uint32_t U7I1[ROLLING_AVERAGE];
 uint32_t U7T[ROLLING_AVERAGE];
 uint32_t U7V[ROLLING_AVERAGE];
 
-uint32_t ADC1ConvertedValues[3];
-uint32_t ADC2ConvertedValues[3];
+uint32_t rolling_average_position=0;
+uint32_t adc_selection=0;
+uint32_t ADCDualConvertedValues[3];
 
 
 int main(void)
@@ -80,15 +80,12 @@ int main(void)
 
 	MX_GPIO_Init();
 	MX_DMA_Init();
-	//MX_ADC1_Init();
-	//MX_ADC2_Init();
+	MX_ADC1_Init();
+	MX_ADC2_Init();
 	MX_FDCAN_Init();
 
 
-/*if( HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADC1ConvertedValues, 3) != HAL_OK)
-{
-	Error_Handler();
-}*/
+	//first
 
 	while(1)
 	{
@@ -100,12 +97,81 @@ int main(void)
 			CanSend(i);
 			}
 		HAL_Delay(100);
-			/*if( HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADC1ConvertedValues, 3) != HAL_OK)
+
+			if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
 			{
 				Error_Handler();
-			}*/
+			}
 
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
+	}
+}
+
+uint32_t temp[3];
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	if (hadc->Instance == ADC1)
+	{
+		uint32_t masterConvertedValue[3];
+		uint32_t slaveConvertedValue[3];
+
+		switch(adc_selection)
+		{
+		case 0:
+			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
+			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
+			adc_selection=1;
+			break;
+		case 1:
+			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
+			adc_selection=2;
+			break;
+		case 2:
+			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
+			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
+			//adc_selection=3;
+			break;
+		case 3:
+			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
+			adc_selection=0;
+			break;
+		default:
+			Error_Handler();
+			break;
+		}
+		//TODO: start timer here
+
+		for(int i=0; i<3; i++)
+		{
+			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
+			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
+			temp[i]=masterConvertedValue[i];
+		}
+
+
+		/*switch(adc_selection)
+		{
+		case 0:
+			U5I0[rolling_average_position]=masterConvertedValue[0]-slaveConvertedValue[0];
+			U6I0[rolling_average_position]=masterConvertedValue[1]-slaveConvertedValue[1];
+			U7I0[rolling_average_position]=masterConvertedValue[2]-slaveConvertedValue[2];
+			break;
+		case 1:
+			U5I1[rolling_average_position]=masterConvertedValue[0]-slaveConvertedValue[0];
+			break;
+		case 2:
+
+			break;
+		case 3:
+
+			break;
+		default:
+			Error_Handler();
+			break;
+		}*/
 	}
 }
 
@@ -138,7 +204,8 @@ uint32_t CanSend(uint32_t message)
 
 	TxHeader.Identifier = Can_IDs[message];
 	TxHeader.DataLength = (Can_DLCs[message]<<16);
-	uint8_t CANTxData[8] = { 0x88, 0xFF, 0x00, 0x01, 0x12, 0x11, 0x22, 0x23 }; //TODO: tx data based on values from flash somehow
+	uint8_t CANTxData[8] = { temp[0]>>8, temp[0], temp[1]>>8, temp[1], temp[2]>>0, temp[2], 0xFF, 0xFF }; //TODO: tx data based on values from flash somehow
+	//TODO: logic for different can tx data
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;
 	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
@@ -272,7 +339,7 @@ static void MX_ADC1_Init(void)
 
 	multimode.Mode = ADC_DUALMODE_REGSIMULT;
 	multimode.DMAAccessMode = ADC_DMAACCESSMODE_12_10_BITS;
-	multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
+	multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_12CYCLES;
 	if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
 	{
 		Error_Handler();
@@ -280,7 +347,7 @@ static void MX_ADC1_Init(void)
 
 
 	sConfig.Channel = ADC_CHANNEL_1;
-	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.Rank = ADC_REGULAR_RANK_3;
 	sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
 	sConfig.SingleDiff = ADC_SINGLE_ENDED;
 	sConfig.OffsetNumber = ADC_OFFSET_NONE;
@@ -298,7 +365,7 @@ static void MX_ADC1_Init(void)
 	}
 
 	sConfig.Channel = ADC_CHANNEL_3;
-	sConfig.Rank = ADC_REGULAR_RANK_3;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	{
 		Error_Handler();
@@ -446,7 +513,6 @@ static void MX_DMA_Init(void)
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
   HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-
 }
 
 static void MX_GPIO_Init(void)

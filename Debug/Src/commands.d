@@ -29,7 +29,7 @@ Src/commands.o: ../Src/commands.c ../Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h ../Inc/config.h \
- ../Inc/commands.h
+ ../Inc/commands.h ../Inc/commands.h
 
 ../Inc/main.h:
 
@@ -94,5 +94,7 @@ Src/commands.o: ../Src/commands.c ../Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h:
 
 ../Inc/config.h:
+
+../Inc/commands.h:
 
 ../Inc/commands.h:
