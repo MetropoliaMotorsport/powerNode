@@ -106,13 +106,14 @@ int main(void)
 	    {
 	     // Error_Handler();
 	    }
-	    HAL_Delay(200);
+	    HAL_Delay(1);
 
 
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
 
+uint32_t m1, m2, m3, s1, s2, s3;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -186,8 +187,17 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		{
 			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
 			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
-			convertedValue[i]=masterConvertedValue[i]-slaveConvertedValue[i];
+			if(masterConvertedValue[i]>slaveConvertedValue[i])
+			{
+				convertedValue[i]=masterConvertedValue[i]-slaveConvertedValue[i];
+			}
+			else //this should only happen due to error in reading at low voltages
+			{
+				convertedValue[i]=0;
+			}
 		}
+		m1=masterConvertedValue[0]; m2=masterConvertedValue[1]; m3=masterConvertedValue[2];
+		s1=slaveConvertedValue[0]; s2=slaveConvertedValue[1]; s3=slaveConvertedValue[2];
 
 		if (HAL_ADCEx_MultiModeStop_DMA(&hadc1) != HAL_OK)
 		{
