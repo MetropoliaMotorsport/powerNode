@@ -48,21 +48,35 @@ uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
 uint32_t Can_IDs[8];
 uint32_t Can_DLCs[8];
+uint32_t Can_Config_Bytes[8][8];
+uint32_t Can_Config_Datas[8][8];
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
 uint32_t U5I0[I_ROLLING_AVERAGE];
+uint32_t U5I0_calculated;
 uint32_t U5I1[I_ROLLING_AVERAGE];
+uint32_t U5I1_calculated;
 uint32_t U5T[T_ROLLING_AVERAGE];
+uint32_t U5T_calculated;
 uint32_t U5V[V_ROLLING_AVERAGE];
+uint32_t U5V_calculated;
 uint32_t U6I0[I_ROLLING_AVERAGE];
+uint32_t U6I0_calculated;
 uint32_t U6I1[I_ROLLING_AVERAGE];
+uint32_t U6I1_calculated;
 uint32_t U6T[T_ROLLING_AVERAGE];
+uint32_t U6T_calculated;
 uint32_t U6V[V_ROLLING_AVERAGE];
+uint32_t U6V_calculated;
 uint32_t U7I0[I_ROLLING_AVERAGE];
+uint32_t U7I0_calculated;
 uint32_t U7I1[I_ROLLING_AVERAGE];
+uint32_t U7I1_calculated;
 uint32_t U7T[T_ROLLING_AVERAGE];
+uint32_t U7T_calculated;
 uint32_t U7V[V_ROLLING_AVERAGE];
+uint32_t U7V_calculated;
 
 uint32_t I0_rolling_average_position=0;
 uint32_t I1_rolling_average_position=0;
@@ -102,6 +116,7 @@ int main(void)
 			{
 			CanSend(i);
 			}
+		//TODO: start this from a timer instead of here
 	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
 	    {
 	     // Error_Handler();
@@ -183,7 +198,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		}
 		//TODO: start timer here
 
-		for(int i=0; i<3; i++)
+		for(uint32_t i=0; i<3; i++)
 		{
 			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
 			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
@@ -219,6 +234,17 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			{
 				I0_rolling_average_position++;
 			}
+
+			uint32_t U5I0_raw=0; uint32_t U6I0_raw=0; uint32_t U7I0_raw=0;
+			for(uint32_t i=0; i<I_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
+			{
+				U5I0_raw+=U5I0[i];
+				U6I0_raw+=U6I0[i];
+				U7I0_raw+=U7I0[i];
+			}
+			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
+			U5I0_calculated=U5I0_raw; U6I0_calculated=U6I0_raw; U7I0_calculated=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+
 			break;
 		case 1:
 			U5I1[I1_rolling_average_position]=convertedValue[0];

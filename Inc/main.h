@@ -66,6 +66,8 @@ extern uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
 extern uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
 extern uint32_t Can_IDs[8];
 extern uint32_t Can_DLCs[8];
+extern uint32_t Can_Config_Bytes[8][8];
+extern uint32_t Can_Config_Datas[8][8];
 
 
 //more details about what is stored in each word can be found in main before the while(1) loop
