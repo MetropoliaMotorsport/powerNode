@@ -51,22 +51,29 @@ uint32_t Can_DLCs[8];
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
-uint32_t U5I0[ROLLING_AVERAGE];
-uint32_t U5I1[ROLLING_AVERAGE];
-uint32_t U5T[ROLLING_AVERAGE];
-uint32_t U5V[ROLLING_AVERAGE];
-uint32_t U6I0[ROLLING_AVERAGE];
-uint32_t U6I1[ROLLING_AVERAGE];
-uint32_t U6T[ROLLING_AVERAGE];
-uint32_t U6V[ROLLING_AVERAGE];
-uint32_t U7I0[ROLLING_AVERAGE];
-uint32_t U7I1[ROLLING_AVERAGE];
-uint32_t U7T[ROLLING_AVERAGE];
-uint32_t U7V[ROLLING_AVERAGE];
+uint32_t U5I0[I_ROLLING_AVERAGE];
+uint32_t U5I1[I_ROLLING_AVERAGE];
+uint32_t U5T[T_ROLLING_AVERAGE];
+uint32_t U5V[V_ROLLING_AVERAGE];
+uint32_t U6I0[I_ROLLING_AVERAGE];
+uint32_t U6I1[I_ROLLING_AVERAGE];
+uint32_t U6T[T_ROLLING_AVERAGE];
+uint32_t U6V[V_ROLLING_AVERAGE];
+uint32_t U7I0[I_ROLLING_AVERAGE];
+uint32_t U7I1[I_ROLLING_AVERAGE];
+uint32_t U7T[T_ROLLING_AVERAGE];
+uint32_t U7V[V_ROLLING_AVERAGE];
 
-uint32_t rolling_average_position=0;
+uint32_t I0_rolling_average_position=0;
+uint32_t I1_rolling_average_position=0;
+uint32_t T_rolling_average_position=0;
+uint32_t V_rolling_average_position=0;
 uint32_t adc_selection=0;
 uint32_t ADCDualConvertedValues[3];
+
+//for these 255 means enable continuously while lower numbers mean to take that many samples
+uint32_t sample_temperature;
+uint32_t sample_voltage;
 
 
 int main(void)
@@ -85,11 +92,6 @@ int main(void)
 	MX_FDCAN_Init();
 
 
-	//first
-	if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
-	{
-		Error_Handler();
-	}
 
 	while(1)
 	{
@@ -100,13 +102,6 @@ int main(void)
 			{
 			CanSend(i);
 			}
-		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
-		HAL_Delay(200);
-
-			/*if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
-			{
-				Error_Handler();
-			}*/
 	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
 	    {
 	     // Error_Handler();
@@ -118,85 +113,147 @@ int main(void)
 	}
 }
 
-uint32_t temp[3];
-uint32_t m1;
-uint32_t m2;
-uint32_t m3;
-uint32_t s1;
-uint32_t s2;
-uint32_t s3;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if (hadc->Instance == ADC1)
 	{
+		uint32_t sampled = adc_selection;
+		uint32_t convertedValue[3];
 		uint32_t masterConvertedValue[3];
 		uint32_t slaveConvertedValue[3];
 
-		/*switch(adc_selection)
+		//we want the ability to not sample temperature and voltage as often as current, as sampling those heats up the switch
+		//we also want to make sure that both current channels are sampled
+		//TODO: change the constant 3 into however many switches are used; if only channel 0 is used then don't read current on channel 1
+		//TODO: set voltage and temperature interrupts from timer, make timer configurable
+		switch(adc_selection)
 		{
-		case 0:
+		case 0: //we have just sampled current for channel 0, so sample current for channel 1
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-			adc_selection=1; //~32
+			adc_selection=1;
 			break;
-		case 1:
-			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
-			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
-			adc_selection=2; //~46
+		case 1: //if temperature or voltage has been enabled sample those, otherwise start again with current for channel 0
+			if (sample_temperature)
+			{
+				HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+				HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
+				if (sample_temperature<255) { sample_temperature--; }
+				adc_selection=2;
+			}
+			else if (sample_voltage)
+			{
+				HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
+				HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
+				if (sample_voltage<255) { sample_voltage--; }
+				adc_selection=3;
+			}
+			else
+			{
+				HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+				HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
+				adc_selection=0;
+			}
 			break;
-		case 2:
-			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
-			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
-			adc_selection=3; //~65
+		case 2: //if voltage has been enabled sample it, otherwise go back to current for channel 0
+			if (sample_voltage)
+			{
+				HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
+				HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
+				if (sample_voltage<255) { sample_voltage--; }
+				adc_selection=3;
+			}
+			else
+			{
+				HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
+				HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
+				adc_selection=0;
+			}
 			break;
-		case 3:
+		case 3: //as voltage has just been sampled go back to current for channel 0
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-			adc_selection=0; //~30
+			adc_selection=0;
 			break;
 		default:
 			Error_Handler();
 			break;
-		}*/
+		}
 		//TODO: start timer here
 
 		for(int i=0; i<3; i++)
 		{
 			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
 			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
-			temp[i]=masterConvertedValue[i];
+			convertedValue[i]=masterConvertedValue[i]-slaveConvertedValue[i];
 		}
 
-		m1=masterConvertedValue[0];
-		m2=masterConvertedValue[1];
-		m3=masterConvertedValue[2];
+		if (HAL_ADCEx_MultiModeStop_DMA(&hadc1) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
-		s1=slaveConvertedValue[0];
-		s2=slaveConvertedValue[1];
-		s3=slaveConvertedValue[2];
-
-
-		/*switch(adc_selection)
+		//if not all switches are used this still does not take too much time and it is fine to write some extra 0s to variables
+		switch(sampled)
 		{
 		case 0:
-			U5I0[rolling_average_position]=masterConvertedValue[0]-slaveConvertedValue[0];
-			U6I0[rolling_average_position]=masterConvertedValue[1]-slaveConvertedValue[1];
-			U7I0[rolling_average_position]=masterConvertedValue[2]-slaveConvertedValue[2];
+			U5I0[I0_rolling_average_position]=convertedValue[0];
+			U6I0[I0_rolling_average_position]=convertedValue[1];
+			U7I0[I0_rolling_average_position]=convertedValue[2];
+			if (I0_rolling_average_position == I_ROLLING_AVERAGE-1)
+			{
+				I0_rolling_average_position=0;
+			}
+			else
+			{
+				I0_rolling_average_position++;
+			}
 			break;
 		case 1:
-			U5I1[rolling_average_position]=masterConvertedValue[0]-slaveConvertedValue[0];
+			U5I1[I1_rolling_average_position]=convertedValue[0];
+			U6I1[I1_rolling_average_position]=convertedValue[1];
+			U7I1[I1_rolling_average_position]=convertedValue[2];
+			if (I1_rolling_average_position == I_ROLLING_AVERAGE-1)
+			{
+				I1_rolling_average_position=0;
+			}
+			else
+			{
+				I1_rolling_average_position++;
+			}
 			break;
 		case 2:
-
+			U5T[T_rolling_average_position]=convertedValue[0];
+			U6T[T_rolling_average_position]=convertedValue[1];
+			U7T[T_rolling_average_position]=convertedValue[2];
+			if (T_rolling_average_position == T_ROLLING_AVERAGE-1)
+			{
+				T_rolling_average_position=0;
+			}
+			else
+			{
+				T_rolling_average_position++;
+			}
 			break;
 		case 3:
-
+			U5V[V_rolling_average_position]=convertedValue[0];
+			U6V[V_rolling_average_position]=convertedValue[1];
+			U7V[V_rolling_average_position]=convertedValue[2];
+			if (V_rolling_average_position == V_ROLLING_AVERAGE-1)
+			{
+				V_rolling_average_position=0;
+			}
+			else
+			{
+				V_rolling_average_position++;
+			}
 			break;
 		default:
 			Error_Handler();
 			break;
-		}*/
+		}
+
 	}
 }
 
@@ -229,7 +286,7 @@ uint32_t CanSend(uint32_t message)
 
 	TxHeader.Identifier = Can_IDs[message];
 	TxHeader.DataLength = (Can_DLCs[message]<<16);
-	uint8_t CANTxData[8] = { temp[0]>>8, temp[0], temp[1]>>8, temp[1], temp[2]>>0, temp[2], 0xFF, 0xFF }; //TODO: tx data based on values from flash somehow
+	uint8_t CANTxData[8] = { 0xFF>>8, 0xFF, 0xFF>>8, 0xFF, 0xFF>>0, 0xFF, 0xFF, 0xFF }; //TODO: tx data based on values from flash somehow
 	//TODO: logic for different can tx data
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;
@@ -351,10 +408,10 @@ static void MX_ADC1_Init(void)
 	hadc1.Init.LowPowerAutoWait = DISABLE;
 	hadc1.Init.ContinuousConvMode = DISABLE;
 	hadc1.Init.NbrOfConversion = 3;
-	hadc1.Init.DiscontinuousConvMode = ENABLE; //try to enable this
+	hadc1.Init.DiscontinuousConvMode = ENABLE;
 	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-	hadc1.Init.DMAContinuousRequests = ENABLE; //try to enable this
+	hadc1.Init.DMAContinuousRequests = ENABLE;
 	hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
 	hadc1.Init.OversamplingMode = DISABLE;
 	if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -416,8 +473,8 @@ static void MX_ADC2_Init(void)
 	hadc2.Init.LowPowerAutoWait = DISABLE;
 	hadc2.Init.ContinuousConvMode = DISABLE;
 	hadc2.Init.NbrOfConversion = 3;
-	hadc2.Init.DiscontinuousConvMode = DISABLE;
-	hadc2.Init.DMAContinuousRequests = DISABLE;
+	hadc2.Init.DiscontinuousConvMode = ENABLE;
+	hadc2.Init.DMAContinuousRequests = ENABLE;
 	hadc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
 	hadc2.Init.OversamplingMode = DISABLE;
 	if (HAL_ADC_Init(&hadc2) != HAL_OK)

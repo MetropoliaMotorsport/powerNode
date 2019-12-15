@@ -40,7 +40,9 @@ extern const pinPort U7IN0;
 extern const pinPort U7IN1;
 extern const pinPort U7MULTI;
 
-#define ROLLING_AVERAGE 4
+#define I_ROLLING_AVERAGE 4
+#define T_ROLLING_AVERAGE 4
+#define V_ROLLING_AVERAGE 1
 
 //can id definitions
 #define CANID_CONFIG 0x700
