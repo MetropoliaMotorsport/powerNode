@@ -86,6 +86,10 @@ int main(void)
 
 
 	//first
+	if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
 	while(1)
 	{
@@ -96,18 +100,31 @@ int main(void)
 			{
 			CanSend(i);
 			}
-		HAL_Delay(100);
+		HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+		HAL_Delay(200);
 
-			if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
+			/*if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
 			{
 				Error_Handler();
-			}
+			}*/
+	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
+	    {
+	     // Error_Handler();
+	    }
+	    HAL_Delay(200);
+
 
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
 
 uint32_t temp[3];
+uint32_t m1;
+uint32_t m2;
+uint32_t m3;
+uint32_t s1;
+uint32_t s2;
+uint32_t s3;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -116,40 +133,48 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		uint32_t masterConvertedValue[3];
 		uint32_t slaveConvertedValue[3];
 
-		switch(adc_selection)
+		/*switch(adc_selection)
 		{
 		case 0:
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-			adc_selection=1;
+			adc_selection=1; //~32
 			break;
 		case 1:
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
-			adc_selection=2;
+			adc_selection=2; //~46
 			break;
 		case 2:
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 1);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 1);
-			//adc_selection=3;
+			adc_selection=3; //~65
 			break;
 		case 3:
 			HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 			HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-			adc_selection=0;
+			adc_selection=0; //~30
 			break;
 		default:
 			Error_Handler();
 			break;
-		}
+		}*/
 		//TODO: start timer here
 
 		for(int i=0; i<3; i++)
 		{
-			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
 			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
+			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
 			temp[i]=masterConvertedValue[i];
 		}
+
+		m1=masterConvertedValue[0];
+		m2=masterConvertedValue[1];
+		m3=masterConvertedValue[2];
+
+		s1=slaveConvertedValue[0];
+		s2=slaveConvertedValue[1];
+		s3=slaveConvertedValue[2];
 
 
 		/*switch(adc_selection)
@@ -326,10 +351,10 @@ static void MX_ADC1_Init(void)
 	hadc1.Init.LowPowerAutoWait = DISABLE;
 	hadc1.Init.ContinuousConvMode = DISABLE;
 	hadc1.Init.NbrOfConversion = 3;
-	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.DiscontinuousConvMode = ENABLE; //try to enable this
 	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-	hadc1.Init.DMAContinuousRequests = DISABLE;
+	hadc1.Init.DMAContinuousRequests = ENABLE; //try to enable this
 	hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
 	hadc1.Init.OversamplingMode = DISABLE;
 	if (HAL_ADC_Init(&hadc1) != HAL_OK)
