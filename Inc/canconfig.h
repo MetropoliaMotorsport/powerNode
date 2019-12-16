@@ -1,6 +1,9 @@
 #ifndef CANCONFIG_H_
 #define CANCONFIG_H_
 
+//function prototypes
+void Set_Can_Bytes(uint32_t*, uint32_t);
+
 //data ID definitions
 #define MESS_U5I0	1 //1 byte in 100's of mA or 2 bytes in 100's of uA
 #define MESS_U5I1	2

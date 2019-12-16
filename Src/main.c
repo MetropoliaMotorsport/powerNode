@@ -85,6 +85,8 @@ uint32_t V_rolling_average_position=0;
 uint32_t adc_selection=0;
 uint32_t ADCDualConvertedValues[3];
 
+uint8_t CANTxData[8];
+
 //for these 255 means enable continuously while lower numbers mean to take that many samples
 uint32_t sample_temperature;
 uint32_t sample_voltage;
@@ -322,8 +324,17 @@ uint32_t CanSend(uint32_t message)
 	FDCAN_TxHeaderTypeDef TxHeader;
 
 	TxHeader.Identifier = Can_IDs[message];
-	TxHeader.DataLength = (Can_DLCs[message]<<16);
-	uint8_t CANTxData[8] = { 0xFF>>8, 0xFF, 0xFF>>8, 0xFF, 0xFF>>0, 0xFF, 0xFF, 0xFF }; //TODO: tx data based on values from flash somehow
+	TxHeader.DataLength = (Can_DLCs[message]<<16); //<<16 makes storing the number of bytes not require a switch statement for classic can
+ //TODO: tx data based on values from flash somehow
+	uint32_t pos=0;
+	for(uint32_t i=0; i<Can_DLCs[message]; i++) //max number of function calls is same as number of bytes
+	{
+		Set_Can_Bytes(&pos, message);
+		if(pos>=Can_DLCs[message])
+		{
+			break;
+		}
+	}
 	//TODO: logic for different can tx data
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;

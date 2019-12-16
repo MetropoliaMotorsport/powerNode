@@ -70,6 +70,9 @@ extern uint8_t Can_DLCs[8];
 extern uint8_t Can_Config_Bytes[8][8];
 extern uint8_t Can_Config_Datas[8][8];
 
+//global variables
+extern uint8_t CANTxData[8];
+
 
 //more details about what is stored in each word can be found in main before the while(1) loop
 //flash address definitions //don't use flash_read function, it is not needed if thing are defined as pointers
