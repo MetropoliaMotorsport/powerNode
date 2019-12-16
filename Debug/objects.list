@@ -22,6 +22,7 @@
 "Src/commands.o"
 "Src/config.o"
 "Src/main.o"
+"Src/parse.o"
 "Src/stm32g4xx_hal_msp.o"
 "Src/stm32g4xx_it.o"
 "Src/syscalls.o"

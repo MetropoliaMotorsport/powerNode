@@ -54,29 +54,29 @@ uint8_t Can_Config_Datas[8][8];
 
 //global variables
 uint32_t U5I0[I_ROLLING_AVERAGE];
-uint32_t U5I0_calculated;
+uint32_t U5I0_raw_average;
 uint32_t U5I1[I_ROLLING_AVERAGE];
-uint32_t U5I1_calculated;
+uint32_t U5I1_raw_average;
 uint32_t U5T[T_ROLLING_AVERAGE];
-uint32_t U5T_calculated;
+uint32_t U5T_raw_average;
 uint32_t U5V[V_ROLLING_AVERAGE];
-uint32_t U5V_calculated;
+uint32_t U5V_raw_average;
 uint32_t U6I0[I_ROLLING_AVERAGE];
-uint32_t U6I0_calculated;
+uint32_t U6I0_raw_average;
 uint32_t U6I1[I_ROLLING_AVERAGE];
-uint32_t U6I1_calculated;
+uint32_t U6I1_raw_average;
 uint32_t U6T[T_ROLLING_AVERAGE];
-uint32_t U6T_calculated;
+uint32_t U6T_raw_average;
 uint32_t U6V[V_ROLLING_AVERAGE];
-uint32_t U6V_calculated;
+uint32_t U6V_raw_average;
 uint32_t U7I0[I_ROLLING_AVERAGE];
-uint32_t U7I0_calculated;
+uint32_t U7I0_raw_average;
 uint32_t U7I1[I_ROLLING_AVERAGE];
-uint32_t U7I1_calculated;
+uint32_t U7I1_raw_average;
 uint32_t U7T[T_ROLLING_AVERAGE];
-uint32_t U7T_calculated;
+uint32_t U7T_raw_average;
 uint32_t U7V[V_ROLLING_AVERAGE];
-uint32_t U7V_calculated;
+uint32_t U7V_raw_average;
 
 uint32_t I0_rolling_average_position=0;
 uint32_t I1_rolling_average_position=0;
@@ -246,7 +246,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I0_raw+=U7I0[i];
 			}
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5I0_calculated=U5I0_raw; U6I0_calculated=U6I0_raw; U7I0_calculated=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+			U5I0_raw_average=U5I0_raw; U6I0_raw_average=U6I0_raw; U7I0_raw_average=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			break;
 		case 1:
@@ -326,6 +326,12 @@ uint32_t CanSend(uint32_t message)
 	TxHeader.Identifier = Can_IDs[message];
 	TxHeader.DataLength = (Can_DLCs[message]<<16); //<<16 makes storing the number of bytes not require a switch statement for classic can
  //TODO: tx data based on values from flash somehow
+	//clear can tx data so that data from incorrectly configured message is 0
+	for(uint32_t i=0; i<8; i++)
+	{
+		CANTxData[i]=0;
+	}
+
 	uint32_t pos=0;
 	for(uint32_t i=0; i<Can_DLCs[message]; i++) //max number of function calls is same as number of bytes
 	{
