@@ -22,8 +22,8 @@ uint32_t Parse_Current(uint32_t raw, uint32_t bytes)
 
 uint32_t Parse_Voltage(uint32_t raw, uint32_t bytes)
 {
-	//voltage is vcc/4, voltage divider is 130 and 82 which is 106/41, voltage is raw*(2^10)/3.3 V, V to mV is *1000; total is 271360000/1353; is no overflow possibility
-	uint32_t calculated=((raw*271360000)/1353); //calculate current in mV
+	//voltage is vcc/4, voltage divider is 130 and 82 which is 106/41, voltage is raw*3.3/(2^10), V to mV is *1000; total is 43725/20992; is no overflow possibility
+	uint32_t calculated=((raw*43725)/20992); //calculate current in mV
 	//TODO: test this code
 	//TODO: need to add offset from ground voltage in to this?
 
