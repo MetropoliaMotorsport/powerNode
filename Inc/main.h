@@ -10,6 +10,7 @@ extern "C" {
 #include "stm32g4xx_ll_pwr.h"
 #include "config.h"
 #include "commands.h"
+#include "canconfig.h"
 
 void Error_Handler(void);
 
@@ -56,18 +57,18 @@ extern const pinPort U7MULTI;
 
 
 //global configuration variables
-extern uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-extern uint32_t Digital_In_Interrupt_EN; //TODO
-extern uint32_t Digital_In_Interrupt_Can_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_Can_Falling; //TODO
-extern uint32_t Digital_In_Interrupt_Power_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_Power_Falling; //TODO
-extern uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
-extern uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
-extern uint32_t Can_IDs[8];
-extern uint32_t Can_DLCs[8];
-extern uint32_t Can_Config_Bytes[8][8];
-extern uint32_t Can_Config_Datas[8][8];
+extern uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
+extern uint8_t Digital_In_Interrupt_EN; //TODO
+extern uint8_t Digital_In_Interrupt_Can_Rising; //TODO
+extern uint8_t Digital_In_Interrupt_Can_Falling; //TODO
+extern uint8_t Digital_In_Interrupt_Power_Rising; //TODO
+extern uint8_t Digital_In_Interrupt_Power_Falling; //TODO
+extern uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
+extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+extern uint16_t Can_IDs[8];
+extern uint8_t Can_DLCs[8];
+extern uint8_t Can_Config_Bytes[8][8];
+extern uint8_t Can_Config_Datas[8][8];
 
 
 //more details about what is stored in each word can be found in main before the while(1) loop

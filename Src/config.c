@@ -38,9 +38,26 @@ void Config_0(void)
 
 #endif
 
-	Can_IDs[0] = 0x0F; Can_IDs[1] = 0xFF; Can_IDs[2] = -1; Can_IDs[3] = -1; Can_IDs[4] = -1; Can_IDs[5] = -1; Can_IDs[6] = 0xF0; Can_IDs[7] = -1;
-	Can_DLCs[0] = 8; Can_DLCs[1] = 0; Can_DLCs[2] = 4; Can_DLCs[3] = 0; Can_DLCs[4] = 0; Can_DLCs[5] = 0; Can_DLCs[6] = 3; Can_DLCs[7] = 0;
+	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
+	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 0; Can_DLCs[6] = 3; Can_DLCs[7] = 0;
 
+	//uint32_t Can_Config_Bytes[8][8];
+	//uint32_t Can_Config_Datas[8][8];
+	uint8_t temp_Can_Config_Bytes[8][8]={	{ 0, 1, 2, 3, 4, 5, 6, 7 },
+											{ MESS_U5I0, MESS_U5I1, MESS_U6I0, MESS_U6I1, 0, 0, 0, 0 },
+											{ MESS_U7I0, MESS_U7I1, MESS_U5T, MESS_U6T, MESS_U7T, 0 },
+											{ MESS_U5V, MESS_U6V, MESS_U7V, 0, 0, 0, 0, 0 },
+											{ MESS_U5V, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
+	for(uint32_t i=0; i<8; i++)
+	{
+		for(uint32_t j=0; j<8; j++)
+		{
+			Can_Config_Bytes[i][j]=temp_Can_Config_Bytes[i][j];
+		}
+	}
 
 }
 

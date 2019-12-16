@@ -38,18 +38,18 @@ const pinPort U7IN1 = { .PORT=GPIOA, .PIN=GPIO_PIN_3 };
 const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 
 //global configuration variables
-uint32_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-uint32_t Digital_In_Interrupt_EN; //TODO
-uint32_t Digital_In_Interrupt_Can_Rising; //TODO
-uint32_t Digital_In_Interrupt_Can_Falling; //TODO
-uint32_t Digital_In_Interrupt_Power_Rising; //TODO
-uint32_t Digital_In_Interrupt_Power_Falling; //TODO
-uint32_t Digital_In_Interrupt_PWM_Rising; //TODO
-uint32_t Digital_In_Interrupt_PWM_Falling; //TODO
-uint32_t Can_IDs[8];
-uint32_t Can_DLCs[8];
-uint32_t Can_Config_Bytes[8][8];
-uint32_t Can_Config_Datas[8][8];
+uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
+uint8_t Digital_In_Interrupt_EN; //TODO
+uint8_t Digital_In_Interrupt_Can_Rising; //TODO
+uint8_t Digital_In_Interrupt_Can_Falling; //TODO
+uint8_t Digital_In_Interrupt_Power_Rising; //TODO
+uint8_t Digital_In_Interrupt_Power_Falling; //TODO
+uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
+uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+uint16_t Can_IDs[8];
+uint8_t Can_DLCs[8];
+uint8_t Can_Config_Bytes[8][8];
+uint8_t Can_Config_Datas[8][8];
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -115,6 +115,7 @@ int main(void)
 		for(int i=0; i<8; i++)
 			{
 			CanSend(i);
+			HAL_Delay(1);
 			}
 		//TODO: start this from a timer instead of here
 	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
