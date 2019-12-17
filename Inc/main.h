@@ -53,11 +53,12 @@ extern const pinPort U7MULTI;
 #define CANID_ACK	0x500
 
 //config commands
-#define SWITCH_POWER	1
-#define CHANGE_DC		2
-#define SAVE_CONFIGS	128
-#define CONFIG_MESSAGE	129
-#define something		255
+#define SWITCH_POWER				1
+#define CHANGE_DC					2
+#define SAVE_CONFIGS				128
+#define CONFIG_MESSAGE				129
+#define CONFIG_SWITCHES_DEFAULT		130
+#define something					255
 
 
 //global configuration variables
@@ -69,6 +70,7 @@ extern uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+extern uint8_t Default_Switch_State;
 extern uint16_t Can_IDs[8];
 extern uint8_t Can_DLCs[8];
 extern uint8_t Can_Config_Bytes[8][8];
@@ -93,31 +95,33 @@ extern uint32_t U7V_real;
 
 //more details about what is stored in each word can be found in main before the while(1) loop
 //flash address definitions //don't use flash_read function, it is not needed if thing are defined as pointers
-#define DIGITAL_IN_0_POS	0
+#define DIGITAL_IN_0_POS			0
 //TODO: add PWM DC (also to configuration) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
-#define DIGITAL_IN_0		(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
-#define DIGITAL_IN_1_POS	(DIGITAL_IN_0_POS+1)
-#define DIGITAL_IN_1		(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
-#define CAN_ID_0_POS		(DIGITAL_IN_1_POS+1)
-#define CAN_ID_0			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_0_POS))
-#define CAN_ID_1_POS		(CAN_ID_0_POS+1)
-#define CAN_ID_1			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_1_POS))
-#define CAN_ID_2_POS		(CAN_ID_1_POS+1)
-#define CAN_ID_2			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_2_POS))
-#define CAN_ID_3_POS		(CAN_ID_2_POS+1)
-#define CAN_ID_3			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_3_POS))
-#define CAN_ID_4_POS		(CAN_ID_3_POS+1)
-#define CAN_ID_4			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_4_POS))
-#define CAN_ID_5_POS		(CAN_ID_4_POS+1)
-#define CAN_ID_5			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_5_POS))
-#define CAN_ID_6_POS		(CAN_ID_5_POS+1)
-#define CAN_ID_6			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_6_POS))
-#define CAN_ID_7_POS		(CAN_ID_6_POS+1)
-#define CAN_ID_7			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_7_POS))
-#define CAN_BYTES_1ST_POS	(CAN_ID_7_POS+1)
-#define CAN_BYTES_1ST		(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_BYTES_1ST_POS))
-#define CAN_DATAS_1ST_POS	(CAN_BYTES_1ST_POS+16)
-#define CAN_DATAS_1ST		(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_DATAS_1ST_POS))
+#define DIGITAL_IN_0				(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
+#define DIGITAL_IN_1_POS			(DIGITAL_IN_0_POS+1)
+#define DIGITAL_IN_1				(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
+#define CAN_ID_0_POS				(DIGITAL_IN_1_POS+1)
+#define CAN_ID_0					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_0_POS))
+#define CAN_ID_1_POS				(CAN_ID_0_POS+1)
+#define CAN_ID_1					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_1_POS))
+#define CAN_ID_2_POS				(CAN_ID_1_POS+1)
+#define CAN_ID_2					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_2_POS))
+#define CAN_ID_3_POS				(CAN_ID_2_POS+1)
+#define CAN_ID_3					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_3_POS))
+#define CAN_ID_4_POS				(CAN_ID_3_POS+1)
+#define CAN_ID_4					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_4_POS))
+#define CAN_ID_5_POS				(CAN_ID_4_POS+1)
+#define CAN_ID_5					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_5_POS))
+#define CAN_ID_6_POS				(CAN_ID_5_POS+1)
+#define CAN_ID_6					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_6_POS))
+#define CAN_ID_7_POS				(CAN_ID_6_POS+1)
+#define CAN_ID_7					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_7_POS))
+#define CAN_BYTES_1ST_POS			(CAN_ID_7_POS+1)
+#define CAN_BYTES_1ST				(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_BYTES_1ST_POS))
+#define CAN_DATAS_1ST_POS			(CAN_BYTES_1ST_POS+16)
+#define CAN_DATAS_1ST				(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_DATAS_1ST_POS))
+#define DEFAULT_SWITCH_STATE_POS	(CAN_DATAS_1ST_POS+16)
+#define DEFAULT_SWITCH_STATE		(*(uint32_t*)(FLASH_PAGE_63+0x4*DEFAULT_SWITCH_STATE_POS))
 //next define will be CAN_DATAS_1ST_POS+16
 
 //flash page definitions

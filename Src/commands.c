@@ -103,3 +103,23 @@ void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 
 	Acknowledge(CONFIG_MESSAGE);
 }
+
+void Config_Switch_Defaults(uint8_t enableChanges, uint8_t newState)
+{
+	for(uint32_t i=0; i<6; i++)
+	{
+		if (((enableChanges>>i)&0b1))
+		{
+			if(((newState>>i)&0b1))
+			{
+				Default_Switch_State|=(1<<i);
+			}
+			else
+			{
+				Default_Switch_State&=~(1<<i);
+			}
+		}
+	}
+
+	Acknowledge(CONFIG_SWITCHES_DEFAULT);
+}

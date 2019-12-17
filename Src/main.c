@@ -46,6 +46,7 @@ uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+uint8_t Default_Switch_State;
 uint16_t Can_IDs[8];
 uint8_t Can_DLCs[8];
 uint8_t Can_Config_Bytes[8][8];
@@ -104,7 +105,6 @@ int main(void)
 	SystemClock_Config();
 
 	Config_Setup();
-
 
 	MX_GPIO_Init();
 	MX_DMA_Init();
@@ -398,7 +398,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		else if (RxHeader.Identifier == CANID_CONFIG)
 		{
 			//TODO: put logic here for toggling output pins and pwm frequencies
-			//TODO: logic for writing config to flash
 			if(CANRxData[0] == ID)
 			{
 				switch(CANRxData[1])
@@ -412,6 +411,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case CONFIG_MESSAGE:
 					Config_Message(CANRxData[2], CANRxData[3], (((uint16_t)CANRxData[4])<<8)+(((uint16_t)CANRxData[5])<<0));
 					break;
+				case CONFIG_SWITCHES_DEFAULT:
+					Config_Switch_Defaults(CANRxData[2], CANRxData[3]);
+					break;
 				default:
 					//TODO: warning to canbus for undefined configuration command
 					break;
@@ -421,7 +423,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		}
 		else
 		{
-			Error_Handler();
+			//Error_Handler();
 			//TODO: move to error can message
 		}
 	}
@@ -690,12 +692,12 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
 	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 1);
-	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 1);
-	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 1);
-	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, 0);
-	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
-	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
+	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, (Default_Switch_State>>0)&0b1);
+	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, (Default_Switch_State>>1)&0b1);
+	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, (Default_Switch_State>>2)&0b1);
+	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, (Default_Switch_State>>3)&0b1);
+	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, (Default_Switch_State>>4)&0b1);
+	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, (Default_Switch_State>>5)&0b1);
 
 	//all outputs on portA assigned here
 	GPIO_InitStruct.Pin = LED.PIN|SEL0.PIN|U5IN0.PIN|U5IN1.PIN|U6IN0.PIN|U6IN1.PIN|U7IN0.PIN|U7IN1.PIN;

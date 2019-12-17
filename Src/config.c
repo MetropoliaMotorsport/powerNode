@@ -66,6 +66,8 @@ void Config_0(void)
 			Can_Config_Datas[i][j]=temp_Can_Config_Datas[i][j];
 		}
 	}
+
+	Default_Switch_State=0b00000000;
 }
 
 void Config_1(void)
@@ -82,6 +84,8 @@ void Config_Write_Flash(void)
 	data[DIGITAL_IN_0_POS]=Digital_In_EN+(Digital_In_Interrupt_EN<<8)+(Digital_In_Interrupt_Can_Rising<<16)+(Digital_In_Interrupt_Can_Falling<<24); //TODO: set this to be the things it should be for digital_in
 	//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
 	data[DIGITAL_IN_1_POS]=(0)+(0)+(Digital_In_Interrupt_Power_Rising<<16)+(Digital_In_Interrupt_Power_Falling<<24);
+	//byte: [x x U7/1 U7/0 U6/1 U6/0 U5/1 U5/0]
+	data[DEFAULT_SWITCH_STATE_POS] = Default_Switch_State;
 
 	uint32_t CanPos[8] = {CAN_ID_0_POS, CAN_ID_1_POS, CAN_ID_2_POS, CAN_ID_3_POS, CAN_ID_4_POS, CAN_ID_5_POS, CAN_ID_6_POS, CAN_ID_7_POS};
 	for(uint32_t i=0; i<8; i++)
@@ -110,12 +114,13 @@ void Config_Write_Flash(void)
 		data[CAN_DATAS_1ST_POS+i*2+1]=Can_Config_Datas[i][4]+(Can_Config_Datas[i][5]<<8)+(Can_Config_Datas[i][6]<<16)+(Can_Config_Datas[i][7]<<24);
 	}
 
-	Flash_Write(FLASH_PAGE_63, 63, data, 42);
+	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
 
 void Config_Read_Flash(void)
 {
-	Digital_In_EN = (0b00011101&(DIGITAL_IN_0>>0)); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+	Digital_In_EN = ((DIGITAL_IN_0>>0)&0b00011101); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+	Default_Switch_State=((DEFAULT_SWITCH_STATE>>0)&0xFF);
 
 	uint32_t CanId[8] = {CAN_ID_0, CAN_ID_1, CAN_ID_2, CAN_ID_3, CAN_ID_4, CAN_ID_5, CAN_ID_6, CAN_ID_7};
 	for(uint32_t i=0; i<8; i++)
