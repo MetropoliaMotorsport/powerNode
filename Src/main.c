@@ -61,6 +61,8 @@ uint32_t U5T[T_ROLLING_AVERAGE];
 uint32_t U5T_raw_average;
 uint32_t U5V[V_ROLLING_AVERAGE];
 uint32_t U5V_raw_average;
+uint32_t U5GNDV[V_ROLLING_AVERAGE];
+uint32_t U5GNDV_raw_average;
 uint32_t U6I0[I_ROLLING_AVERAGE];
 uint32_t U6I0_raw_average;
 uint32_t U6I1[I_ROLLING_AVERAGE];
@@ -69,6 +71,8 @@ uint32_t U6T[T_ROLLING_AVERAGE];
 uint32_t U6T_raw_average;
 uint32_t U6V[V_ROLLING_AVERAGE];
 uint32_t U6V_raw_average;
+uint32_t U6GNDV[V_ROLLING_AVERAGE];
+uint32_t U6GNDV_raw_average;
 uint32_t U7I0[I_ROLLING_AVERAGE];
 uint32_t U7I0_raw_average;
 uint32_t U7I1[I_ROLLING_AVERAGE];
@@ -77,6 +81,8 @@ uint32_t U7T[T_ROLLING_AVERAGE];
 uint32_t U7T_raw_average;
 uint32_t U7V[V_ROLLING_AVERAGE];
 uint32_t U7V_raw_average;
+uint32_t U7GNDV[V_ROLLING_AVERAGE];
+uint32_t U7GNDV_raw_average;
 
 uint32_t I0_rolling_average_position=0;
 uint32_t I1_rolling_average_position=0;
@@ -108,7 +114,6 @@ int main(void)
 	MX_FDCAN_Init();
 
 
-
 	while(1)
 	{
 		//example commands stored here
@@ -130,8 +135,6 @@ int main(void)
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
-
-uint32_t m1, m2, m3, s1, s2, s3;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -214,8 +217,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				convertedValue[i]=0;
 			}
 		}
-		m1=masterConvertedValue[0]; m2=masterConvertedValue[1]; m3=masterConvertedValue[2];
-		s1=slaveConvertedValue[0]; s2=slaveConvertedValue[1]; s3=slaveConvertedValue[2];
 
 		if (HAL_ADCEx_MultiModeStop_DMA(&hadc1) != HAL_OK)
 		{
@@ -261,6 +262,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			{
 				I1_rolling_average_position++;
 			}
+
+			//TODO: calculate averages here
+
 			break;
 		case 2:
 			U5T[T_rolling_average_position]=convertedValue[0];
@@ -274,11 +278,14 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			{
 				T_rolling_average_position++;
 			}
+
+			//TODO: calculate averages here
+
 			break;
 		case 3:
-			U5V[V_rolling_average_position]=convertedValue[0];
-			U6V[V_rolling_average_position]=convertedValue[1];
-			U7V[V_rolling_average_position]=convertedValue[2];
+			U5V[V_rolling_average_position]=convertedValue[0]; U5GNDV[V_rolling_average_position]=slaveConvertedValue[0];
+			U6V[V_rolling_average_position]=convertedValue[1]; U6GNDV[V_rolling_average_position]=slaveConvertedValue[1];
+			U7V[V_rolling_average_position]=convertedValue[2]; U7GNDV[V_rolling_average_position]=slaveConvertedValue[2];
 			if (V_rolling_average_position == V_ROLLING_AVERAGE-1)
 			{
 				V_rolling_average_position=0;
@@ -287,6 +294,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			{
 				V_rolling_average_position++;
 			}
+
+			uint32_t U5V_raw=0; uint32_t U6V_raw=0; uint32_t U7V_raw=0; uint32_t U5GNDV_raw=0; uint32_t U6GNDV_raw=0; uint32_t U7GNDV_raw=0;
+			for(uint32_t i=0; i<V_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
+			{
+				U5V_raw+=U5V[i]; U5GNDV_raw+=U5GNDV[i];
+				U6V_raw+=U6V[i]; U6GNDV_raw+=U6GNDV[i];
+				U7V_raw+=U7V[i]; U7GNDV_raw+=U7GNDV[i];
+			}
+			U5V_raw/=V_ROLLING_AVERAGE; U6V_raw/=V_ROLLING_AVERAGE; U7V_raw/=V_ROLLING_AVERAGE; U5GNDV_raw/=V_ROLLING_AVERAGE; U6GNDV_raw/=V_ROLLING_AVERAGE; U7GNDV_raw/=V_ROLLING_AVERAGE;
+			U5V_raw_average=U5V_raw; U6V_raw_average=U6V_raw; U7V_raw_average=U7V_raw; U5GNDV_raw_average=U5GNDV_raw; U6GNDV_raw_average=U6GNDV_raw; U7GNDV_raw_average=U7GNDV_raw;
+			//TODO: warnings on over/undercurrent, overcurrent shutoff
+
 			break;
 		default:
 			Error_Handler();

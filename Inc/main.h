@@ -86,6 +86,9 @@ extern uint32_t U7I0_raw_average;
 extern uint32_t U7I1_raw_average;
 extern uint32_t U7T_raw_average;
 extern uint32_t U7V_raw_average;
+extern uint32_t U5GNDV_raw_average;
+extern uint32_t U6GNDV_raw_average;
+extern uint32_t U7GNDV_raw_average;
 
 
 //more details about what is stored in each word can be found in main before the while(1) loop
