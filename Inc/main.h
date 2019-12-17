@@ -50,10 +50,13 @@ extern const pinPort U7MULTI;
 #define CANID_CONFIG 0x700
 #define CANID_SYNC 0x80
 #define CANID_ERROR 0x600
+#define CANID_ACK	0x500
 
 //config commands
 #define SWITCH_POWER	1
 #define CHANGE_DC		2
+#define SAVE_CONFIGS	128
+#define CONFIG_MESSAGE	129
 #define something		255
 
 

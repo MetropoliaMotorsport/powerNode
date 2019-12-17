@@ -406,6 +406,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case SWITCH_POWER:
 					Switch_Power(CANRxData[2], CANRxData[3]);
 					break;
+				case SAVE_CONFIGS:
+					Save_Config();
+					break;
+				case CONFIG_MESSAGE:
+					Config_Message(CANRxData[2], CANRxData[3], (((uint16_t)CANRxData[4])<<8)+(((uint16_t)CANRxData[5])<<0));
+					break;
 				default:
 					//TODO: warning to canbus for undefined configuration command
 					break;
