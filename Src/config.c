@@ -66,7 +66,6 @@ void Config_0(void)
 			Can_Config_Datas[i][j]=temp_Can_Config_Datas[i][j];
 		}
 	}
-
 }
 
 void Config_1(void)
@@ -101,7 +100,17 @@ void Config_Write_Flash(void)
 	data[CAN_ID_6_POS]=(0)+(Can_DLCs[6]<<16)+(Can_IDs[6]&0xFFFF);
 	data[CAN_ID_7_POS]=(0)+(Can_DLCs[7]<<16)+(Can_IDs[7]&0xFFFF);*/
 
-	Flash_Write(FLASH_PAGE_63, 63, data, 10);
+	for(uint32_t i=0; i<8; i++)
+	{
+		//byte: [bytes of specific data]
+		data[CAN_BYTES_1ST_POS+i*2]=Can_Config_Bytes[i][0]+(Can_Config_Bytes[i][1]<<8)+(Can_Config_Bytes[i][2]<<16)+(Can_Config_Bytes[i][3]<<24);
+		data[CAN_BYTES_1ST_POS+i*2+1]=Can_Config_Bytes[i][4]+(Can_Config_Bytes[i][5]<<8)+(Can_Config_Bytes[i][6]<<16)+(Can_Config_Bytes[i][7]<<24);
+		//byte: [id of data to send]
+		data[CAN_DATAS_1ST_POS+i*2]=Can_Config_Datas[i][0]+(Can_Config_Datas[i][1]<<8)+(Can_Config_Datas[i][2]<<16)+(Can_Config_Datas[i][3]<<24);
+		data[CAN_DATAS_1ST_POS+i*2+1]=Can_Config_Datas[i][4]+(Can_Config_Datas[i][5]<<8)+(Can_Config_Datas[i][6]<<16)+(Can_Config_Datas[i][7]<<24);
+	}
+
+	Flash_Write(FLASH_PAGE_63, 63, data, 42);
 }
 
 void Config_Read_Flash(void)
@@ -131,6 +140,21 @@ void Config_Read_Flash(void)
 	Can_DLCs[6] = ((CAN_ID_6>>16)&0xFF);
 	Can_IDs[7] = ((CAN_ID_7>>0)&0xFFFF);
 	Can_DLCs[7] = ((CAN_ID_7>>16)&0xFF);*/
+
+	for(uint32_t i=0; i<8; i++)
+	{
+		uint32_t temp_can_bytes_0=*(&CAN_BYTES_1ST+i*2);
+		uint32_t temp_can_bytes_1=*(&CAN_BYTES_1ST+i*2+1);
+		uint32_t temp_can_datas_0=*(&CAN_DATAS_1ST+i*2);
+		uint32_t temp_can_datas_1=*(&CAN_DATAS_1ST+i*2+1);
+		for(uint32_t j=0; j<4; j++)
+		{
+			Can_Config_Bytes[i][j]=(temp_can_bytes_0>>(8*j)) & 0xFF;
+			Can_Config_Bytes[i][j+4]=(temp_can_bytes_1>>(8*j)) & 0xFF;
+			Can_Config_Datas[i][j]=(temp_can_datas_0>>(8*j)) & 0xFF;
+			Can_Config_Datas[i][j+4]=(temp_can_datas_1>>(8*j)) & 0xFF;
+		}
+	}
 }
 
 

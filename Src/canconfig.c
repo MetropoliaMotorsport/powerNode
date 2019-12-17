@@ -11,40 +11,27 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 	switch(Can_Config_Datas[message][*pos])
 	{
 	case MESS_U5I0:
-		transmit=0;
-		switch(Can_Config_Bytes[message][*pos])
-		{
-		case 1: //TODO: function to parse raw values to real values
-			CANTxData[*pos] = transmit>>8 & 0xFF;
-			*pos+=1;
-		case 2:
-			CANTxData[*pos] = transmit>>8 & 0xFF;
-			CANTxData[*pos+1] = transmit>>0 & 0xFF;
-			*pos+=2;
-		default:
-			//TODO: warning for wrong length message
-			break;
-		}
+		transmit=1000;
 		break;
 
 	case MESS_U5I1:
-
+		transmit=1000;
 		break;
 
 	case MESS_U6I0:
-
+		transmit=1000;
 		break;
 
 	case MESS_U6I1:
-
+		transmit=1000;
 		break;
 
 	case MESS_U7I0:
-
+		transmit=1000;
 		break;
 
 	case MESS_U7I1:
-
+		transmit=1000;
 		break;
 
 	case MESS_U5T:

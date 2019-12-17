@@ -111,6 +111,11 @@ extern uint32_t U7V_real;
 #define CAN_ID_6			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_6_POS))
 #define CAN_ID_7_POS		(CAN_ID_6_POS+1)
 #define CAN_ID_7			(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_7_POS))
+#define CAN_BYTES_1ST_POS	(CAN_ID_7_POS+1)
+#define CAN_BYTES_1ST		(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_BYTES_1ST_POS))
+#define CAN_DATAS_1ST_POS	(CAN_BYTES_1ST_POS+16)
+#define CAN_DATAS_1ST		(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_DATAS_1ST_POS))
+//next define will be CAN_DATAS_1ST_POS+16
 
 //flash page definitions
 #define FLASH_PAGE_0 0x8000000
