@@ -60,15 +60,48 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		break;
 
 	case MESS_U5V:
-		transmit=Parse_Voltage(U5V_raw_average, U5GNDV_raw_average, Can_Config_Bytes[message][*pos]);
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U5V_real/1000); //transmit number in V
+			break;
+		case 2:
+			transmit=U5V_real; //transmit number in mV
+			break;
+		default:
+			//TODO: warning wrong number of bytes
+			break;
+		}
 		break;
 
 	case MESS_U6V:
-		transmit=Parse_Voltage(U6V_raw_average, U6GNDV_raw_average, Can_Config_Bytes[message][*pos]);
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U6V_real/1000); //transmit number in V
+			break;
+		case 2:
+			transmit=U6V_real; //transmit number in mV
+			break;
+		default:
+			//TODO: warning wrong number of bytes
+			break;
+		}
 		break;
 
 	case MESS_U7V:
-		transmit=Parse_Voltage(U7V_raw_average, U7GNDV_raw_average, Can_Config_Bytes[message][*pos]);
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U7V_real/1000); //transmit number in V
+			break;
+		case 2:
+			transmit=U7V_real; //transmit number in mV
+			break;
+		default:
+			//TODO: warning wrong number of bytes
+			break;
+		}
 		break;
 
 	default:

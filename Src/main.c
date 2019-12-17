@@ -54,35 +54,34 @@ uint8_t Can_Config_Datas[8][8];
 
 //global variables
 uint32_t U5I0[I_ROLLING_AVERAGE];
-uint32_t U5I0_raw_average;
+uint32_t U5I0_real;
 uint32_t U5I1[I_ROLLING_AVERAGE];
-uint32_t U5I1_raw_average;
+uint32_t U5I1_real;
 uint32_t U5T[T_ROLLING_AVERAGE];
-uint32_t U5T_raw_average;
+uint32_t U5T_real;
 uint32_t U5V[V_ROLLING_AVERAGE];
-uint32_t U5V_raw_average;
+uint32_t U5V_real;
 uint32_t U5GNDV[V_ROLLING_AVERAGE];
-uint32_t U5GNDV_raw_average;
+
 uint32_t U6I0[I_ROLLING_AVERAGE];
-uint32_t U6I0_raw_average;
+uint32_t U6I0_real;
 uint32_t U6I1[I_ROLLING_AVERAGE];
-uint32_t U6I1_raw_average;
+uint32_t U6I1_real;
 uint32_t U6T[T_ROLLING_AVERAGE];
-uint32_t U6T_raw_average;
+uint32_t U6T_real;
 uint32_t U6V[V_ROLLING_AVERAGE];
-uint32_t U6V_raw_average;
+uint32_t U6V_real;
 uint32_t U6GNDV[V_ROLLING_AVERAGE];
-uint32_t U6GNDV_raw_average;
+
 uint32_t U7I0[I_ROLLING_AVERAGE];
-uint32_t U7I0_raw_average;
+uint32_t U7I0_real;
 uint32_t U7I1[I_ROLLING_AVERAGE];
-uint32_t U7I1_raw_average;
+uint32_t U7I1_real;
 uint32_t U7T[T_ROLLING_AVERAGE];
-uint32_t U7T_raw_average;
+uint32_t U7T_real;
 uint32_t U7V[V_ROLLING_AVERAGE];
-uint32_t U7V_raw_average;
+uint32_t U7V_real;
 uint32_t U7GNDV[V_ROLLING_AVERAGE];
-uint32_t U7GNDV_raw_average;
 
 uint32_t I0_rolling_average_position=0;
 uint32_t I1_rolling_average_position=0;
@@ -247,7 +246,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I0_raw+=U7I0[i];
 			}
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5I0_raw_average=U5I0_raw; U6I0_raw_average=U6I0_raw; U7I0_raw_average=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+			U5I0_real=U5I0_raw; U6I0_real=U6I0_raw; U7I0_real=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			break;
 		case 1:
@@ -303,7 +302,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7V_raw+=U7V[i]; U7GNDV_raw+=U7GNDV[i];
 			}
 			U5V_raw/=V_ROLLING_AVERAGE; U6V_raw/=V_ROLLING_AVERAGE; U7V_raw/=V_ROLLING_AVERAGE; U5GNDV_raw/=V_ROLLING_AVERAGE; U6GNDV_raw/=V_ROLLING_AVERAGE; U7GNDV_raw/=V_ROLLING_AVERAGE;
-			U5V_raw_average=U5V_raw; U6V_raw_average=U6V_raw; U7V_raw_average=U7V_raw; U5GNDV_raw_average=U5GNDV_raw; U6GNDV_raw_average=U6GNDV_raw; U7GNDV_raw_average=U7GNDV_raw;
+			U5V_real=Parse_Voltage(U5V_raw, U5GNDV_raw); U6V_real=Parse_Voltage(U6V_raw, U6GNDV_raw); U7V_real=Parse_Voltage(U7V_raw, U7GNDV_raw);
 			//TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			break;

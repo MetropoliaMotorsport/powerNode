@@ -74,21 +74,18 @@ extern uint8_t Can_Config_Datas[8][8];
 //global variables
 extern uint8_t CANTxData[8];
 
-extern uint32_t U5I0_raw_average;
-extern uint32_t U5I1_raw_average;
-extern uint32_t U5T_raw_average;
-extern uint32_t U5V_raw_average;
-extern uint32_t U6I0_raw_average;
-extern uint32_t U6I1_raw_average;
-extern uint32_t U6T_raw_average;
-extern uint32_t U6V_raw_average;
-extern uint32_t U7I0_raw_average;
-extern uint32_t U7I1_raw_average;
-extern uint32_t U7T_raw_average;
-extern uint32_t U7V_raw_average;
-extern uint32_t U5GNDV_raw_average;
-extern uint32_t U6GNDV_raw_average;
-extern uint32_t U7GNDV_raw_average;
+extern uint32_t U5I0_real;
+extern uint32_t U5I1_real;
+extern uint32_t U5T_real;
+extern uint32_t U5V_real;
+extern uint32_t U6I0_real;
+extern uint32_t U6I1_real;
+extern uint32_t U6T_real;
+extern uint32_t U6V_real;
+extern uint32_t U7I0_real;
+extern uint32_t U7I1_real;
+extern uint32_t U7T_real;
+extern uint32_t U7V_real;
 
 
 //more details about what is stored in each word can be found in main before the while(1) loop

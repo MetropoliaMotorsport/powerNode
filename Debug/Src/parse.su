@@ -1,3 +1,3 @@
 parse.c:5:10:Parse_Current	24	static
-parse.c:23:10:Parse_Voltage	32	static
-parse.c:43:10:Parse_Temperatuer	24	static
+parse.c:23:10:Parse_Voltage	24	static
+parse.c:34:10:Parse_Temperatuer	24	static
