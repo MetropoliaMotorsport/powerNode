@@ -1,7 +1,7 @@
 #include "main.h"
 
 //function prototypes
-uint32_t CanSend(uint32_t);
+void Can_Send(uint32_t);
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -51,6 +51,7 @@ uint16_t Can_IDs[8];
 uint8_t Can_DLCs[8];
 uint8_t Can_Config_Bytes[8][8];
 uint8_t Can_Config_Datas[8][8];
+uint8_t Can_Sync_Enable;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -93,6 +94,13 @@ uint32_t ADCDualConvertedValues[3];
 
 uint8_t CANTxData[8];
 
+uint8_t CanBuffer[31];
+uint8_t CanMessagesToSend;
+uint8_t CanBufferReadPos;
+uint8_t CanBufferWritePos;
+
+uint8_t CanSyncFlag;
+
 //for these 255 means enable continuously while lower numbers mean to take that many samples
 uint32_t sample_temperature;
 uint32_t sample_voltage;
@@ -115,14 +123,54 @@ int main(void)
 
 	while(1)
 	{
-		//example commands stored here
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8,HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)); //reading pins may be wanted with interrupts at some time, and it may be wanted to debounce some digital inputs
 
-		for(int i=0; i<8; i++)
+		if(CanSyncFlag)
+		{
+			for(uint32_t i=0; i<8; i++)
 			{
-			CanSend(i);
-			HAL_Delay(1);
+				if ((Can_Sync_Enable>>i)&0b1)
+				{
+					if(CanBuffer[CanBufferWritePos]!=0)
+					{
+						//TODO: warning for full can buffer
+					}
+					//overwrite unsent messages
+					CanBuffer[CanBufferWritePos]=i;
+
+					if(CanBufferWritePos>=30)
+					{
+						CanBufferWritePos=0;
+					}
+					else
+					{
+						CanBufferWritePos++;
+					}
+					CanMessagesToSend++;
+				}
 			}
+			CanSyncFlag=0;
+		}
+
+		//TODO: add option to send messages on timer
+		if (CanMessagesToSend)
+		{
+			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
+			{
+				Can_Send(CanBuffer[CanBufferReadPos]);
+
+				CanBuffer[CanBufferReadPos]=255;
+				CanMessagesToSend--;
+				if(CanBufferReadPos>=30)
+				{
+					CanBufferReadPos=0;
+				}
+				else
+				{
+					CanBufferReadPos++;
+				}
+			}
+		}
+
 		//TODO: start this from a timer instead of here
 	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
 	    {
@@ -315,27 +363,28 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 }
 
 
-uint32_t CanSend(uint32_t message)
+void Can_Send(uint32_t message)
 {
 	//TODO: maybe have warning states based on these if statements
 	if(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
 	{
-		return -1;
+		//TODO: warning for fifo full
+		return;
 	}
 
 	if(Can_IDs[message]>2047)
 	{
-		return -1;
+		return;
 		//TODO: for sure we want warning for trying to send disabled message
 	}
 	else if(Can_DLCs[message]==0)
 	{
-		return -1;
+		return;
 		//TODO: set warning for trying to send message with 0 DLC
 	}
 	else if(Can_DLCs[message]>8)
 	{
-		return -1;
+		return;
 		//TODO: set warning for trying to send too long message
 	}
 
@@ -371,11 +420,10 @@ uint32_t CanSend(uint32_t message)
 
 	if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
 	{
-		return -1;
+		return;
+		//TODO: probably an error for can failure to send
 		//Error_Handler();
 	}
-
-	return 0;
 }
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
@@ -393,6 +441,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 
 		if (RxHeader.Identifier == CANID_SYNC)
 		{
+			//TODO: add an option for a delay to this
+			CanSyncFlag=1;
 			//TODO: put logic for sync message here
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)

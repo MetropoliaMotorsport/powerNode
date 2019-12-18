@@ -75,6 +75,7 @@ extern uint16_t Can_IDs[8];
 extern uint8_t Can_DLCs[8];
 extern uint8_t Can_Config_Bytes[8][8];
 extern uint8_t Can_Config_Datas[8][8];
+extern uint8_t Can_Sync_Enable;
 
 //global variables
 extern uint8_t CANTxData[8];
@@ -122,7 +123,9 @@ extern uint32_t U7V_real;
 #define CAN_DATAS_1ST				(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_DATAS_1ST_POS))
 #define DEFAULT_SWITCH_STATE_POS	(CAN_DATAS_1ST_POS+16)
 #define DEFAULT_SWITCH_STATE		(*(uint32_t*)(FLASH_PAGE_63+0x4*DEFAULT_SWITCH_STATE_POS))
-//next define will be CAN_DATAS_1ST_POS+16
+#define CAN_SYNC_EN_POS				(DEFAULT_SWITCH_STATE_POS+1)
+#define CAN_SYNC_EN					(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_SYNC_EN_POS))
+
 
 //flash page definitions
 #define FLASH_PAGE_0 0x8000000
