@@ -144,3 +144,64 @@ void HAL_FDCAN_MspDeInit(FDCAN_HandleTypeDef* hfdcan)
 
 }
 
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+{
+	if(htim_base->Instance==TIM6)
+	{
+		//TODO: also make sure this doesn't happen if other initialization doesn't happen
+		__HAL_RCC_TIM6_CLK_ENABLE();
+		HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+	}
+	/*else if(htim_base->Instance==TIM7)
+	{
+		__HAL_RCC_TIM7_CLK_ENABLE();
+		HAL_NVIC_SetPriority(TIM7_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM7_IRQn);
+	}
+	else if(htim_base->Instance==TIM15)
+	{
+		__HAL_RCC_TIM15_CLK_ENABLE();
+		HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+	}
+	else if(htim_base->Instance==TIM16)
+	{
+		__HAL_RCC_TIM16_CLK_ENABLE();
+		HAL_NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+	}
+	else if(htim_base->Instance==TIM17)
+	{
+		__HAL_RCC_TIM17_CLK_ENABLE();
+	}*/
+}
+
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+{
+	if(htim_base->Instance==TIM6)
+	{
+		__HAL_RCC_TIM6_CLK_DISABLE();
+		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+	}
+	/*else if(htim_base->Instance==TIM7)
+	{
+		__HAL_RCC_TIM7_CLK_DISABLE();
+		HAL_NVIC_DisableIRQ(TIM7_IRQn);
+	}
+	else if(htim_base->Instance==TIM15)
+	{
+		__HAL_RCC_TIM15_CLK_DISABLE();
+		HAL_NVIC_DisableIRQ(TIM1_BRK_TIM15_IRQn);
+	}
+	else if(htim_base->Instance==TIM16)
+	{
+		__HAL_RCC_TIM16_CLK_DISABLE();
+		HAL_NVIC_DisableIRQ(TIM1_UP_TIM16_IRQn);
+	}
+	else if(htim_base->Instance==TIM17)
+	{
+		__HAL_RCC_TIM17_CLK_DISABLE();
+	}*/
+}

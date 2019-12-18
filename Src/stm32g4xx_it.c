@@ -5,6 +5,7 @@
 extern FDCAN_HandleTypeDef hfdcan;
 extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_adc2;
+extern TIM_HandleTypeDef htim6;
 
 void NMI_Handler(void)
 {
@@ -69,9 +70,6 @@ void DMA1_Channel1_IRQHandler(void)
 	HAL_DMA_IRQHandler(&hdma_adc1);
 }
 
-/**
-  * @brief This function handles DMA1 channel2 global interrupt.
-  */
 void DMA1_Channel2_IRQHandler(void)
 {
 	HAL_DMA_IRQHandler(&hdma_adc2);
@@ -81,4 +79,9 @@ void DMA1_Channel2_IRQHandler(void)
 void FDCAN1_IT0_IRQHandler(void)
 {
 	HAL_FDCAN_IRQHandler(&hfdcan);
+}
+
+void TIM6_DAC_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim6);
 }

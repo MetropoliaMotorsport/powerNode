@@ -10,12 +10,16 @@ static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN_Init(void);
 
+//TODO: organize timer prototypes
+static void MX_TIM6_Init(void);
+
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
+TIM_HandleTypeDef htim6;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -120,6 +124,9 @@ int main(void)
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
 
+	//TODO: organize the timer part of everything
+	MX_TIM6_Init(); //TODO: this configuration should be optional in case no periodic sending of can messages is configured
+
 
 	while(1)
 	{
@@ -182,6 +189,16 @@ int main(void)
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM6)
+	{
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+	}
+}
+
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -837,6 +854,21 @@ static void MX_GPIO_Init(void)
 	{
 		//here we configure pins intended for PWM purposes
 	}
+}
+
+static void MX_TIM6_Init(void)
+{
+	htim6.Instance = TIM6;
+	htim6.Init.Prescaler = 16999;
+	htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim6.Init.Period = 2000; //TODO: make this configurable depending on wanted time
+	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE; //is this ok?
+	if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_TIM_Base_Start_IT(&htim6);
 }
 
 
