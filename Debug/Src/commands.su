@@ -1,5 +1,6 @@
 commands.c:10:6:Acknowledge	56	static
 commands.c:50:6:Save_Config	8	static
 commands.c:62:6:Switch_Power	24	static
-commands.c:74:6:Config_Message	16	static
-commands.c:107:6:Config_Switch_Defaults	24	static
+commands.c:76:6:Config_Message	16	static
+commands.c:109:6:Config_Switch_Defaults	24	static
+commands.c:129:6:Config_Can_Sync	24	static

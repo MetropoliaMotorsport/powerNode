@@ -439,6 +439,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			//TODO: move to error can message
 		}
 
+		//set any bytes not actaully read to 0 to prevent unknown values being in them
+		for(uint32_t i=(RxHeader.DataLength>>16); i<8; i++)
+		{
+			CANRxData[i]=0;
+		}
+
 		if (RxHeader.Identifier == CANID_SYNC)
 		{
 			//TODO: add an option for a delay to this
@@ -463,6 +469,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 					break;
 				case CONFIG_SWITCHES_DEFAULT:
 					Config_Switch_Defaults(CANRxData[2], CANRxData[3]);
+					break;
+				case CONFIG_CAN_SYNC:
+					Config_Can_Sync(CANRxData[2], CANRxData[3]);
 					break;
 				default:
 					//TODO: warning to canbus for undefined configuration command

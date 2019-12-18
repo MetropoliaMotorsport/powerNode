@@ -58,6 +58,7 @@ extern const pinPort U7MULTI;
 #define SAVE_CONFIGS				128
 #define CONFIG_MESSAGE				129
 #define CONFIG_SWITCHES_DEFAULT		130
+#define CONFIG_CAN_SYNC				131
 #define something					255
 
 

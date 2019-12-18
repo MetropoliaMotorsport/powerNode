@@ -68,6 +68,8 @@ void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
 		}
 	}
+
+	Acknowledge(SWITCH_POWER);
 }
 
 
@@ -122,4 +124,24 @@ void Config_Switch_Defaults(uint8_t enableChanges, uint8_t newState)
 	}
 
 	Acknowledge(CONFIG_SWITCHES_DEFAULT);
+}
+
+void Config_Can_Sync(uint8_t enableChanges, uint8_t newState)
+{
+	for(uint32_t i=0; i<6; i++)
+	{
+		if (((enableChanges>>i)&0b1))
+		{
+			if(((newState>>i)&0b1))
+			{
+				Can_Sync_Enable|=(1<<i);
+			}
+			else
+			{
+				Can_Sync_Enable&=~(1<<i);
+			}
+		}
+	}
+
+	Acknowledge(CONFIG_CAN_SYNC);
 }

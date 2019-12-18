@@ -69,7 +69,7 @@ void Config_0(void)
 		}
 	}
 
-	Can_Sync_Enable = 0b11111111;
+	Can_Sync_Enable = 0b10101010;
 }
 
 void Config_1(void)
