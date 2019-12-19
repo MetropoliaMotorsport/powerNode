@@ -65,6 +65,7 @@ uint16_t Can_Interval;
 //global variables
 uint8_t canErrorToTransmit; //8 32 bit values, each 32 bit value can store 32 errors or warnings
 uint32_t canErrors[8];
+uint8_t canSendErrorFlag;
 
 uint32_t U5I0[I_ROLLING_AVERAGE];
 uint32_t U5I0_real;
@@ -140,9 +141,13 @@ int main(void)
 
 	while(1)
 	{
-		if(canErrorToTransmit)
+		if(canErrorToTransmit && canSendErrorFlag)
 		{
 			Send_Error();
+			if(!canErrorToTransmit)
+			{
+				canSendErrorFlag=0;
+			}
 		}
 
 
@@ -200,8 +205,7 @@ int main(void)
 		}
 
 
-		//only send can messages if there are not errors to send
-		if (CanMessagesToSend && !canErrorToTransmit)
+		if (CanMessagesToSend)
 		{
 			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
 			{
@@ -241,7 +245,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if(htim->Instance == TIM7)
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		canSendErrorFlag=1;
 	}
 }
 
