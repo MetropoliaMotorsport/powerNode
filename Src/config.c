@@ -41,10 +41,10 @@ void Config_0(void)
 	Default_Switch_State = 0b00000000;
 
 	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
-	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 0; Can_DLCs[6] = 3; Can_DLCs[7] = 0;
+	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 3; Can_DLCs[6] = 3; Can_DLCs[7] = 8;
 
 	//TODO: write and read this from flash as well
-	uint8_t temp_Can_Config_Bytes[8][8]={	{ 0, 1, 2, 3, 4, 5, 6, 7 },
+	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ 2, 0, 2, 0, 2, 0, 2, 0 },
 											{ 1, 1, 1, 1, 1, 0, 0, 0 },
 											{ 1, 1, 1, 0, 0, 0, 0, 0 },
@@ -52,7 +52,7 @@ void Config_0(void)
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
-	uint8_t temp_Can_Config_Datas[8][8]={	{ 0, 1, 2, 3, 4, 5, 6, 7 },
+	uint8_t temp_Can_Config_Datas[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ MESS_U5I0, 0, MESS_U5I1, 0, MESS_U6I0, 0, MESS_U6I1, 0 },
 											{ MESS_U7I0, MESS_U7I1, MESS_U5T, MESS_U6T, MESS_U7T, 0, 0, 0 },
 											{ MESS_U5V, MESS_U6V, MESS_U7V, 0, 0, 0, 0, 0 },
@@ -69,7 +69,8 @@ void Config_0(void)
 		}
 	}
 
-	Can_Sync_Enable = 0b10101010;
+	Can_Sync_Enable = 0b01000000;
+	Can_Timed_Enable = 0b10000000;
 }
 
 void Config_1(void)
@@ -83,9 +84,9 @@ void Config_Write_Flash(void)
 	uint32_t data[512] = {0};
 
 	//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
-	data[DIGITAL_IN_0_POS]=Digital_In_EN+(Digital_In_Interrupt_EN<<8)+(Digital_In_Interrupt_Can_Rising<<16)+(Digital_In_Interrupt_Can_Falling<<24); //TODO: set this to be the things it should be for digital_in
+	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising&0xFF)<<16)+((Digital_In_Interrupt_Can_Falling&0xFF)<<24); //TODO: set this to be the things it should be for digital_in
 	//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
-	data[DIGITAL_IN_1_POS]=(0)+(0)+(Digital_In_Interrupt_Power_Rising<<16)+(Digital_In_Interrupt_Power_Falling<<24);
+	data[DIGITAL_IN_1_POS]=(0)+(0)+((Digital_In_Interrupt_Power_Rising&0xFF)<<16)+((Digital_In_Interrupt_Power_Falling&0xFF)<<24);
 	//TODO: read other stuff from digital in back to flash, make it work in general
 	//bytes: [x], [x], [x], [x x U7/1 U7/0 U6/1 U6/0 U5/1 U5/0]
 	data[DEFAULT_SWITCH_STATE_POS]=Default_Switch_State&0xFF;
@@ -94,7 +95,7 @@ void Config_Write_Flash(void)
 	for(uint32_t i=0; i<8; i++)
 	{
 		//bytes: [unused], [can dlc], [can id high], [can id low] x8 //any can id outside the valid range of 0 to 2047 should be treated as disabled
-		data[CanPos[i]]=(0)+(Can_DLCs[i]<<16)+(Can_IDs[i]&0xFFFF);
+		data[CanPos[i]]=(0)+((Can_DLCs[i]&0xFF)<<16)+(Can_IDs[i]&0xFFFF);
 	}
 
 	//bytes: [unused], [can dlc], [can id high], [can id low] x8 //any can id outside the valid range of 0 to 2047 should be treated as disabled
@@ -116,8 +117,8 @@ void Config_Write_Flash(void)
 		data[CAN_DATAS_1ST_POS+i*2]=Can_Config_Datas[i][0]+(Can_Config_Datas[i][1]<<8)+(Can_Config_Datas[i][2]<<16)+(Can_Config_Datas[i][3]<<24);
 		data[CAN_DATAS_1ST_POS+i*2+1]=Can_Config_Datas[i][4]+(Can_Config_Datas[i][5]<<8)+(Can_Config_Datas[i][6]<<16)+(Can_Config_Datas[i][7]<<24);
 	}
-	//bytes: [x], [x], [x], [send can messages on sync]
-	data[CAN_SYNC_EN_POS]=Can_Sync_Enable&0xFF;
+	//bytes: [x], [x], [send can message on timer], [send can messages on sync]
+	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8);
 
 	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
@@ -165,7 +166,8 @@ void Config_Read_Flash(void)
 			Can_Config_Datas[i][j+4]=(temp_can_datas_1>>(8*j)) & 0xFF;
 		}
 	}
-	Can_Sync_Enable=(CAN_SYNC_EN>>0)&0b11111111;
+	Can_Sync_Enable=(CAN_SEND_EN>>0)&0b11111111;
+	Can_Timed_Enable=(CAN_SEND_EN>>8)&0b11111111;
 
 }
 

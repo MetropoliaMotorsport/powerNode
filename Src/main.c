@@ -56,6 +56,7 @@ uint8_t Can_DLCs[8];
 uint8_t Can_Config_Bytes[8][8];
 uint8_t Can_Config_Datas[8][8];
 uint8_t Can_Sync_Enable;
+uint8_t Can_Timed_Enable;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -104,6 +105,7 @@ uint8_t CanBufferReadPos;
 uint8_t CanBufferWritePos;
 
 uint8_t CanSyncFlag;
+uint8_t CanTimerFlag;
 
 //for these 255 means enable continuously while lower numbers mean to take that many samples
 uint32_t sample_temperature;
@@ -157,6 +159,33 @@ int main(void)
 			}
 			CanSyncFlag=0;
 		}
+		if(CanTimerFlag)
+		{
+			for(uint32_t i=0; i<8; i++)
+			{
+				if ((Can_Timed_Enable>>i)&0b1)
+				{
+					if(CanBuffer[CanBufferWritePos]!=0)
+					{
+						//TODO: warning for full can buffer
+					}
+					//overwrite unsent messages
+					CanBuffer[CanBufferWritePos]=i;
+
+					if(CanBufferWritePos>=30)
+					{
+						CanBufferWritePos=0;
+					}
+					else
+					{
+						CanBufferWritePos++;
+					}
+					CanMessagesToSend++;
+				}
+			}
+			CanTimerFlag=0;
+		}
+
 
 		//TODO: add option to send messages on timer
 		if (CanMessagesToSend)
@@ -195,7 +224,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM6)
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		CanTimerFlag=1;
 	}
 }
 
@@ -861,8 +890,8 @@ static void MX_TIM6_Init(void)
 	htim6.Instance = TIM6;
 	htim6.Init.Prescaler = 16999;
 	htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim6.Init.Period = 2000; //TODO: make this configurable depending on wanted time
-	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE; //is this ok?
+	htim6.Init.Period = 10000; //TODO: make this configurable depending on wanted time
+	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
 	{
 		Error_Handler();
