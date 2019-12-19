@@ -28,9 +28,37 @@ void Config_Setup(void)
 
 void Config_0(void)
 {
+	//TODO: check that these work properly
+	warn_undervoltage_U5=18000;
+	warn_overvoltage_U5=28000;
+	warn_undertemperature_U5=0;
+	warn_overtemperature_U5=1023;
+	warn_undercurrent_U5I0=0;
+	warn_overcurrent_U5I0=1000;
+	warn_undercurrent_U5I1=0;
+	warn_overcurrent_U5I1=1000;
+	warn_undervoltage_U6=18000;
+	warn_overvoltage_U6=28000;
+	warn_undertemperature_U6=0;
+	warn_overtemperature_U6=1023;
+	warn_undercurrent_U6I0=0;
+	warn_overcurrent_U6I0=1000;
+	warn_undercurrent_U6I1=0;
+	warn_overcurrent_U6I1=1000;
+	warn_undervoltage_U7=18000;
+	warn_overvoltage_U7=28000;
+	warn_undertemperature_U7=0;
+	warn_overtemperature_U7=1023;
+	warn_undercurrent_U7I0=0;
+	warn_overcurrent_U7I0=1000;
+	warn_undercurrent_U7I1=0;
+	warn_overcurrent_U7I1=1000;
+
+
+
 #if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
-	Digital_In_EN = 0xb00000000;
+	Digital_In_EN = 0b00000000;
 
 #else //in this case we test digital inputs
 
@@ -82,6 +110,20 @@ void Config_Write_Flash(void)
 {
 	uint32_t data[512] = {0};
 
+	//bytes: [underlimit high], [underlimit low], [overlimit high], [overlimit low]
+	data[U5_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U5<<0)&0xFFFF)+((warn_overvoltage_U5<<16)&0xFFFF);
+	data[U5_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U5<<0)&0xFFFF)+((warn_overtemperature_U5<<16)&0xFFFF);
+	data[U5_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U5I0<<0)&0xFFFF)+((warn_overcurrent_U5I0<<16)&0xFFFF);
+	data[U5_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U5I1<<0)&0xFFFF)+((warn_overcurrent_U5I1<<16)&0xFFFF);
+	data[U6_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U6<<0)&0xFFFF)+((warn_overvoltage_U6<<16)&0xFFFF);
+	data[U6_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U6<<0)&0xFFFF)+((warn_overtemperature_U6<<16)&0xFFFF);
+	data[U6_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U6I0<<0)&0xFFFF)+((warn_overcurrent_U6I0<<16)&0xFFFF);
+	data[U6_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U6I1<<0)&0xFFFF)+((warn_overcurrent_U6I1<<16)&0xFFFF);
+	data[U7_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U7<<0)&0xFFFF)+((warn_overvoltage_U7<<16)&0xFFFF);
+	data[U7_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U7<<0)&0xFFFF)+((warn_overtemperature_U7<<16)&0xFFFF);
+	data[U7_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U7I0<<0)&0xFFFF)+((warn_overcurrent_U7I0<<16)&0xFFFF);
+	data[U7_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U7I1<<0)&0xFFFF)+((warn_overcurrent_U7I1<<16)&0xFFFF);
+
 	//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
 	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising&0xFF)<<16)+((Digital_In_Interrupt_Can_Falling&0xFF)<<24); //TODO: set this to be the things it should be for digital_in
 	//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
@@ -124,6 +166,31 @@ void Config_Write_Flash(void)
 
 void Config_Read_Flash(void)
 {
+	warn_undervoltage_U5=((U5_VOLTAGE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overvoltage_U5=((U5_VOLTAGE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undertemperature_U5=((U5_TEMPERATURE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overtemperature_U5=((U5_TEMPERATURE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undercurrent_U5I0=((U5_CURRENT_WARNING_LIMIT_I0>>0)&0xFFFF);
+	warn_overcurrent_U5I0=((U5_CURRENT_WARNING_LIMIT_I0>>16)&0xFFFF);
+	warn_undercurrent_U5I1=((U5_CURRENT_WARNING_LIMIT_I1>>0)&0xFFFF);
+	warn_overcurrent_U5I1=((U5_CURRENT_WARNING_LIMIT_I1>>16)&0xFFFF);
+	warn_undervoltage_U6=((U6_VOLTAGE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overvoltage_U6=((U6_VOLTAGE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undertemperature_U6=((U6_TEMPERATURE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overtemperature_U6=((U6_TEMPERATURE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undercurrent_U6I0=((U6_CURRENT_WARNING_LIMIT_I0>>0)&0xFFFF);
+	warn_overcurrent_U6I0=((U6_CURRENT_WARNING_LIMIT_I0>>16)&0xFFFF);
+	warn_undercurrent_U6I1=((U6_CURRENT_WARNING_LIMIT_I1>>0)&0xFFFF);
+	warn_overcurrent_U6I1=((U6_CURRENT_WARNING_LIMIT_I1>>16)&0xFFFF);
+	warn_undervoltage_U7=((U7_VOLTAGE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overvoltage_U7=((U7_VOLTAGE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undertemperature_U7=((U7_TEMPERATURE_WARNING_LIMIT>>0)&0xFFFF);
+	warn_overtemperature_U7=((U7_TEMPERATURE_WARNING_LIMIT>>16)&0xFFFF);
+	warn_undercurrent_U7I0=((U7_CURRENT_WARNING_LIMIT_I0>>0)&0xFFFF);
+	warn_overcurrent_U7I0=((U7_CURRENT_WARNING_LIMIT_I0>>16)&0xFFFF);
+	warn_undercurrent_U7I1=((U7_CURRENT_WARNING_LIMIT_I1>>0)&0xFFFF);
+	warn_overcurrent_U7I1=((U7_CURRENT_WARNING_LIMIT_I1>>16)&0xFFFF);
+
 	Digital_In_EN = ((DIGITAL_IN_0>>0)&0b00011101); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	Default_Switch_State=((DEFAULT_SWITCH_STATE>>0)&0b00111111);
 

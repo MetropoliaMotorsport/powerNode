@@ -1,10 +1,7 @@
 #include "main.h"
 
-//function prototypes
-void Can_Send(uint8_t);
-void Set_Error(uint32_t);
-void Send_Error(void);
 
+//static function prototypes
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
@@ -60,6 +57,34 @@ uint8_t Can_Config_Datas[8][8];
 uint8_t Can_Sync_Enable;
 uint8_t Can_Timed_Enable;
 uint16_t Can_Interval;
+
+uint16_t warn_undervoltage_U5;
+uint16_t warn_overvoltage_U5;
+uint16_t warn_undertemperature_U5;
+uint16_t warn_overtemperature_U5;
+uint16_t warn_undercurrent_U5I0;
+uint16_t warn_overcurrent_U5I0;
+uint16_t warn_undercurrent_U5I1;
+uint16_t warn_overcurrent_U5I1;
+uint16_t cutoff_overcurrent_U5; //TODO
+uint16_t warn_undervoltage_U6;
+uint16_t warn_overvoltage_U6;
+uint16_t warn_undertemperature_U6;
+uint16_t warn_overtemperature_U6;
+uint16_t warn_undercurrent_U6I0;
+uint16_t warn_overcurrent_U6I0;
+uint16_t warn_undercurrent_U6I1;
+uint16_t warn_overcurrent_U6I1;
+uint16_t cutoff_overcurrent_U6; //TODO
+uint16_t warn_undervoltage_U7;
+uint16_t warn_overvoltage_U7;
+uint16_t warn_undertemperature_U7;
+uint16_t warn_overtemperature_U7;
+uint16_t warn_undercurrent_U7I0;
+uint16_t warn_overcurrent_U7I0;
+uint16_t warn_undercurrent_U7I1;
+uint16_t warn_overcurrent_U7I1;
+uint16_t cutoff_overcurrent_U7; //TODO
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -363,6 +388,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
 			U5I0_real=U5I0_raw; U6I0_real=U6I0_raw; U7I0_real=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
+			//TODO: check overcurrent and switch off immediately if too high
+			if (U5I0_real>
+
 			break;
 		case 1:
 			U5I1[I1_rolling_average_position]=convertedValue[0];
@@ -377,7 +405,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				I1_rolling_average_position++;
 			}
 
-			//TODO: calculate averages here
+			uint32_t U5I1_raw=0; uint32_t U6I1_raw=1; uint32_t U7I1_raw=0;
+			for(uint32_t i=0; i<I_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
+			{
+				U5I1_raw+=U5I1[i];
+				U6I1_raw+=U6I1[i];
+				U7I1_raw+=U7I1[i];
+			}
+			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
+			U5I1_real=U5I1_raw; U6I1_real=U6I1_raw; U7I1_real=U7I1_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			break;
 		case 2:
