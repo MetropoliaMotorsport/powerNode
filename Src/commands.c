@@ -31,16 +31,16 @@ void Acknowledge(uint8_t cmd)
 	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 	TxHeader.MessageMarker = 0;
 
-	if(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
+	while(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
 	{
 		//TODO: think if this is the best way to handle this
 		//Error_Handler();
-		return;
+		//return;
 	}
 
 	if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
 	{
-		//Error_Handler();
+		Set_Error(ERR_SEND_FAILED);
 		return;
 	}
 
@@ -77,7 +77,7 @@ void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 {
 	if(message>7)
 	{
-		//TODO: warning for trying to modify wrong message
+		Set_Error(ERR_MODIFY_INVALID_MESSAGE);
 		return;
 	}
 
@@ -99,7 +99,7 @@ void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 	}
 	else
 	{
-		//TODO: warning for trying to change undefined thing in message
+		Set_Error(ERR_MODIFY_INVALID_THING);
 		return;
 	}
 

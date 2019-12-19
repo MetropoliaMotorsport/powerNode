@@ -1,7 +1,9 @@
 #include "main.h"
 
 //function prototypes
-void Can_Send(uint32_t);
+void Can_Send(uint8_t);
+void Set_Error(uint32_t);
+void Send_Error(void);
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -9,8 +11,6 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN_Init(void);
-
-//TODO: organize timer prototypes
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 
@@ -63,6 +63,9 @@ uint16_t Can_Interval;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
+uint8_t canErrorToTransmit; //8 32 bit values, each 32 bit value can store 32 errors or warnings
+uint32_t canErrors[8];
+
 uint32_t U5I0[I_ROLLING_AVERAGE];
 uint32_t U5I0_real;
 uint32_t U5I1[I_ROLLING_AVERAGE];
@@ -137,6 +140,11 @@ int main(void)
 
 	while(1)
 	{
+		if(canErrorToTransmit)
+		{
+			Send_Error();
+		}
+
 
 		if(CanSyncFlag)
 		{
@@ -146,7 +154,7 @@ int main(void)
 				{
 					if(CanBuffer[CanBufferWritePos]!=0)
 					{
-						//TODO: warning for full can buffer
+						Set_Error(ERR_CAN_BUFFER_FULL);
 					}
 					//overwrite unsent messages
 					CanBuffer[CanBufferWritePos]=i;
@@ -172,7 +180,7 @@ int main(void)
 				{
 					if(CanBuffer[CanBufferWritePos]!=255)
 					{
-						//TODO: warning for full can buffer
+						Set_Error(ERR_CAN_BUFFER_FULL);
 					}
 					//overwrite unsent messages
 					CanBuffer[CanBufferWritePos]=i;
@@ -192,8 +200,8 @@ int main(void)
 		}
 
 
-		//TODO: add option to send messages on timer
-		if (CanMessagesToSend)
+		//only send can messages if there are not errors to send
+		if (CanMessagesToSend && !canErrorToTransmit)
 		{
 			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
 			{
@@ -418,36 +426,35 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 }
 
 
-void Can_Send(uint32_t message)
+void Can_Send(uint8_t message)
 {
-	//TODO: maybe have warning states based on these if statements
 	if(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
 	{
-		//TODO: warning for fifo full
+		Set_Error(ERR_CAN_FIFO_FULL);
 		return;
 	}
 
 	if(Can_IDs[message]>2047)
 	{
+		Set_Error(ERR_MESSAGE_DISABLED);
 		return;
-		//TODO: for sure we want warning for trying to send disabled message
 	}
 	else if(Can_DLCs[message]==0)
 	{
+		Set_Error(ERR_DLC_0);
 		return;
-		//TODO: set warning for trying to send message with 0 DLC
 	}
 	else if(Can_DLCs[message]>8)
 	{
+		Set_Error(ERR_DLC_LONG);
 		return;
-		//TODO: set warning for trying to send too long message
 	}
 
 	FDCAN_TxHeaderTypeDef TxHeader;
 
 	TxHeader.Identifier = Can_IDs[message];
 	TxHeader.DataLength = (Can_DLCs[message]<<16); //<<16 makes storing the number of bytes not require a switch statement for classic can
- //TODO: tx data based on values from flash somehow
+
 	//clear can tx data so that data from incorrectly configured message is 0
 	for(uint32_t i=0; i<8; i++)
 	{
@@ -463,7 +470,6 @@ void Can_Send(uint32_t message)
 			break;
 		}
 	}
-	//TODO: logic for different can tx data
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;
 	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
@@ -475,9 +481,8 @@ void Can_Send(uint32_t message)
 
 	if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
 	{
+		Set_Error(ERR_SEND_FAILED);
 		return;
-		//TODO: probably an error for can failure to send
-		//Error_Handler();
 	}
 }
 
@@ -490,8 +495,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	{
 		if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, CANRxData) != HAL_OK)
 		{
-			Error_Handler();
-			//TODO: move to error can message
+			Set_Error(ERR_RECIEVE_FAILED);
 		}
 
 		//set any bytes not actaully read to 0 to prevent unknown values being in them
@@ -504,50 +508,104 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		{
 			//TODO: add an option for a delay to this
 			CanSyncFlag=1;
-			//TODO: put logic for sync message here
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)
 		{
-			//TODO: put logic here for toggling output pins and pwm frequencies
+			//TODO: PWM frequencies
 			if(CANRxData[0] == ID)
 			{
 				switch(CANRxData[1])
 				{
 				case SWITCH_POWER:
 					Switch_Power(CANRxData[2], CANRxData[3]);
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case SAVE_CONFIGS:
 					Save_Config();
 					break;
 				case CONFIG_MESSAGE:
 					Config_Message(CANRxData[2], CANRxData[3], (((uint16_t)CANRxData[4])<<8)+(((uint16_t)CANRxData[5])<<0));
+					if ((RxHeader.DataLength>>16) < 6) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case CONFIG_SWITCHES_DEFAULT:
 					Config_Switch_Defaults(CANRxData[2], CANRxData[3]);
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case CONFIG_CAN_SYNC:
 					Config_Can_Sync(CANRxData[2], CANRxData[3]);
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case CONFIG_CAN_TIMED:
 					Config_Can_Timed(CANRxData[2], CANRxData[3]);
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case CONFIG_CAN_INTERVAL:
 					Config_Can_Interval((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0));
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				default:
-					//TODO: warning to canbus for undefined configuration command
+					Set_Error(ERR_INVALID_COMMAND);
 					break;
 				}
 			}
 		}
 		else
 		{
-			//Error_Handler();
-			//TODO: move to error can message
+			Set_Error(ERR_RECIEVED_INVALID_ID);
 		}
 	}
 }
 
+
+void Set_Error(uint32_t error)
+{
+	canErrors[(error/32)]  |= (1<<(error%32));
+	canErrorToTransmit |= (1<<(error/32));
+}
+
+void Send_Error(void)
+{
+	for(uint32_t i=0; i<8; i++)
+	{
+		if (canErrorToTransmit&(1<<i))
+		{
+			if(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
+			{
+				FDCAN_TxHeaderTypeDef TxHeader;
+
+				TxHeader.Identifier = CANID_ERROR;
+				TxHeader.DataLength = FDCAN_DLC_BYTES_6;
+
+				CANTxData[0]=ID;
+				CANTxData[1]=i;
+				CANTxData[2]=(canErrors[i]>>24)&0xFF;
+				CANTxData[3]=(canErrors[i]>>16)&0xFF;
+				CANTxData[4]=(canErrors[i]>>8)&0xFF;
+				CANTxData[5]=(canErrors[i]>>0)&0xFF;
+
+				TxHeader.IdType = FDCAN_STANDARD_ID;
+				TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+				TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+				TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+				TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+				TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+				TxHeader.MessageMarker = 0;
+
+				if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
+				{
+					Set_Error(ERR_SEND_FAILED);
+					return;
+				}
+				else
+				{
+					//if we sent the error message clear the error so that if it only occurs once the error is not sent continuously
+					canErrors[i]=0;
+					canErrorToTransmit &= ~(1<<i);
+				}
+			}
+		}
+	}
+}
 
 
 void SystemClock_Config(void)
@@ -806,8 +864,6 @@ static void MX_GPIO_Init(void)
 
 	//led pin, sel pins, and in pins should always be outputs
 	//led pin and sel pins should always start low, in pins should start based on configuration
-	//TODO: somewhere else check and set the default for IN pins
-	//TODO: in analog reading section use SEL0 and SEL1 for multisense multiplexing
 	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
 	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
@@ -841,7 +897,7 @@ static void MX_GPIO_Init(void)
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO3.PORT, &GPIO_InitStruct);
 	}
-	else if (1)
+	else if (1) //TODO
 	{
 		//here we configure pins intended for PWM purposes
 	}

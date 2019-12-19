@@ -43,7 +43,6 @@ void Config_0(void)
 	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
 	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 3; Can_DLCs[6] = 3; Can_DLCs[7] = 8;
 
-	//TODO: write and read this from flash as well
 	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ 2, 0, 2, 0, 2, 0, 2, 0 },
 											{ 1, 1, 1, 1, 1, 0, 0, 0 },

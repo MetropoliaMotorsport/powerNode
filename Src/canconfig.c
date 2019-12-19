@@ -56,7 +56,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 			transmit=U5V_real; //transmit number in mV
 			break;
 		default:
-			//TODO: warning wrong number of bytes
+			Set_Error(ERR_MESS_INVALID_BYTES);
 			break;
 		}
 		break;
@@ -71,7 +71,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 			transmit=U6V_real; //transmit number in mV
 			break;
 		default:
-			//TODO: warning wrong number of bytes
+			Set_Error(ERR_MESS_INVALID_BYTES);
 			break;
 		}
 		break;
@@ -86,13 +86,13 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 			transmit=U7V_real; //transmit number in mV
 			break;
 		default:
-			//TODO: warning wrong number of bytes
+			Set_Error(ERR_MESS_INVALID_BYTES);
 			break;
 		}
 		break;
 
 	default:
-		//TODO: warning from requested undefined message
+		Set_Error(ERR_MESS_UNDEFINED);
 		break;
 	}
 

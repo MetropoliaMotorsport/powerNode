@@ -17,7 +17,30 @@ void Error_Handler(void);
 
 
 //warning and error codes
-#define something		1
+#define ERR_CAN_BUFFER_FULL			1
+#define ERR_CAN_FIFO_FULL			2
+#define ERR_MESSAGE_DISABLED		3
+#define ERR_DLC_0					4
+#define ERR_DLC_LONG				5
+#define ERR_SEND_FAILED				6
+#define ERR_RECIEVE_FAILED			7
+#define ERR_INVALID_COMMAND			8
+#define ERR_COMMAND_SHORT			9
+#define ERR_RECIEVED_INVALID_ID 	10
+
+#define ERR_MODIFY_INVALID_MESSAGE	33
+#define ERR_MODIFY_INVALID_THING	34
+
+#define ERR_MESS_INVALID_BYTES		97
+#define ERR_MESS_UNDEFINED			98
+
+#define WARN_UNDERVOLT				193
+#define WARN_OVERTEMP				194
+#define WARN_UNDERCURR				195
+#define WARN_OVERCURR				196
+#define ERROR_OVERCURR_TRIP			197
+
+//Set_Error(something);
 
 
 //structs
