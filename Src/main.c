@@ -57,6 +57,7 @@ uint8_t Can_Config_Bytes[8][8];
 uint8_t Can_Config_Datas[8][8];
 uint8_t Can_Sync_Enable;
 uint8_t Can_Timed_Enable;
+uint16_t Can_Interval;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -99,7 +100,7 @@ uint32_t ADCDualConvertedValues[3];
 
 uint8_t CANTxData[8];
 
-uint8_t CanBuffer[31];
+uint8_t CanBuffer[31] = {[0 ... 30]=255};
 uint8_t CanMessagesToSend;
 uint8_t CanBufferReadPos;
 uint8_t CanBufferWritePos;
@@ -165,7 +166,7 @@ int main(void)
 			{
 				if ((Can_Timed_Enable>>i)&0b1)
 				{
-					if(CanBuffer[CanBufferWritePos]!=0)
+					if(CanBuffer[CanBufferWritePos]!=255)
 					{
 						//TODO: warning for full can buffer
 					}
@@ -519,10 +520,15 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case CONFIG_CAN_SYNC:
 					Config_Can_Sync(CANRxData[2], CANRxData[3]);
 					break;
+				case CONFIG_CAN_TIMED:
+					Config_Can_Timed(CANRxData[2], CANRxData[3]);
+					break;
+				case CONFIG_CAN_INTERVAL:
+					Config_Can_Interval((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0));
+					break;
 				default:
 					//TODO: warning to canbus for undefined configuration command
 					break;
-
 				}
 			}
 		}
@@ -890,7 +896,7 @@ static void MX_TIM6_Init(void)
 	htim6.Instance = TIM6;
 	htim6.Init.Prescaler = 16999;
 	htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim6.Init.Period = 10000; //TODO: make this configurable depending on wanted time
+	htim6.Init.Period = Can_Interval;
 	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
 	{

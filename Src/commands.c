@@ -128,7 +128,7 @@ void Config_Switch_Defaults(uint8_t enableChanges, uint8_t newState)
 
 void Config_Can_Sync(uint8_t enableChanges, uint8_t newState)
 {
-	for(uint32_t i=0; i<6; i++)
+	for(uint32_t i=0; i<8; i++)
 	{
 		if (((enableChanges>>i)&0b1))
 		{
@@ -144,4 +144,31 @@ void Config_Can_Sync(uint8_t enableChanges, uint8_t newState)
 	}
 
 	Acknowledge(CONFIG_CAN_SYNC);
+}
+
+void Config_Can_Timed(uint8_t enableChanges, uint8_t newState)
+{
+	for(uint32_t i=0; i<8; i++)
+	{
+		if (((enableChanges>>i)&0b1))
+		{
+			if(((newState>>i)&0b1))
+			{
+				Can_Timed_Enable|=(1<<i);
+			}
+			else
+			{
+				Can_Timed_Enable&=~(1<<i);
+			}
+		}
+	}
+
+	Acknowledge(CONFIG_CAN_TIMED);
+}
+
+void Config_Can_Interval(uint16_t newInterval)
+{
+	Can_Interval=newInterval;
+
+	Acknowledge(CONFIG_CAN_INTERVAL);
 }

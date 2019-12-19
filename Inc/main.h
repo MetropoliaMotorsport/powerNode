@@ -59,6 +59,8 @@ extern const pinPort U7MULTI;
 #define CONFIG_MESSAGE				129
 #define CONFIG_SWITCHES_DEFAULT		130
 #define CONFIG_CAN_SYNC				131
+#define CONFIG_CAN_TIMED			132
+#define CONFIG_CAN_INTERVAL			133
 #define something					255
 
 
@@ -78,6 +80,7 @@ extern uint8_t Can_Config_Bytes[8][8];
 extern uint8_t Can_Config_Datas[8][8];
 extern uint8_t Can_Sync_Enable;
 extern uint8_t Can_Timed_Enable;
+extern uint16_t Can_Interval;
 
 //global variables
 extern uint8_t CANTxData[8];

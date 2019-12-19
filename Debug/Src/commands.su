@@ -4,3 +4,5 @@ commands.c:62:6:Switch_Power	24	static
 commands.c:76:6:Config_Message	16	static
 commands.c:109:6:Config_Switch_Defaults	24	static
 commands.c:129:6:Config_Can_Sync	24	static
+commands.c:149:6:Config_Can_Timed	24	static
+commands.c:169:6:Config_Can_Interval	16	static

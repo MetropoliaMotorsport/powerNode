@@ -68,9 +68,9 @@ void Config_0(void)
 			Can_Config_Datas[i][j]=temp_Can_Config_Datas[i][j];
 		}
 	}
-
 	Can_Sync_Enable = 0b01000000;
 	Can_Timed_Enable = 0b10000000;
+	Can_Interval=100;
 }
 
 void Config_1(void)
@@ -117,8 +117,8 @@ void Config_Write_Flash(void)
 		data[CAN_DATAS_1ST_POS+i*2]=Can_Config_Datas[i][0]+(Can_Config_Datas[i][1]<<8)+(Can_Config_Datas[i][2]<<16)+(Can_Config_Datas[i][3]<<24);
 		data[CAN_DATAS_1ST_POS+i*2+1]=Can_Config_Datas[i][4]+(Can_Config_Datas[i][5]<<8)+(Can_Config_Datas[i][6]<<16)+(Can_Config_Datas[i][7]<<24);
 	}
-	//bytes: [x], [x], [send can message on timer], [send can messages on sync]
-	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8);
+	//bytes: [can interval (.1 ms) high], [can interval (.1 ms) low], [send can message on timer], [send can messages on sync]
+	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8)+((Can_Interval&0xFFFF)<<16);
 
 	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
@@ -168,7 +168,7 @@ void Config_Read_Flash(void)
 	}
 	Can_Sync_Enable=(CAN_SEND_EN>>0)&0b11111111;
 	Can_Timed_Enable=(CAN_SEND_EN>>8)&0b11111111;
-
+	Can_Interval=(CAN_SEND_EN>>16)&0xFFFF;
 }
 
 
