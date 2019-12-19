@@ -6,6 +6,7 @@ extern FDCAN_HandleTypeDef hfdcan;
 extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_adc2;
 extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim7;
 
 void NMI_Handler(void)
 {
@@ -84,4 +85,9 @@ void FDCAN1_IT0_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim6);
+}
+
+void TIM7_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim7);
 }

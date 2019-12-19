@@ -16,6 +16,10 @@ extern "C" {
 void Error_Handler(void);
 
 
+//warning and error codes
+#define something		1
+
+
 //structs
 typedef struct pinPort
 {
@@ -46,9 +50,12 @@ extern const pinPort U7MULTI;
 #define T_ROLLING_AVERAGE 4
 #define V_ROLLING_AVERAGE 1
 
+#define ERROR_PERIOD_100US	10000 //send error every second
+
+
 //can id definitions
-#define CANID_CONFIG 0x700
 #define CANID_SYNC 0x80
+#define CANID_CONFIG 0x700
 #define CANID_ERROR 0x600
 #define CANID_ACK	0x500
 
@@ -61,7 +68,6 @@ extern const pinPort U7MULTI;
 #define CONFIG_CAN_SYNC				131
 #define CONFIG_CAN_TIMED			132
 #define CONFIG_CAN_INTERVAL			133
-#define something					255
 
 
 //global configuration variables
@@ -99,8 +105,8 @@ extern uint32_t U7T_real;
 extern uint32_t U7V_real;
 
 
-//more details about what is stored in each word can be found in main before the while(1) loop
-//flash address definitions //don't use flash_read function, it is not needed if thing are defined as pointers
+//more details about what is stored in each word can be found in config.c
+//flash address definitions
 #define DIGITAL_IN_0_POS			0
 //TODO: add PWM DC (also to configuration) after PWM is set up; set interrupt to toggle power switches after power switches and interrupts are set up; set possibility for interrupt to send can message once can is set up; basic interrupt stuff, standard setup from enabling
 #define DIGITAL_IN_0				(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))

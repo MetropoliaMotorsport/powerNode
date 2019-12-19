@@ -12,6 +12,7 @@ static void MX_FDCAN_Init(void);
 
 //TODO: organize timer prototypes
 static void MX_TIM6_Init(void);
+static void MX_TIM7_Init(void);
 
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
@@ -20,6 +21,7 @@ ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
 TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim7;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -126,10 +128,12 @@ int main(void)
 	MX_ADC1_Init();
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
+	if(Can_Timed_Enable) { MX_TIM6_Init(); }//only start timer 6 if can will send a message on an interval; this means mcu must be power cycled when enabling sending a can message on an interval though
+	MX_TIM7_Init();
 
-	//TODO: organize the timer part of everything
-	MX_TIM6_Init(); //TODO: this configuration should be optional in case no periodic sending of can messages is configured
-
+	//start everything that can generate interrupts after initialization is done
+	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	while(1)
 	{
@@ -226,6 +230,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM6)
 	{
 		CanTimerFlag=1;
+	}
+	else if(htim->Instance == TIM7)
+	{
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 	}
 }
 
@@ -902,8 +910,19 @@ static void MX_TIM6_Init(void)
 	{
 		Error_Handler();
 	}
+}
 
-	HAL_TIM_Base_Start_IT(&htim6);
+static void MX_TIM7_Init(void)
+{
+	htim7.Instance = TIM7;
+	htim7.Init.Prescaler = 16999;
+	htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim7.Init.Period = ERROR_PERIOD_100US;
+	htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 
