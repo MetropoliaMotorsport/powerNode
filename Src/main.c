@@ -389,7 +389,34 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			U5I0_real=U5I0_raw; U6I0_real=U6I0_raw; U7I0_real=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			//TODO: check overcurrent and switch off immediately if too high
-			if (U5I0_real>
+
+			//TODO: probably move this to main because it isn't so important
+			//TODO: undercurrent warnings need to only happen when enabled, and logic for enabling them needs to exist
+			if (U5I0_real>warn_overcurrent_U5I0)
+			{
+				Set_Error(WARN_OVERCURR_U5I0);
+			}
+			if (U5I0_real<warn_undercurrent_U5I0)
+			{
+				Set_Error(WARN_UNDERCURR_U5I0);
+			}
+			if (U6I0_real>warn_overcurrent_U6I0)
+			{
+				Set_Error(WARN_OVERCURR_U6I0);
+			}
+			if (U6I0_real<warn_undercurrent_U6I0)
+			{
+				Set_Error(WARN_UNDERCURR_U6I0);
+			}
+			if (U7I0_real>warn_overcurrent_U7I0)
+			{
+				Set_Error(WARN_OVERCURR_U7I0);
+			}
+			if (U7I0_real<warn_undercurrent_U7I0)
+			{
+				Set_Error(WARN_UNDERCURR_U7I0);
+			}
+			//TODO: test all these limits when I have power supply and power trimmer
 
 			break;
 		case 1:
@@ -415,6 +442,35 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
 			U5I1_real=U5I1_raw; U6I1_real=U6I1_raw; U7I1_real=U7I1_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
 
+			//TODO: check overcurrent and switch off immediately if too high
+
+			//TODO: probably move this to main because it isn't so important
+			if (U5I1_real>warn_overcurrent_U5I1)
+			{
+				Set_Error(WARN_OVERCURR_U5I1);
+			}
+			if (U5I1_real<warn_undercurrent_U5I1)
+			{
+				Set_Error(WARN_UNDERCURR_U5I1);
+			}
+			if (U6I1_real>warn_overcurrent_U6I1)
+			{
+				Set_Error(WARN_OVERCURR_U6I1);
+			}
+			if (U6I1_real<warn_undercurrent_U6I1)
+			{
+				Set_Error(WARN_UNDERCURR_U6I1);
+			}
+			if (U7I1_real>warn_overcurrent_U7I1)
+			{
+				Set_Error(WARN_OVERCURR_U7I1);
+			}
+			if (U7I1_real<warn_undercurrent_U7I1)
+			{
+				Set_Error(WARN_UNDERCURR_U7I1);
+			}
+			//TODO: test all these limits when I have power supply and power trimmer
+
 			break;
 		case 2:
 			U5T[T_rolling_average_position]=convertedValue[0];
@@ -429,7 +485,42 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				T_rolling_average_position++;
 			}
 
-			//TODO: calculate averages here
+			uint32_t U5T_raw=0; uint32_t U6T_raw=1; uint32_t U7T_raw=0;
+			for(uint32_t i=0; i<T_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
+			{
+				U5T_raw+=U5T[i];
+				U6T_raw+=U6T[i];
+				U7T_raw+=U7T[i];
+			}
+			U5T_raw/=T_ROLLING_AVERAGE; U6T_raw/=T_ROLLING_AVERAGE; U7T_raw/=T_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
+			U5T_real=U5T_raw; U6T_real=U6T_raw; U7T_real=U7T_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+
+			//TODO: probably move this to main because it isn't so important
+			if (U5T_real>warn_overtemperature_U5)
+			{
+				Set_Error(WARN_OVERTEMP_U5);
+			}
+			if (U5T_real<warn_undertemperature_U5)
+			{
+				Set_Error(WARN_UNDERTEMP_U5);
+			}
+			if (U6T_real>warn_overtemperature_U6)
+			{
+				Set_Error(WARN_OVERTEMP_U6);
+			}
+			if (U6T_real<warn_undertemperature_U6)
+			{
+				Set_Error(WARN_UNDERTEMP_U6);
+			}
+			if (U7T_real>warn_overtemperature_U7)
+			{
+				Set_Error(WARN_OVERTEMP_U7);
+			}
+			if (U7T_real<warn_undertemperature_U7)
+			{
+				Set_Error(WARN_UNDERTEMP_U7);
+			}
+			//TODO: test all these limits when I have power supply and power trimmer
 
 			break;
 		case 3:
@@ -454,8 +545,33 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			}
 			U5V_raw/=V_ROLLING_AVERAGE; U6V_raw/=V_ROLLING_AVERAGE; U7V_raw/=V_ROLLING_AVERAGE; U5GNDV_raw/=V_ROLLING_AVERAGE; U6GNDV_raw/=V_ROLLING_AVERAGE; U7GNDV_raw/=V_ROLLING_AVERAGE;
 			U5V_real=Parse_Voltage(U5V_raw, U5GNDV_raw); U6V_real=Parse_Voltage(U6V_raw, U6GNDV_raw); U7V_real=Parse_Voltage(U7V_raw, U7GNDV_raw);
-			//TODO: warnings on over/undercurrent, overcurrent shutoff
 
+			//TODO: probably move this to main because it isn't so important
+			if (U5V_real>warn_overvoltage_U5)
+			{
+				Set_Error(WARN_OVERVOLT_U5);
+			}
+			if (U5V_real<warn_undervoltage_U5)
+			{
+				Set_Error(WARN_UNDERVOLT_U5);
+			}
+			if (U6V_real>warn_overvoltage_U6)
+			{
+				Set_Error(WARN_OVERVOLT_U6);
+			}
+			if (U6V_real<warn_undervoltage_U6)
+			{
+				Set_Error(WARN_UNDERVOLT_U6);
+			}
+			if (U7V_real>warn_overvoltage_U7)
+			{
+				Set_Error(WARN_OVERVOLT_U7);
+			}
+			if (U7V_real<warn_undervoltage_U7)
+			{
+				Set_Error(WARN_UNDERVOLT_U7);
+			}
+			//TODO: test all these limits when I have power supply and power trimmer
 			break;
 		default:
 			Error_Handler();
