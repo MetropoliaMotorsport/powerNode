@@ -10,6 +10,7 @@ static void MX_ADC2_Init(void);
 static void MX_FDCAN_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_TIM15_Init(void);
 
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
@@ -19,6 +20,7 @@ DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
+TIM_HandleTypeDef htim15;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -159,10 +161,14 @@ int main(void)
 	MX_FDCAN_Init();
 	if(Can_Timed_Enable) { MX_TIM6_Init(); }//only start timer 6 if can will send a message on an interval; this means mcu must be power cycled when enabling sending a can message on an interval though
 	MX_TIM7_Init();
+	MX_TIM15_Init();
 
 	//start everything that can generate interrupts after initialization is done
 	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
 	HAL_TIM_Base_Start_IT(&htim7);
+
+	//this timer starts the adc, so start it last
+	HAL_TIM_Base_Start_IT(&htim15);
 
 	while(1)
 	{
@@ -250,11 +256,7 @@ int main(void)
 		}
 
 		//TODO: start this from a timer instead of here
-	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
-	    {
-	     // Error_Handler();
-	    }
-	    HAL_Delay(1);
+
 
 
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
@@ -264,13 +266,28 @@ int main(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM6)
+	if(htim->Instance == TIM15)
+	{
+		HAL_TIM_Base_Stop_IT(&htim15);
+	    if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, ADCDualConvertedValues, 3) != HAL_OK)
+	    {
+	    	Error_Handler();
+	    }
+	}
+	else if (htim->Instance == TIM6)
 	{
 		CanTimerFlag=1;
 	}
-	else if(htim->Instance == TIM7)
+	else if (htim->Instance == TIM7)
 	{
 		canSendErrorFlag=1;
+	}
+	else if (htim->Instance == TIM15)
+	{
+	}
+	else
+	{
+		Error_Handler();
 	}
 }
 
@@ -341,7 +358,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			Error_Handler();
 			break;
 		}
-		//TODO: start timer here
+
+		HAL_TIM_Base_Start_IT(&htim15);
 
 		for(uint32_t i=0; i<3; i++)
 		{
@@ -577,7 +595,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			Error_Handler();
 			break;
 		}
-
 	}
 }
 
@@ -1132,6 +1149,18 @@ static void MX_TIM7_Init(void)
 	htim7.Init.Period = ERROR_PERIOD_100US;
 	htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+static void MX_TIM15_Init(void)
+{
+	htim15.Instance = TIM15;
+	htim15.Init.Prescaler = 16;
+	htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim15.Init.Period = 200; //this corresponds to 20us, which is what is required for the multisense output pins
+	if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
 	{
 		Error_Handler();
 	}
