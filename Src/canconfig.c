@@ -101,6 +101,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 	{
 		//fill the least significant byte first
 		CANTxData[temp_pos+(Can_Config_Bytes[message][temp_pos]-i-1)] = transmit>>(i*8) & 0xFF;
+		//TODO: seems sometimes transmit value is corrrupted when writing to flash, after I have sending without errors check if that is a thing still
 
 		*pos+=1;
 	}

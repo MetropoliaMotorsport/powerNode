@@ -11,6 +11,7 @@ static void MX_FDCAN_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_TIM15_Init(void);
+static void MX_TIM16_Init(void);
 
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
@@ -21,6 +22,7 @@ DMA_HandleTypeDef hdma_adc2;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim15;
+TIM_HandleTypeDef htim16;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -59,6 +61,7 @@ uint8_t Can_Config_Datas[8][8];
 uint8_t Can_Sync_Enable;
 uint8_t Can_Timed_Enable;
 uint16_t Can_Interval;
+uint16_t Can_Sync_Delay;
 
 uint16_t warn_undervoltage_U5;
 uint16_t warn_overvoltage_U5;
@@ -159,9 +162,10 @@ int main(void)
 	MX_ADC1_Init();
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
-	if(Can_Timed_Enable) { MX_TIM6_Init(); }//only start timer 6 if can will send a message on an interval; this means mcu must be power cycled when enabling sending a can message on an interval though
+	if(Can_Timed_Enable) { MX_TIM6_Init(); } //only start timer 6 if can will send a message on an interval; this means mcu must be power cycled when enabling sending a can message on an interval though
 	MX_TIM7_Init();
 	MX_TIM15_Init();
+	if(Can_Sync_Delay) { MX_TIM16_Init(); } //only start timer 16 if can sync will be delayed; mcu must be power cycled to change delay anyway
 
 	//start everything that can generate interrupts after initialization is done
 	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
@@ -282,8 +286,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		canSendErrorFlag=1;
 	}
-	else if (htim->Instance == TIM15)
+	else if (htim->Instance == TIM16)
 	{
+		HAL_TIM_Base_Stop_IT(&htim16);
+		CanSyncFlag=1;
 	}
 	else
 	{
@@ -679,8 +685,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 
 		if (RxHeader.Identifier == CANID_SYNC)
 		{
-			//TODO: add an option for a delay to this
-			CanSyncFlag=1;
+			if(Can_Sync_Delay)
+			{
+				HAL_TIM_Base_Start_IT(&htim16);
+			}
+			else
+			{
+				CanSyncFlag=1;
+			}
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)
 		{
@@ -716,6 +728,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 					Config_Can_Interval((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0));
 					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
+				case CONFIG_CAN_SYNC_DELAY:
+					Config_Can_Sync_Delay((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0));
+					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 				default:
 					Set_Error(ERR_INVALID_COMMAND);
 					break;
@@ -1161,6 +1176,20 @@ static void MX_TIM15_Init(void)
 	htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim15.Init.Period = 200; //this corresponds to 20us, which is what is required for the multisense output pins
 	if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+static void MX_TIM16_Init(void)
+{
+	htim16.Instance = TIM16;
+	htim16.Init.Prescaler = 1699; //10us resolution
+	htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim16.Init.Period = Can_Sync_Delay;
+	htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
 	{
 		Error_Handler();
 	}

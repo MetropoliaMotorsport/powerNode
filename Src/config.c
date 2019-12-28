@@ -96,8 +96,9 @@ void Config_0(void)
 		}
 	}
 	Can_Sync_Enable = 0b01000000;
-	Can_Timed_Enable = 0b10000000;
+	Can_Timed_Enable = 0b10000000; //TODO: make these work without errors
 	Can_Interval=100;
+	Can_Sync_Delay=0;
 }
 
 void Config_1(void)
@@ -111,18 +112,18 @@ void Config_Write_Flash(void)
 	uint32_t data[512] = {0};
 
 	//bytes: [underlimit high], [underlimit low], [overlimit high], [overlimit low]
-	data[U5_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U5<<0)&0xFFFF)+((warn_overvoltage_U5<<16)&0xFFFF);
-	data[U5_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U5<<0)&0xFFFF)+((warn_overtemperature_U5<<16)&0xFFFF);
-	data[U5_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U5I0<<0)&0xFFFF)+((warn_overcurrent_U5I0<<16)&0xFFFF);
-	data[U5_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U5I1<<0)&0xFFFF)+((warn_overcurrent_U5I1<<16)&0xFFFF);
-	data[U6_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U6<<0)&0xFFFF)+((warn_overvoltage_U6<<16)&0xFFFF);
-	data[U6_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U6<<0)&0xFFFF)+((warn_overtemperature_U6<<16)&0xFFFF);
-	data[U6_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U6I0<<0)&0xFFFF)+((warn_overcurrent_U6I0<<16)&0xFFFF);
-	data[U6_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U6I1<<0)&0xFFFF)+((warn_overcurrent_U6I1<<16)&0xFFFF);
-	data[U7_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U7<<0)&0xFFFF)+((warn_overvoltage_U7<<16)&0xFFFF);
-	data[U7_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U7<<0)&0xFFFF)+((warn_overtemperature_U7<<16)&0xFFFF);
-	data[U7_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U7I0<<0)&0xFFFF)+((warn_overcurrent_U7I0<<16)&0xFFFF);
-	data[U7_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U7I1<<0)&0xFFFF)+((warn_overcurrent_U7I1<<16)&0xFFFF);
+	data[U5_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U5<<0)&0xFFFF)+((warn_overvoltage_U5<<16)&0xFFFF0000);
+	data[U5_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U5<<0)&0xFFFF)+((warn_overtemperature_U5<<16)&0xFFFF0000);
+	data[U5_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U5I0<<0)&0xFFFF)+((warn_overcurrent_U5I0<<16)&0xFFFF0000);
+	data[U5_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U5I1<<0)&0xFFFF)+((warn_overcurrent_U5I1<<16)&0xFFFF0000);
+	data[U6_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U6<<0)&0xFFFF)+((warn_overvoltage_U6<<16)&0xFFFF0000);
+	data[U6_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U6<<0)&0xFFFF)+((warn_overtemperature_U6<<16)&0xFFFF0000);
+	data[U6_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U6I0<<0)&0xFFFF)+((warn_overcurrent_U6I0<<16)&0xFFFF0000);
+	data[U6_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U6I1<<0)&0xFFFF)+((warn_overcurrent_U6I1<<16)&0xFFFF0000);
+	data[U7_VOLTAGE_WARNING_LIMIT_POS]=((warn_undervoltage_U7<<0)&0xFFFF)+((warn_overvoltage_U7<<16)&0xFFFF0000);
+	data[U7_TEMPERATURE_WARNING_LIMIT_POS]=((warn_undertemperature_U7<<0)&0xFFFF)+((warn_overtemperature_U7<<16)&0xFFFF0000);
+	data[U7_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U7I0<<0)&0xFFFF)+((warn_overcurrent_U7I0<<16)&0xFFFF0000);
+	data[U7_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U7I1<<0)&0xFFFF)+((warn_overcurrent_U7I1<<16)&0xFFFF0000);
 
 	//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
 	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising&0xFF)<<16)+((Digital_In_Interrupt_Can_Falling&0xFF)<<24); //TODO: set this to be the things it should be for digital_in
@@ -189,7 +190,7 @@ void Config_Read_Flash(void)
 	warn_undercurrent_U7I0=((U7_CURRENT_WARNING_LIMIT_I0>>0)&0xFFFF);
 	warn_overcurrent_U7I0=((U7_CURRENT_WARNING_LIMIT_I0>>16)&0xFFFF);
 	warn_undercurrent_U7I1=((U7_CURRENT_WARNING_LIMIT_I1>>0)&0xFFFF);
-	warn_overcurrent_U7I1=((U7_CURRENT_WARNING_LIMIT_I1>>16)&0xFFFF);
+	warn_overcurrent_U7I1=((U7_CURRENT_WARNING_LIMIT_I1>>16)&0xFFFF); //TODO: something here stops can sending, not sure why
 
 	Digital_In_EN = ((DIGITAL_IN_0>>0)&0b00011101); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	Default_Switch_State=((DEFAULT_SWITCH_STATE>>0)&0b00111111);
@@ -200,23 +201,6 @@ void Config_Read_Flash(void)
 		Can_IDs[i]=((CanId[i]>>0)&0xFFFF);
 		Can_DLCs[i]=((CanId[i]>>16)&0xFF);
 	}
-
-	/*Can_IDs[0] = ((CAN_ID_0>>0)&0xFFFF);
-	Can_DLCs[0] = ((CAN_ID_0>>16)&0xFF);
-	Can_IDs[1] = ((CAN_ID_1>>0)&0xFFFF);
-	Can_DLCs[1] = ((CAN_ID_1>>16)&0xFF);
-	Can_IDs[2] = ((CAN_ID_2>>0)&0xFFFF);
-	Can_DLCs[2] = ((CAN_ID_2>>16)&0xFF);
-	Can_IDs[3] = ((CAN_ID_3>>0)&0xFFFF);
-	Can_DLCs[3] = ((CAN_ID_3>>16)&0xFF);
-	Can_IDs[4] = ((CAN_ID_4>>0)&0xFFFF);
-	Can_DLCs[4] = ((CAN_ID_4>>16)&0xFF);
-	Can_IDs[5] = ((CAN_ID_5>>0)&0xFFFF);
-	Can_DLCs[5] = ((CAN_ID_5>>16)&0xFF);
-	Can_IDs[6] = ((CAN_ID_6>>0)&0xFFFF);
-	Can_DLCs[6] = ((CAN_ID_6>>16)&0xFF);
-	Can_IDs[7] = ((CAN_ID_7>>0)&0xFFFF);
-	Can_DLCs[7] = ((CAN_ID_7>>16)&0xFF);*/
 
 	for(uint32_t i=0; i<8; i++)
 	{

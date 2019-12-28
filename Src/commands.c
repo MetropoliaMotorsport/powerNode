@@ -47,6 +47,8 @@ void Acknowledge(uint8_t cmd)
 	ack_k++;
 }
 
+extern TIM_HandleTypeDef htim15;
+
 void Save_Config()
 {
 	Config_Write_Flash();
@@ -171,4 +173,11 @@ void Config_Can_Interval(uint16_t newInterval)
 	Can_Interval=newInterval;
 
 	Acknowledge(CONFIG_CAN_INTERVAL);
+}
+
+void Config_Can_Sync_Delay(uint16_t newDelay)
+{
+	Can_Sync_Delay=newDelay;
+
+	Acknowledge(CONFIG_CAN_SYNC_DELAY);
 }

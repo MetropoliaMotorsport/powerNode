@@ -8,6 +8,7 @@ extern DMA_HandleTypeDef hdma_adc2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim15;
+extern TIM_HandleTypeDef htim16;
 
 void NMI_Handler(void)
 {
@@ -96,4 +97,9 @@ void TIM7_IRQHandler(void)
 void TIM1_BRK_TIM15_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim15);
+}
+
+void TIM1_UP_TIM16_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim16);
 }

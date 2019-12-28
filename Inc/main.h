@@ -118,6 +118,7 @@ extern const pinPort U7MULTI;
 #define CONFIG_CAN_SYNC				131
 #define CONFIG_CAN_TIMED			132
 #define CONFIG_CAN_INTERVAL			133
+#define CONFIG_CAN_SYNC_DELAY		134
 
 
 //global configuration variables
@@ -137,6 +138,7 @@ extern uint8_t Can_Config_Datas[8][8];
 extern uint8_t Can_Sync_Enable;
 extern uint8_t Can_Timed_Enable;
 extern uint16_t Can_Interval;
+extern uint16_t Can_Sync_Delay;
 
 extern uint16_t warn_undervoltage_U5;
 extern uint16_t warn_overvoltage_U5;
