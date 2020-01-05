@@ -162,6 +162,8 @@ void Config_Write_Flash(void)
 	//note that only two messages may be sent on sync, or 3 if absolutely no other messages are being sent (including errors)
 	//bytes: [can interval (.1 ms) high], [can interval (.1 ms) low], [send can message on timer], [send can messages on sync]
 	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8)+((Can_Interval&0xFFFF)<<16);
+	//bytes: [can sync delay (10 us) high], [can sync delay (10 us) low], [x], [x]
+	data[CAN_SYNC_DELAY_POS]=((Can_Sync_Delay&0xFFFF)<<16);
 
 	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
@@ -220,6 +222,7 @@ void Config_Read_Flash(void)
 	Can_Sync_Enable=(CAN_SEND_EN>>0)&0b11111111;
 	Can_Timed_Enable=(CAN_SEND_EN>>8)&0b11111111;
 	Can_Interval=(CAN_SEND_EN>>16)&0xFFFF;
+	Can_Sync_Delay=(CAN_SYNC_DELAY>>16)*0xFFFF;
 }
 
 

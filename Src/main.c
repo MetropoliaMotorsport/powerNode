@@ -235,7 +235,6 @@ int main(void)
 	}
 }
 
-volatile uint32_t a, b, c;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -249,7 +248,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim->Instance == TIM16)
 	{
-		b=HAL_GetTick();
 		HAL_TIM_Base_Stop_IT(&htim16);
 		Can_Sync();
 	}
@@ -268,6 +266,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 
+//TODO: wouldn't be bad idea to set it up to do 4 or some number of conversions of each channel (calculated to never blow a fuse) before switching SEL pins, since this function seems to be taking a lot of time, but that could make the problem worse unless averaging is only done 1 in 4 of those times
+//TODO: better idea would be to maybe skip some temperature/voltage readings (if they were happening) and give a longer time to rest of mcu instead, possibly by starting timer 15 several times from inside itself instead of starting the adc, or just factoring in a longer delay time considering temperature and voltage are not being continously measured
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if (hadc->Instance == ADC1)
@@ -645,10 +645,6 @@ void Can_Sync(void)
 			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
 			{
 				Can_Send(i);
-			}
-			else
-			{
-				Set_Error(ERR_CAN_FIFO_FULL);
 			}
 		}
 	}
