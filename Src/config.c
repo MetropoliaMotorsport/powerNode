@@ -97,8 +97,8 @@ void Config_0(void)
 	}
 	Can_Sync_Enable = 0b01000000;
 	Can_Timed_Enable = 0b10000000; //TODO: make these work without errors
-	Can_Interval=100;
-	Can_Sync_Delay=0;
+	Can_Interval=1000;
+	Can_Sync_Delay=0; //500 corresponds to 5ms delay
 }
 
 void Config_1(void)
@@ -159,6 +159,7 @@ void Config_Write_Flash(void)
 		data[CAN_DATAS_1ST_POS+i*2]=Can_Config_Datas[i][0]+(Can_Config_Datas[i][1]<<8)+(Can_Config_Datas[i][2]<<16)+(Can_Config_Datas[i][3]<<24);
 		data[CAN_DATAS_1ST_POS+i*2+1]=Can_Config_Datas[i][4]+(Can_Config_Datas[i][5]<<8)+(Can_Config_Datas[i][6]<<16)+(Can_Config_Datas[i][7]<<24);
 	}
+	//note that only two messages may be sent on sync, or 3 if absolutely no other messages are being sent (including errors)
 	//bytes: [can interval (.1 ms) high], [can interval (.1 ms) low], [send can message on timer], [send can messages on sync]
 	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8)+((Can_Interval&0xFFFF)<<16);
 

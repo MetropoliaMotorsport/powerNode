@@ -179,5 +179,5 @@ void Config_Can_Sync_Delay(uint16_t newDelay)
 {
 	Can_Sync_Delay=newDelay;
 
-	Acknowledge(CONFIG_CAN_SYNC_DELAY);
+	Acknowledge(CONFIG_CAN_SYNC_DELAY); //TODO: test this
 }

@@ -141,7 +141,6 @@ uint8_t CanMessagesToSend;
 uint8_t CanBufferReadPos;
 uint8_t CanBufferWritePos;
 
-uint8_t CanSyncFlag;
 uint8_t CanTimerFlag;
 
 //for these 255 means enable continuously while lower numbers mean to take that many samples
@@ -185,33 +184,6 @@ int main(void)
 			}
 		}
 
-
-		if(CanSyncFlag)
-		{
-			for(uint32_t i=0; i<8; i++)
-			{
-				if ((Can_Sync_Enable>>i)&0b1)
-				{
-					if(CanBuffer[CanBufferWritePos]!=0)
-					{
-						Set_Error(ERR_CAN_BUFFER_FULL);
-					}
-					//overwrite unsent messages
-					CanBuffer[CanBufferWritePos]=i;
-
-					if(CanBufferWritePos>=30)
-					{
-						CanBufferWritePos=0;
-					}
-					else
-					{
-						CanBufferWritePos++;
-					}
-					CanMessagesToSend++;
-				}
-			}
-			CanSyncFlag=0;
-		}
 		if(CanTimerFlag)
 		{
 			for(uint32_t i=0; i<8; i++)
@@ -239,10 +211,10 @@ int main(void)
 			CanTimerFlag=0;
 		}
 
-
 		if (CanMessagesToSend)
 		{
-			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
+			//only put one thing to the fifo at a time so that sync message can be put to the front of the fifo
+			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 2)
 			{
 				Can_Send(CanBuffer[CanBufferReadPos]);
 
@@ -259,14 +231,11 @@ int main(void)
 			}
 		}
 
-		//TODO: start this from a timer instead of here
-
-
-
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
 
+volatile uint32_t a, b, c;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -278,6 +247,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	    	Error_Handler();
 	    }
 	}
+	else if (htim->Instance == TIM16)
+	{
+		b=HAL_GetTick();
+		HAL_TIM_Base_Stop_IT(&htim16);
+		Can_Sync();
+	}
 	else if (htim->Instance == TIM6)
 	{
 		CanTimerFlag=1;
@@ -285,11 +260,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	else if (htim->Instance == TIM7)
 	{
 		canSendErrorFlag=1;
-	}
-	else if (htim->Instance == TIM16)
-	{
-		HAL_TIM_Base_Stop_IT(&htim16);
-		CanSyncFlag=1;
 	}
 	else
 	{
@@ -665,6 +635,25 @@ void Can_Send(uint8_t message)
 	}
 }
 
+//for can sync we must send from the interrupt in order to send fast enough, but this means only 2 (or sometimes 3) messages may be sent without discarding messages
+void Can_Sync(void)
+{
+	for(uint32_t i=0; i<8; i++)
+	{
+		if ((Can_Sync_Enable>>i)&0b1)
+		{
+			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 0)
+			{
+				Can_Send(i);
+			}
+			else
+			{
+				Set_Error(ERR_CAN_FIFO_FULL);
+			}
+		}
+	}
+}
+
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
 	FDCAN_RxHeaderTypeDef RxHeader;
@@ -687,11 +676,13 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		{
 			if(Can_Sync_Delay)
 			{
+				a=HAL_GetTick();
 				HAL_TIM_Base_Start_IT(&htim16);
+				c=HAL_GetTick();
 			}
 			else
 			{
-				CanSyncFlag=1;
+				Can_Sync();
 			}
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)

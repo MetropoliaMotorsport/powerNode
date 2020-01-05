@@ -17,6 +17,7 @@ void Error_Handler(void);
 
 //function prototypes
 void Can_Send(uint8_t);
+void Can_Sync(void);
 void Set_Error(uint32_t);
 void Send_Error(void);
 
