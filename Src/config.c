@@ -99,6 +99,12 @@ void Config_0(void)
 	Can_Timed_Enable = 0b10000000; //TODO: make these work without errors
 	Can_Interval=1000;
 	Can_Sync_Delay=0; //500 corresponds to 5ms delay
+
+	sample_temperature=0; //also save these so continous reading can be configured
+	sample_voltage=0;
+	SampleTemperatureVoltagePeriod=100; //TODO: RESOLUTION IN 100'S OF US, WRITE TO OTHER PART LATER //10ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
+	SampleTemperatureBurst=1;
+	SampleVoltageBurst=1;
 }
 
 void Config_1(void)

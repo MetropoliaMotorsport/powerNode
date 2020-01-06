@@ -68,6 +68,9 @@ void Send_Error(void);
 #define WARN_OVERCURR_U7I1				218
 #define ERROR_OVERCURR_TRIP_U7			219 //tODO
 
+#define WARN_TEMP_MEASURE_OVERFLOW		225
+#define WARN_VOLT_MEASURE_OVERFLOW		226
+
 //Set_Error(something);
 
 
@@ -168,6 +171,12 @@ extern uint16_t warn_overcurrent_U7I0;
 extern uint16_t warn_undercurrent_U7I1;
 extern uint16_t warn_overcurrent_U7I1;
 extern uint16_t cutoff_overcurrent_U7; //TODO
+
+extern uint32_t sample_temperature;
+extern uint32_t sample_voltage;
+extern uint16_t SampleTemperatureVoltagePeriod;
+extern uint8_t SampleTemperatureBurst;
+extern uint8_t SampleVoltageBurst;
 
 //global variables
 extern uint8_t CANTxData[8];

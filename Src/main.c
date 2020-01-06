@@ -129,11 +129,11 @@ uint32_t U7V[V_ROLLING_AVERAGE];
 uint32_t U7V_real;
 uint32_t U7GNDV[V_ROLLING_AVERAGE];
 
-uint32_t I0_rolling_average_position=0;
-uint32_t I1_rolling_average_position=0;
-uint32_t T_rolling_average_position=0;
-uint32_t V_rolling_average_position=0;
-uint32_t adc_selection=0;
+uint32_t I0_rolling_average_position;
+uint32_t I1_rolling_average_position;
+uint32_t T_rolling_average_position;
+uint32_t V_rolling_average_position;
+uint32_t adc_selection;
 uint32_t ADCDualConvertedValues[3];
 
 uint8_t CANTxData[8];
@@ -144,6 +144,10 @@ uint8_t CanBufferReadPos;
 uint8_t CanBufferWritePos;
 
 uint8_t CanTimerFlag;
+
+uint16_t SampleTemperatureVoltagePeriod;
+uint8_t SampleTemperatureBurst;
+uint8_t SampleVoltageBurst;
 
 //for these 255 means enable continuously while lower numbers mean to take that many samples
 uint32_t sample_temperature;
@@ -167,7 +171,7 @@ int main(void)
 	MX_TIM6_Init(); //initialize unnecessary timers to avoid error handler being called when configuration is changed
 	MX_TIM7_Init();
 	MX_TIM15_Init();
-	MX_TIM16_Init();
+	MX_TIM16_Init(); //""  ""
 
 	//start everything that can generate interrupts after initialization is done
 	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
@@ -257,7 +261,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim->Instance == TIM1)
 	{
-		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
+		sample_temperature+=SampleTemperatureBurst;
+		if(sample_temperature>255) //in this case sample_temperature should be continuous or it should be measured slower
+		{
+			Set_Error(WARN_TEMP_MEASURE_OVERFLOW);
+		}
+
+		sample_voltage+=SampleVoltageBurst;
+		if(sample_voltage>255)
+		{
+			Set_Error(WARN_VOLT_MEASURE_OVERFLOW);
+		}
 	}
 	else if (htim->Instance == TIM7)
 	{
@@ -1140,9 +1154,9 @@ static void MX_GPIO_Init(void)
 static void MX_TIM1_Init(void)
 {
 	htim1.Instance = TIM1;
-	htim1.Init.Prescaler = 16999; //resolution in ms
+	htim1.Init.Prescaler = 1699; //resolution in 100's of us
 	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim1.Init.Period = 1000;
+	htim1.Init.Period = SampleTemperatureVoltagePeriod;
 	if (HAL_TIM_Base_Init(&htim1) !=HAL_OK)
 	{
 		Error_Handler();
