@@ -91,6 +91,18 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		}
 		break;
 
+	case MESS_DI:
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			//DIO4 still not working, but we send whatever it says anyway
+			transmit=(HAL_GPIO_ReadPin(DIO3.PORT, DIO3.PIN)<<0)|(HAL_GPIO_ReadPin(DIO4.PORT, DIO4.PIN)<<1)|(HAL_GPIO_ReadPin(DIO5.PORT, DIO5.PIN)<<2)|(HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN)<<3)|(HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN)<<4);
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
+
 	default:
 		Set_Error(ERR_MESS_UNDEFINED);
 		break;

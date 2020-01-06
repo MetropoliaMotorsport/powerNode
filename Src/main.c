@@ -251,13 +251,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		HAL_TIM_Base_Stop_IT(&htim16);
 		Can_Sync();
 	}
-	else if (htim->Instance == TIM6)
-	{
-		CanTimerFlag=1;
-	}
 	else if (htim->Instance == TIM7)
 	{
 		canSendErrorFlag=1;
+	}
+	else if (htim->Instance == TIM6)
+	{
+		CanTimerFlag=1;
 	}
 	else
 	{
@@ -672,9 +672,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		{
 			if(Can_Sync_Delay)
 			{
-				a=HAL_GetTick();
 				HAL_TIM_Base_Start_IT(&htim16);
-				c=HAL_GetTick();
 			}
 			else
 			{

@@ -17,6 +17,7 @@ void Set_Can_Bytes(uint32_t*, uint32_t);
 #define MESS_U5V	10 //1 byte in V or 2 bytes in mV
 #define MESS_U6V	11
 #define MESS_U7V	12
+#define MESS_DI		13 //1 byte always with up to 5 bits used, bits referring to pwm outputs or floating inputs may be something //TODO???
 //TODO: digital io, power state, pwm io, ???
 
 #endif
