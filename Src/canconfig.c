@@ -4,7 +4,7 @@
 
 void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 {
-//Can_Config_Bytes[message][*pos];
+	//Can_Config_Bytes[message][*pos];
 
 	uint32_t transmit=0;
 
@@ -102,6 +102,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 			Set_Error(ERR_MESS_INVALID_BYTES);
 			break;
 		}
+		break;
 
 	default:
 		Set_Error(ERR_MESS_UNDEFINED);

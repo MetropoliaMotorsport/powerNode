@@ -37,11 +37,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  16 .debug_macro  00020c48  00000000  00000000  0003e060  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   0001010c  00000000  00000000  0005eca8  2**0
+ 17 .debug_line   0001010d  00000000  00000000  0005eca8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    000d995f  00000000  00000000  0006edb4  2**0
+ 18 .debug_str    000d995f  00000000  00000000  0006edb5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00148713  2**0
+ 19 .comment      0000007b  00000000  00000000  00148714  2**0
                   CONTENTS, READONLY
  20 .debug_frame  00005d9c  00000000  00000000  00148790  2**2
                   CONTENTS, READONLY, DEBUGGING
@@ -13818,7 +13818,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004de8:	af00      	add	r7, sp, #0
  8004dea:	6078      	str	r0, [r7, #4]
  8004dec:	6039      	str	r1, [r7, #0]
-//Can_Config_Bytes[message][*pos];
+	//Can_Config_Bytes[message][*pos];
 
 	uint32_t transmit=0;
  8004dee:	2300      	movs	r3, #0
@@ -13835,7 +13835,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004e00:	781b      	ldrb	r3, [r3, #0]
  8004e02:	3b01      	subs	r3, #1
  8004e04:	2b0c      	cmp	r3, #12
- 8004e06:	f200 80d5 	bhi.w	8004fb4 <Set_Can_Bytes+0x1d0>
+ 8004e06:	f200 80d6 	bhi.w	8004fb6 <Set_Can_Bytes+0x1d2>
  8004e0a:	a201      	add	r2, pc, #4	; (adr r2, 8004e10 <Set_Can_Bytes+0x2c>)
  8004e0c:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
  8004e10:	08004e45 	.word	0x08004e45
@@ -13844,9 +13844,9 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004e1c:	08004e5d 	.word	0x08004e5d
  8004e20:	08004e65 	.word	0x08004e65
  8004e24:	08004e6d 	.word	0x08004e6d
- 8004e28:	08004fbd 	.word	0x08004fbd
- 8004e2c:	08004fbd 	.word	0x08004fbd
- 8004e30:	08004fbd 	.word	0x08004fbd
+ 8004e28:	08004fbf 	.word	0x08004fbf
+ 8004e2c:	08004fbf 	.word	0x08004fbf
+ 8004e30:	08004fbf 	.word	0x08004fbf
  8004e34:	08004e75 	.word	0x08004e75
  8004e38:	08004eb1 	.word	0x08004eb1
  8004e3c:	08004eed 	.word	0x08004eed
@@ -13857,42 +13857,42 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004e44:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e48:	617b      	str	r3, [r7, #20]
 		break;
- 8004e4a:	e0b8      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e4a:	e0b9      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U5I1:
 		transmit=1000;
  8004e4c:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e50:	617b      	str	r3, [r7, #20]
 		break;
- 8004e52:	e0b4      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e52:	e0b5      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U6I0:
 		transmit=1000;
  8004e54:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e58:	617b      	str	r3, [r7, #20]
 		break;
- 8004e5a:	e0b0      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e5a:	e0b1      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U6I1:
 		transmit=1000;
  8004e5c:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e60:	617b      	str	r3, [r7, #20]
 		break;
- 8004e62:	e0ac      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e62:	e0ad      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U7I0:
 		transmit=1000;
  8004e64:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e68:	617b      	str	r3, [r7, #20]
 		break;
- 8004e6a:	e0a8      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e6a:	e0a9      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U7I1:
 		transmit=1000;
  8004e6c:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
  8004e70:	617b      	str	r3, [r7, #20]
 		break;
- 8004e72:	e0a4      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004e72:	e0a5      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 	case MESS_U7T:
 
 		break;
@@ -13938,7 +13938,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004eac:	bf00      	nop
 		}
 		break;
- 8004eae:	e086      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004eae:	e087      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U6V:
 		switch(Can_Config_Bytes[message][*pos])
@@ -13981,7 +13981,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004ee8:	bf00      	nop
 		}
 		break;
- 8004eea:	e068      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004eea:	e069      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_U7V:
 		switch(Can_Config_Bytes[message][*pos])
@@ -14024,7 +14024,7 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
  8004f24:	bf00      	nop
 		}
 		break;
- 8004f26:	e04a      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004f26:	e04b      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	case MESS_DI:
 		switch(Can_Config_Bytes[message][*pos])
@@ -14101,79 +14101,80 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 			break;
  8004fb2:	bf00      	nop
 		}
+		break;
+ 8004fb4:	e004      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 
 	default:
 		Set_Error(ERR_MESS_UNDEFINED);
- 8004fb4:	2062      	movs	r0, #98	; 0x62
- 8004fb6:	f001 ff0b 	bl	8006dd0 <Set_Error>
+ 8004fb6:	2062      	movs	r0, #98	; 0x62
+ 8004fb8:	f001 ff0a 	bl	8006dd0 <Set_Error>
 		break;
- 8004fba:	e000      	b.n	8004fbe <Set_Can_Bytes+0x1da>
+ 8004fbc:	e000      	b.n	8004fc0 <Set_Can_Bytes+0x1dc>
 		break;
- 8004fbc:	bf00      	nop
+ 8004fbe:	bf00      	nop
 	}
 
 	uint32_t temp_pos = *pos;
- 8004fbe:	687b      	ldr	r3, [r7, #4]
- 8004fc0:	681b      	ldr	r3, [r3, #0]
- 8004fc2:	60fb      	str	r3, [r7, #12]
+ 8004fc0:	687b      	ldr	r3, [r7, #4]
+ 8004fc2:	681b      	ldr	r3, [r3, #0]
+ 8004fc4:	60fb      	str	r3, [r7, #12]
 	for(uint32_t i=0; i<Can_Config_Bytes[message][temp_pos]; i++)
- 8004fc4:	2300      	movs	r3, #0
- 8004fc6:	613b      	str	r3, [r7, #16]
- 8004fc8:	e01c      	b.n	8005004 <Set_Can_Bytes+0x220>
+ 8004fc6:	2300      	movs	r3, #0
+ 8004fc8:	613b      	str	r3, [r7, #16]
+ 8004fca:	e01c      	b.n	8005006 <Set_Can_Bytes+0x222>
 	{
 		//fill the least significant byte first
 		CANTxData[temp_pos+(Can_Config_Bytes[message][temp_pos]-i-1)] = transmit>>(i*8) & 0xFF;
- 8004fca:	693b      	ldr	r3, [r7, #16]
- 8004fcc:	00db      	lsls	r3, r3, #3
- 8004fce:	697a      	ldr	r2, [r7, #20]
- 8004fd0:	fa22 f103 	lsr.w	r1, r2, r3
- 8004fd4:	4a14      	ldr	r2, [pc, #80]	; (8005028 <Set_Can_Bytes+0x244>)
- 8004fd6:	683b      	ldr	r3, [r7, #0]
- 8004fd8:	00db      	lsls	r3, r3, #3
- 8004fda:	441a      	add	r2, r3
- 8004fdc:	68fb      	ldr	r3, [r7, #12]
- 8004fde:	4413      	add	r3, r2
- 8004fe0:	781b      	ldrb	r3, [r3, #0]
- 8004fe2:	461a      	mov	r2, r3
- 8004fe4:	693b      	ldr	r3, [r7, #16]
- 8004fe6:	1ad2      	subs	r2, r2, r3
- 8004fe8:	68fb      	ldr	r3, [r7, #12]
- 8004fea:	4413      	add	r3, r2
- 8004fec:	3b01      	subs	r3, #1
- 8004fee:	b2c9      	uxtb	r1, r1
- 8004ff0:	4a17      	ldr	r2, [pc, #92]	; (8005050 <Set_Can_Bytes+0x26c>)
- 8004ff2:	54d1      	strb	r1, [r2, r3]
+ 8004fcc:	693b      	ldr	r3, [r7, #16]
+ 8004fce:	00db      	lsls	r3, r3, #3
+ 8004fd0:	697a      	ldr	r2, [r7, #20]
+ 8004fd2:	fa22 f103 	lsr.w	r1, r2, r3
+ 8004fd6:	4a14      	ldr	r2, [pc, #80]	; (8005028 <Set_Can_Bytes+0x244>)
+ 8004fd8:	683b      	ldr	r3, [r7, #0]
+ 8004fda:	00db      	lsls	r3, r3, #3
+ 8004fdc:	441a      	add	r2, r3
+ 8004fde:	68fb      	ldr	r3, [r7, #12]
+ 8004fe0:	4413      	add	r3, r2
+ 8004fe2:	781b      	ldrb	r3, [r3, #0]
+ 8004fe4:	461a      	mov	r2, r3
+ 8004fe6:	693b      	ldr	r3, [r7, #16]
+ 8004fe8:	1ad2      	subs	r2, r2, r3
+ 8004fea:	68fb      	ldr	r3, [r7, #12]
+ 8004fec:	4413      	add	r3, r2
+ 8004fee:	3b01      	subs	r3, #1
+ 8004ff0:	b2c9      	uxtb	r1, r1
+ 8004ff2:	4a17      	ldr	r2, [pc, #92]	; (8005050 <Set_Can_Bytes+0x26c>)
+ 8004ff4:	54d1      	strb	r1, [r2, r3]
 		//TODO: seems sometimes transmit value is corrrupted when writing to flash, after I have sending without errors check if that is a thing still
 
 		*pos+=1;
- 8004ff4:	687b      	ldr	r3, [r7, #4]
- 8004ff6:	681b      	ldr	r3, [r3, #0]
- 8004ff8:	1c5a      	adds	r2, r3, #1
- 8004ffa:	687b      	ldr	r3, [r7, #4]
- 8004ffc:	601a      	str	r2, [r3, #0]
+ 8004ff6:	687b      	ldr	r3, [r7, #4]
+ 8004ff8:	681b      	ldr	r3, [r3, #0]
+ 8004ffa:	1c5a      	adds	r2, r3, #1
+ 8004ffc:	687b      	ldr	r3, [r7, #4]
+ 8004ffe:	601a      	str	r2, [r3, #0]
 	for(uint32_t i=0; i<Can_Config_Bytes[message][temp_pos]; i++)
- 8004ffe:	693b      	ldr	r3, [r7, #16]
- 8005000:	3301      	adds	r3, #1
- 8005002:	613b      	str	r3, [r7, #16]
- 8005004:	4a08      	ldr	r2, [pc, #32]	; (8005028 <Set_Can_Bytes+0x244>)
- 8005006:	683b      	ldr	r3, [r7, #0]
- 8005008:	00db      	lsls	r3, r3, #3
- 800500a:	441a      	add	r2, r3
- 800500c:	68fb      	ldr	r3, [r7, #12]
- 800500e:	4413      	add	r3, r2
- 8005010:	781b      	ldrb	r3, [r3, #0]
- 8005012:	461a      	mov	r2, r3
- 8005014:	693b      	ldr	r3, [r7, #16]
- 8005016:	4293      	cmp	r3, r2
- 8005018:	d3d7      	bcc.n	8004fca <Set_Can_Bytes+0x1e6>
+ 8005000:	693b      	ldr	r3, [r7, #16]
+ 8005002:	3301      	adds	r3, #1
+ 8005004:	613b      	str	r3, [r7, #16]
+ 8005006:	4a08      	ldr	r2, [pc, #32]	; (8005028 <Set_Can_Bytes+0x244>)
+ 8005008:	683b      	ldr	r3, [r7, #0]
+ 800500a:	00db      	lsls	r3, r3, #3
+ 800500c:	441a      	add	r2, r3
+ 800500e:	68fb      	ldr	r3, [r7, #12]
+ 8005010:	4413      	add	r3, r2
+ 8005012:	781b      	ldrb	r3, [r3, #0]
+ 8005014:	461a      	mov	r2, r3
+ 8005016:	693b      	ldr	r3, [r7, #16]
+ 8005018:	4293      	cmp	r3, r2
+ 800501a:	d3d7      	bcc.n	8004fcc <Set_Can_Bytes+0x1e8>
 	}
 
 }
- 800501a:	bf00      	nop
- 800501c:	371c      	adds	r7, #28
- 800501e:	46bd      	mov	sp, r7
- 8005020:	bd90      	pop	{r4, r7, pc}
- 8005022:	bf00      	nop
+ 800501c:	bf00      	nop
+ 800501e:	371c      	adds	r7, #28
+ 8005020:	46bd      	mov	sp, r7
+ 8005022:	bd90      	pop	{r4, r7, pc}
  8005024:	200000cc 	.word	0x200000cc
  8005028:	200001b0 	.word	0x200001b0
  800502c:	200005b0 	.word	0x200005b0
@@ -15022,7 +15023,7 @@ void Config_0(void)
  8005556:	4b60      	ldr	r3, [pc, #384]	; (80056d8 <Config_0+0x26c>)
  8005558:	2216      	movs	r2, #22
  800555a:	81da      	strh	r2, [r3, #14]
-	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 3; Can_DLCs[6] = 3; Can_DLCs[7] = 8;
+	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 3; Can_DLCs[6] = 3; Can_DLCs[7] = 1;
  800555c:	4b5f      	ldr	r3, [pc, #380]	; (80056dc <Config_0+0x270>)
  800555e:	2208      	movs	r2, #8
  8005560:	701a      	strb	r2, [r3, #0]
@@ -15045,7 +15046,7 @@ void Config_0(void)
  8005582:	2203      	movs	r2, #3
  8005584:	719a      	strb	r2, [r3, #6]
  8005586:	4b55      	ldr	r3, [pc, #340]	; (80056dc <Config_0+0x270>)
- 8005588:	2208      	movs	r2, #8
+ 8005588:	2201      	movs	r2, #1
  800558a:	71da      	strb	r2, [r3, #7]
 
 	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },

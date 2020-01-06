@@ -4804,7 +4804,7 @@ OUTPUT(motorsport_PowerNode.elf elf32-littlearm)
  .debug_macro   0x0000000000020830      0x22d Src/stm32g4xx_it.o
  .debug_macro   0x0000000000020a5d      0x1eb Src/system_stm32g4xx.o
 
-.debug_line     0x0000000000000000    0x1010c
+.debug_line     0x0000000000000000    0x1010d
  .debug_line    0x0000000000000000      0x9a2 Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.o
  .debug_line    0x00000000000009a2     0x14e6 Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_adc.o
  .debug_line    0x0000000000001e88     0x1202 Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_adc_ex.o
@@ -4819,15 +4819,15 @@ OUTPUT(motorsport_PowerNode.elf elf32-littlearm)
  .debug_line    0x000000000000834b      0xb8d Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc_ex.o
  .debug_line    0x0000000000008ed8     0x1c6a Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_tim.o
  .debug_line    0x000000000000ab42     0x10db Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_tim_ex.o
- .debug_line    0x000000000000bc1d      0x793 Src/canconfig.o
- .debug_line    0x000000000000c3b0      0x848 Src/commands.o
- .debug_line    0x000000000000cbf8      0x93b Src/config.o
- .debug_line    0x000000000000d533      0xc1d Src/main.o
- .debug_line    0x000000000000e150      0x764 Src/parse.o
- .debug_line    0x000000000000e8b4      0x857 Src/stm32g4xx_hal_msp.o
- .debug_line    0x000000000000f10b      0x863 Src/stm32g4xx_it.o
- .debug_line    0x000000000000f96e      0x71a Src/system_stm32g4xx.o
- .debug_line    0x0000000000010088       0x84 Startup/startup_stm32g441kbtx.o
+ .debug_line    0x000000000000bc1d      0x794 Src/canconfig.o
+ .debug_line    0x000000000000c3b1      0x848 Src/commands.o
+ .debug_line    0x000000000000cbf9      0x93b Src/config.o
+ .debug_line    0x000000000000d534      0xc1d Src/main.o
+ .debug_line    0x000000000000e151      0x764 Src/parse.o
+ .debug_line    0x000000000000e8b5      0x857 Src/stm32g4xx_hal_msp.o
+ .debug_line    0x000000000000f10c      0x863 Src/stm32g4xx_it.o
+ .debug_line    0x000000000000f96f      0x71a Src/system_stm32g4xx.o
+ .debug_line    0x0000000000010089       0x84 Startup/startup_stm32g441kbtx.o
 
 .debug_str      0x0000000000000000    0xd995f
  .debug_str     0x0000000000000000    0xd023a Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.o
