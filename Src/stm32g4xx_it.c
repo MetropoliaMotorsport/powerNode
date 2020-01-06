@@ -5,6 +5,7 @@
 extern FDCAN_HandleTypeDef hfdcan;
 extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_adc2;
+extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim15;
@@ -96,10 +97,15 @@ void TIM7_IRQHandler(void)
 
 void TIM1_BRK_TIM15_IRQHandler(void)
 {
+	//we don't care or want to do anything with TIM1 BRK
 	HAL_TIM_IRQHandler(&htim15);
 }
 
 void TIM1_UP_TIM16_IRQHandler(void)
 {
+	//this will work becuase IRQHandler checks to see what event happened
+	//however, IRQHandler is not very efficient function for the things we are using here, code could be faster checking registers and calling callback function directly
+	//but no time for writing that now
+	HAL_TIM_IRQHandler(&htim1);
 	HAL_TIM_IRQHandler(&htim16);
 }

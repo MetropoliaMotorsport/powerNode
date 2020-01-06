@@ -8,6 +8,7 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN_Init(void);
+static void MX_TIM1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_TIM15_Init(void);
@@ -19,6 +20,7 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim15;
@@ -161,12 +163,14 @@ int main(void)
 	MX_ADC1_Init();
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
-	if(Can_Timed_Enable) { MX_TIM6_Init(); } //only start timer 6 if can will send a message on an interval; this means mcu must be power cycled when enabling sending a can message on an interval though
+	MX_TIM1_Init(); //TODO: if regularly read voltage/temperature enabled
+	MX_TIM6_Init(); //initialize unnecessary timers to avoid error handler being called when configuration is changed
 	MX_TIM7_Init();
 	MX_TIM15_Init();
-	if(Can_Sync_Delay) { MX_TIM16_Init(); } //only start timer 16 if can sync will be delayed; mcu must be power cycled to change delay anyway
+	MX_TIM16_Init();
 
 	//start everything that can generate interrupts after initialization is done
+	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
 	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
 	HAL_TIM_Base_Start_IT(&htim7);
 
@@ -250,6 +254,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		HAL_TIM_Base_Stop_IT(&htim16);
 		Can_Sync();
+	}
+	else if (htim->Instance == TIM1)
+	{
+		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
 	}
 	else if (htim->Instance == TIM7)
 	{
@@ -1125,6 +1133,19 @@ static void MX_GPIO_Init(void)
 	else if (1)
 	{
 		//here we configure pins intended for PWM purposes
+	}
+}
+
+
+static void MX_TIM1_Init(void)
+{
+	htim1.Instance = TIM1;
+	htim1.Init.Prescaler = 16999; //resolution in ms
+	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim1.Init.Period = 1000;
+	if (HAL_TIM_Base_Init(&htim1) !=HAL_OK)
+	{
+		Error_Handler();
 	}
 }
 
