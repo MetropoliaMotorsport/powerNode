@@ -15247,17 +15247,17 @@ void Config_0(void)
  80056dc:	2200      	movs	r2, #0
  80056de:	801a      	strh	r2, [r3, #0]
 
-	sample_temperature=255; //these are only saved to allow configuration of continous temperature/voltage reading
+	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
  80056e0:	4b2d      	ldr	r3, [pc, #180]	; (8005798 <Config_0+0x2b0>)
- 80056e2:	22ff      	movs	r2, #255	; 0xff
+ 80056e2:	2200      	movs	r2, #0
  80056e4:	601a      	str	r2, [r3, #0]
-	sample_voltage=255;
+	sample_voltage=0;
  80056e6:	4b2d      	ldr	r3, [pc, #180]	; (800579c <Config_0+0x2b4>)
- 80056e8:	22ff      	movs	r2, #255	; 0xff
+ 80056e8:	2200      	movs	r2, #0
  80056ea:	601a      	str	r2, [r3, #0]
-	SampleTemperatureVoltagePeriod=100; //10ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
+	SampleTemperatureVoltagePeriod=10; //1ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
  80056ec:	4b2c      	ldr	r3, [pc, #176]	; (80057a0 <Config_0+0x2b8>)
- 80056ee:	2264      	movs	r2, #100	; 0x64
+ 80056ee:	220a      	movs	r2, #10
  80056f0:	801a      	strh	r2, [r3, #0]
 	SampleTemperatureBurst=1;
  80056f2:	4b2c      	ldr	r3, [pc, #176]	; (80057a4 <Config_0+0x2bc>)
@@ -20314,16 +20314,17 @@ uint32_t Parse_Temperature(uint32_t raw)
  8007a76:	b085      	sub	sp, #20
  8007a78:	af00      	add	r7, sp, #0
  8007a7a:	6078      	str	r0, [r7, #4]
-	uint32_t calculated=401-(raw*3791/2500); //calculate temperature in °C
+	uint32_t calculated=401-(raw*3791/5000); //calculate temperature in °C
  8007a7c:	687b      	ldr	r3, [r7, #4]
  8007a7e:	f640 62cf 	movw	r2, #3791	; 0xecf
  8007a82:	fb02 f303 	mul.w	r3, r2, r3
  8007a86:	4a07      	ldr	r2, [pc, #28]	; (8007aa4 <Parse_Temperature+0x30>)
  8007a88:	fba2 2303 	umull	r2, r3, r2, r3
- 8007a8c:	0adb      	lsrs	r3, r3, #11
+ 8007a8c:	0b1b      	lsrs	r3, r3, #12
  8007a8e:	f5c3 73c8 	rsb	r3, r3, #400	; 0x190
  8007a92:	3301      	adds	r3, #1
  8007a94:	60fb      	str	r3, [r7, #12]
+	//TODO: get some sort of line for this and check what it looks like in reality, datasheet only gives value for 1k ohm resistor
 
 	return calculated;
  8007a96:	68fb      	ldr	r3, [r7, #12]

@@ -100,9 +100,9 @@ void Config_0(void)
 	Can_Interval=1000;
 	Can_Sync_Delay=0; //500 corresponds to 5ms delay
 
-	sample_temperature=255; //these are only saved to allow configuration of continous temperature/voltage reading
-	sample_voltage=255;
-	SampleTemperatureVoltagePeriod=100; //10ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
+	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
+	sample_voltage=0;
+	SampleTemperatureVoltagePeriod=10; //1ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
 	SampleTemperatureBurst=1;
 	SampleVoltageBurst=1;
 }
