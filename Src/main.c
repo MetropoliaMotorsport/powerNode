@@ -261,7 +261,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim->Instance == TIM1)
 	{
-		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
 		sample_temperature+=SampleTemperatureBurst;
 		if(sample_temperature>255) //in this case sample_temperature should be continuous or it should be measured slower
 		{
@@ -510,7 +509,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7T_raw+=U7T[i];
 			}
 			U5T_raw/=T_ROLLING_AVERAGE; U6T_raw/=T_ROLLING_AVERAGE; U7T_raw/=T_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5T_real=U5T_raw; U6T_real=U6T_raw; U7T_real=U7T_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+			U5T_real=Parse_Temperature(U5T_raw); U6T_real=Parse_Temperature(U6T_raw); U7T_real=Parse_Temperature(U7T_raw); //TODO: warnings on over/undercurrent, overcurrent shutoff
 
 			//TODO: probably move this to main because it isn't so important
 			if (U5T_real>warn_overtemperature_U5)
@@ -888,7 +887,7 @@ static void MX_ADC1_Init(void)
 
 	sConfig.Channel = ADC_CHANNEL_1;
 	sConfig.Rank = ADC_REGULAR_RANK_3;
-	sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
 	sConfig.SingleDiff = ADC_SINGLE_ENDED;
 	sConfig.OffsetNumber = ADC_OFFSET_NONE;
 	sConfig.Offset = 0;
@@ -943,7 +942,7 @@ static void MX_ADC2_Init(void)
 
 	sConfig.Channel = ADC_CHANNEL_10;
 	sConfig.Rank = ADC_REGULAR_RANK_1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
 	sConfig.SingleDiff = ADC_SINGLE_ENDED;
 	sConfig.OffsetNumber = ADC_OFFSET_NONE;
 	sConfig.Offset = 0;
@@ -1200,7 +1199,7 @@ static void MX_TIM15_Init(void)
 	htim15.Instance = TIM15;
 	htim15.Init.Prescaler = 16;
 	htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim15.Init.Period = 200; //this corresponds to 20us, which is what is required for the multisense output pins
+	htim15.Init.Period = 1000; //this corresponds to 100us, as going at max speed (20us) seems to be too fast
 	if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
 	{
 		Error_Handler();

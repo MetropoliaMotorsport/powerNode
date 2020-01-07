@@ -30,19 +30,11 @@ uint32_t Parse_Voltage(uint32_t raw, uint32_t raw_ground)
 	return calculated;
 }
 
-uint32_t Parse_Temperatuer(uint32_t raw, uint32_t bytes)
+uint32_t Parse_Temperature(uint32_t raw)
 {
-	uint32_t calculated=raw/10; //calculate current in °C
-	//TODO: put actual calculation here instead of made up numbers
+	uint32_t calculated=401-(raw*3791/2500); //calculate temperature in °C
+	//TODO: get some sort of line for this and check what it looks like in reality, datasheet only gives value for 1k ohm resistor
 
-
-	switch(bytes)
-	{
-	case 1:
-		return (calculated/1000); //return value in °C
-	default:
-		//TODO: don't define number of bytes here
-		return 0;
-	}
+	return calculated;
 }
 

@@ -100,9 +100,9 @@ extern const pinPort U7IN0;
 extern const pinPort U7IN1;
 extern const pinPort U7MULTI;
 
-#define I_ROLLING_AVERAGE 4
-#define T_ROLLING_AVERAGE 4
-#define V_ROLLING_AVERAGE 1
+#define I_ROLLING_AVERAGE 16
+#define T_ROLLING_AVERAGE 16
+#define V_ROLLING_AVERAGE 16
 
 #define ERROR_PERIOD_100US	10000 //send error every second
 
