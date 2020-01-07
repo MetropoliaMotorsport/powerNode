@@ -167,7 +167,7 @@ int main(void)
 	MX_ADC1_Init();
 	MX_ADC2_Init();
 	MX_FDCAN_Init();
-	MX_TIM1_Init(); //TODO: if regularly read voltage/temperature enabled
+	MX_TIM1_Init(); //""  ""
 	MX_TIM6_Init(); //initialize unnecessary timers to avoid error handler being called when configuration is changed
 	MX_TIM7_Init();
 	MX_TIM15_Init();
@@ -261,6 +261,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim->Instance == TIM1)
 	{
+		HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
 		sample_temperature+=SampleTemperatureBurst;
 		if(sample_temperature>255) //in this case sample_temperature should be continuous or it should be measured slower
 		{
@@ -738,6 +739,11 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case CONFIG_CAN_SYNC_DELAY:
 					Config_Can_Sync_Delay((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0));
 					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CONFIG_CAN_TV_READING:
+					Config_Temperature_Voltage_Reading((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0), CANRxData[4], CANRxData[5]);
+					if ((RxHeader.DataLength>>16) < 6) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
 				default:
 					Set_Error(ERR_INVALID_COMMAND);
 					break;
@@ -1154,7 +1160,7 @@ static void MX_GPIO_Init(void)
 static void MX_TIM1_Init(void)
 {
 	htim1.Instance = TIM1;
-	htim1.Init.Prescaler = 1699; //resolution in 100's of us
+	htim1.Init.Prescaler = 16999; //resolution in 100's of us
 	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim1.Init.Period = SampleTemperatureVoltagePeriod;
 	if (HAL_TIM_Base_Init(&htim1) !=HAL_OK)

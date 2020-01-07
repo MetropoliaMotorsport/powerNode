@@ -100,9 +100,9 @@ void Config_0(void)
 	Can_Interval=1000;
 	Can_Sync_Delay=0; //500 corresponds to 5ms delay
 
-	sample_temperature=0; //also save these so continous reading can be configured
+	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
 	sample_voltage=0;
-	SampleTemperatureVoltagePeriod=100; //TODO: RESOLUTION IN 100'S OF US, WRITE TO OTHER PART LATER //10ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
+	SampleTemperatureVoltagePeriod=100; //10ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
 	SampleTemperatureBurst=1;
 	SampleVoltageBurst=1;
 }
@@ -167,9 +167,14 @@ void Config_Write_Flash(void)
 	}
 	//note that only two messages may be sent on sync, or 3 if absolutely no other messages are being sent (including errors)
 	//bytes: [can interval (.1 ms) high], [can interval (.1 ms) low], [send can message on timer], [send can messages on sync]
-	data[CAN_SEND_EN_POS]=(Can_Sync_Enable&0xFF)+((Can_Timed_Enable&0xFF)<<8)+((Can_Interval&0xFFFF)<<16);
+	data[CAN_SEND_EN_POS]=((Can_Sync_Enable&0xFF)<<0)+((Can_Timed_Enable&0xFF)<<8)+((Can_Interval&0xFFFF)<<16);
 	//bytes: [can sync delay (10 us) high], [can sync delay (10 us) low], [x], [x]
 	data[CAN_SYNC_DELAY_POS]=((Can_Sync_Delay&0xFFFF)<<16);
+
+	//bytes: [temperature samples to take / continuous sampling], [voltage samples to take / continuous sampling], [temperature samples to take per interval], [voltage samples to take per inteval]
+	data[TV_BURST_POS]=((sample_temperature&0xFF)<<0)+((sample_voltage&0xFF)<<8)+((SampleTemperatureBurst&0xFF)<<16)+((SampleVoltageBurst&0xFF)<<24);
+	//bytes: [x], [x], [temperature/voltage sampling interval (.1 ms) high], [temperature/voltage sampling interval (.1 ms) low]
+	data[TV_BURST_TIMING_POS]=((SampleTemperatureVoltagePeriod&0xFFFF)<<0);
 
 	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
@@ -229,6 +234,12 @@ void Config_Read_Flash(void)
 	Can_Timed_Enable=(CAN_SEND_EN>>8)&0b11111111;
 	Can_Interval=(CAN_SEND_EN>>16)&0xFFFF;
 	Can_Sync_Delay=(CAN_SYNC_DELAY>>16)*0xFFFF;
+
+	sample_temperature = (TV_BURST>>0)&0xFF;
+	sample_voltage = (TV_BURST>>8)&0xFF;
+	SampleTemperatureBurst = (TV_BURST>>16)&0xFF;
+	SampleVoltageBurst = (TV_BURST>>24)&0xFF;
+	SampleTemperatureVoltagePeriod= (TV_BURST_TIMING>>0)&0xFFFF;
 }
 
 

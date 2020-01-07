@@ -13,5 +13,6 @@ void Config_Can_Sync(uint8_t, uint8_t);
 void Config_Can_Timed(uint8_t, uint8_t);
 void Config_Can_Interval(uint16_t);
 void Config_Can_Sync_Delay(uint16_t);
+void Config_Temperature_Voltage_Reading(uint16_t, uint8_t, uint8_t);
 
 #endif

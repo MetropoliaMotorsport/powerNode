@@ -179,5 +179,34 @@ void Config_Can_Sync_Delay(uint16_t newDelay)
 {
 	Can_Sync_Delay=newDelay;
 
-	Acknowledge(CONFIG_CAN_SYNC_DELAY); //TODO: test this
+	Acknowledge(CONFIG_CAN_SYNC_DELAY);
+}
+
+void Config_Temperature_Voltage_Reading(uint16_t interval, uint8_t tempBurst, uint8_t voltBurst)
+{
+	if(tempBurst==255)
+	{
+		sample_temperature=255;
+		SampleTemperatureBurst=0;
+	}
+	else
+	{
+		sample_temperature=0;
+		SampleTemperatureBurst=tempBurst;
+	}
+
+	if(voltBurst==255)
+	{
+		sample_voltage=255;
+		SampleVoltageBurst=0;
+	}
+	else
+	{
+		sample_voltage=0;
+		SampleVoltageBurst=voltBurst;
+	}
+
+	SampleTemperatureVoltagePeriod=interval;
+
+	Acknowledge(CONFIG_CAN_TV_READING);
 }

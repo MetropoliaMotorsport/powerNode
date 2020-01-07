@@ -123,6 +123,7 @@ extern const pinPort U7MULTI;
 #define CONFIG_CAN_TIMED			132
 #define CONFIG_CAN_INTERVAL			133
 #define CONFIG_CAN_SYNC_DELAY		134
+#define CONFIG_CAN_TV_READING		135
 
 
 //global configuration variables
@@ -252,6 +253,10 @@ extern uint32_t U7V_real;
 #define U7_CURRENT_WARNING_LIMIT_I0			(*(uint32_t*)(FLASH_PAGE_63+0x4*U7_CURRENT_WARNING_LIMIT_I0_POS))
 #define U7_CURRENT_WARNING_LIMIT_I1_POS		(U7_CURRENT_WARNING_LIMIT_I0_POS+1)
 #define U7_CURRENT_WARNING_LIMIT_I1			(*(uint32_t*)(FLASH_PAGE_63+0x4*U7_CURRENT_WARNING_LIMIT_I1_POS))
+#define TV_BURST_POS						(U7_CURRENT_WARNING_LIMIT_I1_POS+1)
+#define TV_BURST							(*(uint32_t*)(FLASH_PAGE_63+0x4*TV_BURST_POS))
+#define TV_BURST_TIMING_POS					(TV_BURST_POS+1)
+#define TV_BURST_TIMING						(*(uint32_t*)(FLASH_PAGE_63+0x4*TV_BURST_TIMING_POS))
 
 
 //flash page definitions

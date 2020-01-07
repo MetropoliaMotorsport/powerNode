@@ -7,3 +7,4 @@ commands.c:131:6:Config_Can_Sync	24	static
 commands.c:151:6:Config_Can_Timed	24	static
 commands.c:171:6:Config_Can_Interval	16	static
 commands.c:178:6:Config_Can_Sync_Delay	16	static
+commands.c:185:6:Config_Temperature_Voltage_Reading	16	static
