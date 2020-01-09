@@ -2,6 +2,9 @@
 #include "config.h"
 
 
+#define TEST_PWM_NOT_INPUT	1
+
+
 void Config_Setup(void)
 {
 	if(Flash_Read(FLASH_PAGE_63)==0xFFFFFFFF) //initialize the flash to avoid errors
@@ -59,10 +62,12 @@ void Config_0(void)
 #if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
 	Digital_In_EN = 0b00000000;
+	PWM_Out_EN =  0b00011111; //TODO: in progress
 
 #else //in this case we test digital inputs
 
 	Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+	PWM_Out_EN = 0b00000000;
 
 #endif
 

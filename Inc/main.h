@@ -20,6 +20,7 @@ void Can_Send(uint8_t);
 void Can_Sync(void);
 void Set_Error(uint32_t);
 void Send_Error(void);
+void Write_PWM(TIM_HandleTypeDef, uint16_t);
 
 
 //warning and error codes
@@ -135,6 +136,7 @@ extern uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+extern uint8_t PWM_Out_EN;
 extern uint8_t Default_Switch_State;
 extern uint16_t Can_IDs[8];
 extern uint8_t Can_DLCs[8];

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "main.h" //TODO: eventually add interupts to at least digital inputs, maybe pwm inputs as well?
 
 
 //static function prototypes
@@ -8,11 +8,13 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_FDCAN_Init(void);
-static void MX_TIM1_Init(void);
+static void MX_TIM1_Init(void); //regular mode timers first
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_TIM16_Init(void);
+static void MX_TIM17_Init(void); //output only pwm timer next
+//pwm io timers last
 
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
@@ -25,6 +27,7 @@ TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim15;
 TIM_HandleTypeDef htim16;
+TIM_HandleTypeDef htim17;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -55,6 +58,7 @@ uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+uint8_t PWM_Out_EN;
 uint8_t Default_Switch_State;
 uint16_t Can_IDs[8];
 uint8_t Can_DLCs[8];
@@ -173,6 +177,8 @@ int main(void)
 	MX_TIM15_Init();
 	MX_TIM16_Init(); //""  ""
 
+	MX_TIM17_Init();
+
 	//start everything that can generate interrupts after initialization is done
 	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
 	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
@@ -181,8 +187,24 @@ int main(void)
 	//this timer starts the adc, so start it last
 	HAL_TIM_Base_Start_IT(&htim15);
 
+
+
 	while(1)
 	{
+		while(1)
+		{
+			Write_PWM(htim17, 0);
+			HAL_Delay(100);
+			Write_PWM(htim17, 64);
+			HAL_Delay(100);
+			Write_PWM(htim17, 128);
+			HAL_Delay(100);
+			Write_PWM(htim17, 192);
+			HAL_Delay(100);
+			Write_PWM(htim17, 255);
+			HAL_Delay(100);
+		}
+
 		if(canErrorToTransmit && canSendErrorFlag)
 		{
 			Send_Error();
@@ -807,6 +829,33 @@ void Send_Error(void)
 	}
 }
 
+void Write_PWM(TIM_HandleTypeDef htim, uint16_t pulse)
+{
+	if(pulse>255) { pulse=255; }
+
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	uint32_t channel = TIM_CHANNEL_1; //TODO: TIM2 will need channel 2
+
+	if (HAL_TIM_PWM_Stop(&htim, channel) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/*htim.Init.Period = 255;
+	HAL_TIM_PWM_Init(&htim);*/
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = pulse; //TODO: set up defaults for this
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, channel) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_TIM_PWM_Start(&htim, channel) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
 
 void SystemClock_Config(void)
 {
@@ -835,7 +884,6 @@ void SystemClock_Config(void)
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
 	if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_8) != HAL_OK)
 	{
 		Error_Handler();
@@ -1218,6 +1266,56 @@ static void MX_TIM16_Init(void)
 	{
 		Error_Handler();
 	}
+}
+
+static void MX_TIM17_Init(void)
+{
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+	htim17.Instance = TIM17;
+	htim17.Init.Prescaler = 32; //TODO: this should be configurable, currently set to ~20kHz
+	htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim17.Init.Period = 255; //pulse will be from 0 to 255
+	htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim17.Init.RepetitionCounter = 0;
+	htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_TIM_PWM_Init(&htim17) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 0;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+
+	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+	sBreakDeadTimeConfig.DeadTime = 0;
+	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+	sBreakDeadTimeConfig.BreakFilter = 0;
+	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+	if (HAL_TIMEx_ConfigBreakDeadTime(&htim17, &sBreakDeadTimeConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_TIM_MspPostInit(&htim17);
 }
 
 

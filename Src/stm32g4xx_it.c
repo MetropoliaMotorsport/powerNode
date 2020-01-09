@@ -11,6 +11,9 @@ extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 
+//external variables
+extern uint8_t CanTimerFlag;
+
 void NMI_Handler(void)
 {
 
