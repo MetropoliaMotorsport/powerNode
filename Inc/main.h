@@ -20,7 +20,10 @@ void Can_Send(uint8_t);
 void Can_Sync(void);
 void Set_Error(uint32_t);
 void Send_Error(void);
-void Write_PWM(TIM_HandleTypeDef, uint16_t);
+void Write_PWM(uint32_t, uint16_t);
+
+//external functions
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 
 
 //warning and error codes
@@ -71,6 +74,8 @@ void Write_PWM(TIM_HandleTypeDef, uint16_t);
 
 #define WARN_TEMP_MEASURE_OVERFLOW		225
 #define WARN_VOLT_MEASURE_OVERFLOW		226
+
+#define WARN_PWM_INVALID_CHANNEL		257
 
 //Set_Error(something);
 

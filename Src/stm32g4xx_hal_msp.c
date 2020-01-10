@@ -219,35 +219,111 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	/*if(htim->Instance==TIM4)
+	if(htim->Instance==TIM2)
 	{
-		__HAL_RCC_GPIOB_CLK_ENABLE();
-		GPIO_InitStruct.Pin = GPIO_PIN_6;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-		GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		if(PWM_Out_EN&(1<<0)) //TIM2 is for PB3, which is first output pin
+		{
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+			GPIO_InitStruct.Pin = GPIO_PIN_3;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
+	}
+	else if(htim->Instance==TIM3)
+	{
+		if(PWM_Out_EN&(1<<1)) //TIM3 is for PB4, which is second output pin
+		{
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+			GPIO_InitStruct.Pin = GPIO_PIN_4;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
+	}
+	else if(htim->Instance==TIM4)
+	{
+		if(PWM_Out_EN&(1<<3)) //TIM4 is for PB6, which is fourth output pin
+		{
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+			GPIO_InitStruct.Pin = GPIO_PIN_6;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
 	}
 	else if(htim->Instance==TIM8)
 	{
-		__HAL_RCC_GPIOA_CLK_ENABLE();
-		GPIO_InitStruct.Pin = GPIO_PIN_15;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-		GPIO_InitStruct.Alternate = GPIO_AF2_TIM8;
-		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		if(PWM_Out_EN&(1<<4)) //TIM8 is for PA15, which if fourth output pin
+		{
+			__HAL_RCC_GPIOA_CLK_ENABLE();
+			GPIO_InitStruct.Pin = GPIO_PIN_15;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Alternate = GPIO_AF2_TIM8;
+			HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		}
 	}
-	else*/ if(htim->Instance==TIM17)
+	else if(htim->Instance==TIM17)
 	{
-		__HAL_RCC_GPIOB_CLK_ENABLE();
-		GPIO_InitStruct.Pin = GPIO_PIN_5;
-		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-		GPIO_InitStruct.Alternate = GPIO_AF10_TIM17;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		if(PWM_Out_EN&(1<<2)) //TIM17 is for PB5, which is third output pin
+		{
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+			GPIO_InitStruct.Pin = GPIO_PIN_5;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Alternate = GPIO_AF10_TIM17;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
+	}
+
+}
+
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
+{
+	if(htim_pwm->Instance==TIM2)
+	{
+		__HAL_RCC_TIM2_CLK_ENABLE();
+	}
+	else if(htim_pwm->Instance==TIM3)
+	{
+		__HAL_RCC_TIM3_CLK_ENABLE();
+	}
+	else if(htim_pwm->Instance==TIM4)
+	{
+		__HAL_RCC_TIM4_CLK_ENABLE();
+	}
+	else if(htim_pwm->Instance==TIM8)
+	{
+		__HAL_RCC_TIM8_CLK_ENABLE();
+	}
+}
+
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
+{
+	if(htim_pwm->Instance==TIM2)
+	{
+		__HAL_RCC_TIM2_CLK_DISABLE();
+	}
+	else if(htim_pwm->Instance==TIM3)
+	{
+		__HAL_RCC_TIM3_CLK_DISABLE();
+	}
+	else if(htim_pwm->Instance==TIM4)
+	{
+		__HAL_RCC_TIM4_CLK_DISABLE();
+	}
+	else if(htim_pwm->Instance==TIM8)
+	{
+		__HAL_RCC_TIM8_CLK_DISABLE();
 	}
 
 }
