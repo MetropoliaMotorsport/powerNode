@@ -62,7 +62,7 @@ void Config_0(void)
 #if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
 
 	Digital_In_EN = 0b00000000;
-	PWM_Out_EN =  0b00011111; //TODO: in progress
+	PWM_Out_EN =  0b00011111;
 	PWM_Prescalers[0] = 32; PWM_Prescalers[1] = 32; PWM_Prescalers[2] = 32; PWM_Prescalers[3] = 32; PWM_Prescalers[4] = 32;
 	PWM_Pulses[0] = 64; PWM_Pulses[1] = 96; PWM_Pulses[2] = 128; PWM_Pulses[3] = 160; PWM_Pulses[4] = 204;
 
@@ -150,6 +150,15 @@ void Config_Write_Flash(void)
 	//bytes: [x], [x], [x], [x x U7/1 U7/0 U6/1 U6/0 U5/1 U5/0]
 	data[DEFAULT_SWITCH_STATE_POS]=Default_Switch_State&0xFF;
 
+	//bytes: [x], [x], [x], [pwm output enable]
+	data[PWM_EN_POS]=(PWM_Out_EN&0xFF);
+	//bytes: [pwm prescaler high], [pwm prescaler low], [pwm DC high], [pwm DC low]; note that prescaler=32 is ~20kHz, so probably will never be more than one byte; also DC is currently set up so 255 = 100% and 0 = 0%; so is only one byte
+	data[PWM_0_POS]=((PWM_Prescalers[0]&0xFFFF)<<16)+((PWM_Pulses[0]&0xFFFF)<<0);
+	data[PWM_1_POS]=((PWM_Prescalers[1]&0xFFFF)<<16)+((PWM_Pulses[1]&0xFFFF)<<0);
+	data[PWM_2_POS]=((PWM_Prescalers[2]&0xFFFF)<<16)+((PWM_Pulses[2]&0xFFFF)<<0);
+	data[PWM_3_POS]=((PWM_Prescalers[3]&0xFFFF)<<16)+((PWM_Pulses[3]&0xFFFF)<<0);
+	data[PWM_4_POS]=((PWM_Prescalers[4]&0xFFFF)<<16)+((PWM_Pulses[4]&0xFFFF)<<0);
+
 	uint32_t CanPos[8] = {CAN_ID_0_POS, CAN_ID_1_POS, CAN_ID_2_POS, CAN_ID_3_POS, CAN_ID_4_POS, CAN_ID_5_POS, CAN_ID_6_POS, CAN_ID_7_POS};
 	for(uint32_t i=0; i<8; i++)
 	{
@@ -219,6 +228,18 @@ void Config_Read_Flash(void)
 
 	Digital_In_EN = ((DIGITAL_IN_0>>0)&0b00011101); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	Default_Switch_State=((DEFAULT_SWITCH_STATE>>0)&0b00111111);
+
+	PWM_Out_EN = ((PWM_EN>>0)&0b00011111);
+	PWM_Pulses[0] = ((PWM_0>>0)&0xFFFF);
+	PWM_Prescalers[0] = ((PWM_0>>16)&0xFFFF);
+	PWM_Pulses[1] = ((PWM_1>>0)&0xFFFF);
+	PWM_Prescalers[1] = ((PWM_1>>16)&0xFFFF);
+	PWM_Pulses[2] = ((PWM_2>>0)&0xFFFF);
+	PWM_Prescalers[2] = ((PWM_2>>16)&0xFFFF);
+	PWM_Pulses[3] = ((PWM_3>>0)&0xFFFF);
+	PWM_Prescalers[3] = ((PWM_3>>16)&0xFFFF);
+	PWM_Pulses[4] = ((PWM_4>>0)&0xFFFF);
+	PWM_Prescalers[4] = ((PWM_4>>16)&0xFFFF);
 
 	uint32_t CanId[8] = {CAN_ID_0, CAN_ID_1, CAN_ID_2, CAN_ID_3, CAN_ID_4, CAN_ID_5, CAN_ID_6, CAN_ID_7};
 	for(uint32_t i=0; i<8; i++)

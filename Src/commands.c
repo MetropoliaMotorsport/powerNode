@@ -63,7 +63,7 @@ const pinPort *switches[] = {&U5IN0, &U5IN1, &U6IN0, &U6IN1, &U7IN0, &U7IN1};
 
 void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 {
-	for(uint32_t i=0; i<6; i++)
+	for(uint32_t i=0; i<5; i++)
 	{
 		if ((1<<i) & enableSwitching)
 		{
@@ -72,6 +72,19 @@ void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 	}
 
 	Acknowledge(SWITCH_POWER);
+}
+
+void Switch_DC(uint8_t channelEN, uint8_t newDC[8])
+{
+	uint32_t pos=3; //start at pos 3 and use a length 8 array so that we can just pass rx data
+	for(uint32_t i=0; i<5; i++)
+	{
+		if ((1<<i) & channelEN)
+		{
+			Write_PWM(i, newDC[pos]);
+			pos++;
+		}
+	}
 }
 
 

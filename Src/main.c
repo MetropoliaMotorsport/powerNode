@@ -738,6 +738,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 					Switch_Power(CANRxData[2], CANRxData[3]);
 					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
+				case CHANGE_DC:
+					Switch_DC(CANRxData[2], CANRxData);
+					if ((RxHeader.DataLength>>16) < (3+((CANRxData[2]>>4)&1))+((CANRxData[2]>>3)&1)+((CANRxData[2]>>2)&1)+((CANRxData[2]>>1)&1)+((CANRxData[2]>>0)&1)) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
 				case SAVE_CONFIGS:
 					Save_Config();
 					break;
