@@ -141,8 +141,13 @@ extern uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+
 extern uint8_t PWM_Out_EN;
+extern uint16_t PWM_Prescalers[5];
+extern uint16_t PWM_Pulses[5];
+
 extern uint8_t Default_Switch_State;
+
 extern uint16_t Can_IDs[8];
 extern uint8_t Can_DLCs[8];
 extern uint8_t Can_Config_Bytes[8][8];
@@ -264,6 +269,18 @@ extern uint32_t U7V_real;
 #define TV_BURST							(*(uint32_t*)(FLASH_PAGE_63+0x4*TV_BURST_POS))
 #define TV_BURST_TIMING_POS					(TV_BURST_POS+1)
 #define TV_BURST_TIMING						(*(uint32_t*)(FLASH_PAGE_63+0x4*TV_BURST_TIMING_POS))
+#define PWM_0_POS							(TV_BURST_TIMING_POS+1)
+#define PWM_0								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_0_POS))
+#define PWM_1_POS							(PWM_0_POS+1)
+#define PWM_1								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_1_POS))
+#define PWM_2_POS							(PWM_1_POS+1)
+#define PWM_2								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_2_POS))
+#define PWM_3_POS							(PWM_2_POS+1)
+#define PWM_3								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_3_POS))
+#define PWM_4_POS							(PWM_3_POS+1)
+#define PWM_4								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_4_POS))
+#define PWM_EN_POS							(PWM_4_POS+1)
+#define PWM_EN								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_EN_POS))
 
 
 //flash page definitions

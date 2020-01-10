@@ -65,8 +65,13 @@ uint8_t Digital_In_Interrupt_Power_Rising; //TODO
 uint8_t Digital_In_Interrupt_Power_Falling; //TODO
 uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
 uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+
 uint8_t PWM_Out_EN;
+uint16_t PWM_Prescalers[5];
+uint16_t PWM_Pulses[5];
+
 uint8_t Default_Switch_State;
+
 uint16_t Can_IDs[8];
 uint8_t Can_DLCs[8];
 uint8_t Can_Config_Bytes[8][8];
@@ -830,56 +835,59 @@ void Send_Error(void)
 
 void Write_PWM(uint32_t DIO_channel, uint16_t pulse) //TODO: make sure the pwm signal works nicely in real life
 {
-	TIM_HandleTypeDef htim = {0};
-	uint32_t channel = 0;
-	TIM_OC_InitTypeDef sConfigOC = {0};
+	if(PWM_Out_EN&(1<<DIO_channel))
+	{
+		TIM_HandleTypeDef htim = {0};
+		uint32_t channel = 0;
+		TIM_OC_InitTypeDef sConfigOC = {0};
 
-	if(pulse>255) { pulse=255; }
+		if(pulse>255) { pulse=255; }
 
-	switch(DIO_channel)
-	{
-		case 0: //PB3
-			htim = htim2;
-			channel = TIM_CHANNEL_2;
-			break;
-		case 1: //PB4
-			htim = htim3;
-			channel = TIM_CHANNEL_1;
-			break;
-		case 2: //PB5
-			htim = htim17;
-			channel = TIM_CHANNEL_1;
-			break;
-		case 3: //PB6
-			htim = htim4;
-			channel = TIM_CHANNEL_1;
-			break;
-		case 4: //PA15
-			htim = htim8;
-			channel = TIM_CHANNEL_1;
-			break;
-		default:
-			Set_Error(WARN_PWM_INVALID_CHANNEL);
-			return;
-	}
+		switch(DIO_channel)
+		{
+			case 0: //PB3
+				htim = htim2;
+				channel = TIM_CHANNEL_2;
+				break;
+			case 1: //PB4
+				htim = htim3;
+				channel = TIM_CHANNEL_1;
+				break;
+			case 2: //PB5
+				htim = htim17;
+				channel = TIM_CHANNEL_1;
+				break;
+			case 3: //PB6
+				htim = htim4;
+				channel = TIM_CHANNEL_1;
+				break;
+			case 4: //PA15
+				htim = htim8;
+				channel = TIM_CHANNEL_1;
+				break;
+			default:
+				Set_Error(WARN_PWM_INVALID_CHANNEL);
+				return;
+		}
 
-	if (HAL_TIM_PWM_Stop(&htim, channel) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/*htim.Init.Period = 255;
-	HAL_TIM_PWM_Init(&htim);*/
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = pulse; //TODO: set up defaults for this
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	if (HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, channel) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_TIM_PWM_Start(&htim, channel) != HAL_OK)
-	{
-		Error_Handler();
+		if (HAL_TIM_PWM_Stop(&htim, channel) != HAL_OK)
+		{
+			Error_Handler();
+		}
+		/*htim.Init.Period = 255;
+		HAL_TIM_PWM_Init(&htim);*/
+		sConfigOC.OCMode = TIM_OCMODE_PWM1;
+		sConfigOC.Pulse = pulse; //TODO: set up defaults for this
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+		sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+		if (HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, channel) != HAL_OK)
+		{
+			Error_Handler();
+		}
+		if (HAL_TIM_PWM_Start(&htim, channel) != HAL_OK)
+		{
+			Error_Handler();
+		}
 	}
 }
 
@@ -1280,7 +1288,7 @@ static void MX_TIM17_Init(void)
 	TIM_OC_InitTypeDef sConfigOC = {0};
 
 	htim17.Instance = TIM17;
-	htim17.Init.Prescaler = 32; //TODO: this should be configurable, currently set to ~20kHz
+	htim17.Init.Prescaler = PWM_Prescalers[2];
 	htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim17.Init.Period = 255; //pulse will be from 0 to 255
 	htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1296,7 +1304,7 @@ static void MX_TIM17_Init(void)
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 0; //TODO: default DC here
+	sConfigOC.Pulse = PWM_Pulses[2];
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1308,6 +1316,14 @@ static void MX_TIM17_Init(void)
 	}
 
 	HAL_TIM_MspPostInit(&htim17);
+
+	if(PWM_Out_EN&(1<<2))
+	{
+		if (HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
 }
 
 static void MX_TIM2_Init()
@@ -1315,7 +1331,7 @@ static void MX_TIM2_Init()
 	TIM_OC_InitTypeDef sConfigOC = {0};
 
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 32; //TODO: this should be configurable, currently set to ~20kHz
+	htim2.Init.Prescaler = PWM_Prescalers[0];
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim2.Init.Period = 255;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1326,7 +1342,7 @@ static void MX_TIM2_Init()
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 0;
+	sConfigOC.Pulse = PWM_Pulses[0];
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
@@ -1336,7 +1352,13 @@ static void MX_TIM2_Init()
 
 	HAL_TIM_MspPostInit(&htim2);
 
-
+	if(PWM_Out_EN&(1<<0))
+	{
+		if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
 }
 
 static void MX_TIM3_Init()
@@ -1344,7 +1366,7 @@ static void MX_TIM3_Init()
 	TIM_OC_InitTypeDef sConfigOC = {0};
 
 	htim3.Instance = TIM3;
-	htim3.Init.Prescaler = 32; //TODO: this should be configurable, currently set to ~20kHz
+	htim3.Init.Prescaler = PWM_Prescalers[1];
 	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim3.Init.Period = 255;
 	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1355,7 +1377,7 @@ static void MX_TIM3_Init()
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 0;
+	sConfigOC.Pulse = PWM_Pulses[1];
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -1364,6 +1386,14 @@ static void MX_TIM3_Init()
 	}
 
 	HAL_TIM_MspPostInit(&htim3);
+
+	if(PWM_Out_EN&(1<<1))
+	{
+		if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
 }
 
 static void MX_TIM4_Init()
@@ -1371,7 +1401,7 @@ static void MX_TIM4_Init()
 	TIM_OC_InitTypeDef sConfigOC = {0};
 
 	htim4.Instance = TIM4;
-	htim4.Init.Prescaler = 32; //TODO: this should be configurable, currently set to ~20kHz
+	htim4.Init.Prescaler = PWM_Prescalers[3];
 	htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim4.Init.Period = 255;
 	htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1382,7 +1412,7 @@ static void MX_TIM4_Init()
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 0;
+	sConfigOC.Pulse = PWM_Pulses[3];
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -1391,6 +1421,14 @@ static void MX_TIM4_Init()
 	}
 
 	HAL_TIM_MspPostInit(&htim4);
+
+	if(PWM_Out_EN&(1<<3))
+	{
+		if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
 }
 
 static void MX_TIM8_Init()
@@ -1398,7 +1436,7 @@ static void MX_TIM8_Init()
 	TIM_OC_InitTypeDef sConfigOC = {0};
 
 	htim8.Instance = TIM8;
-	htim8.Init.Prescaler = 32;//TODO: this should be configurable, currently set to ~20kHz
+	htim8.Init.Prescaler = PWM_Prescalers[4];
 	htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim8.Init.Period = 255;
 	htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1410,7 +1448,7 @@ static void MX_TIM8_Init()
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 0;
+	sConfigOC.Pulse = PWM_Pulses[4];
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1422,6 +1460,14 @@ static void MX_TIM8_Init()
 	}
 
 	HAL_TIM_MspPostInit(&htim8);
+
+	if(PWM_Out_EN&(1<<4))
+	{
+		if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
 }
 
 

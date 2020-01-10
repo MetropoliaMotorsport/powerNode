@@ -63,13 +63,19 @@ void Config_0(void)
 
 	Digital_In_EN = 0b00000000;
 	PWM_Out_EN =  0b00011111; //TODO: in progress
+	PWM_Prescalers[0] = 32; PWM_Prescalers[1] = 32; PWM_Prescalers[2] = 32; PWM_Prescalers[3] = 32; PWM_Prescalers[4] = 32;
+	PWM_Pulses[0] = 64; PWM_Pulses[1] = 96; PWM_Pulses[2] = 128; PWM_Pulses[3] = 160; PWM_Pulses[4] = 204;
+
 
 #else //in this case we test digital inputs
 
 	Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	PWM_Out_EN = 0b00000000;
+	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
+	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
 
 #endif
+
 
 	Default_Switch_State = 0b00000000;
 
