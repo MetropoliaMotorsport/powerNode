@@ -1,6 +1,9 @@
 #include "main.h"
 #include "parse.h"
 
+//external handlers
+extern TIM_HandleTypeDef htim2;
+
 
 uint32_t Parse_Current(uint32_t raw, uint32_t bytes)
 {
@@ -36,5 +39,74 @@ uint32_t Parse_Temperature(uint32_t raw)
 	//TODO: get some sort of line for this and check what it looks like in reality, datasheet only gives value for 1k ohm resistor
 
 	return calculated;
+}
+
+/*
+		volatile uint32_t a = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+		volatile uint32_t b = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);*/
+
+uint32_t Calculate_PWM_DC(uint32_t channel)
+{
+	uint32_t DC=0;
+	uint32_t T=0, off=0;
+
+	if (!(PWM_In_EN>>channel)&1)
+	{
+		//TODO: error message for uninitialized channel
+		return 0;
+	}
+
+	switch(channel)
+	{
+	case 0:
+		T=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+		off=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+		break;
+	case 3:
+
+		break;
+	case 4:
+
+		break;
+	default:
+		//TODO: error message here for trying to calculate PWM of invalid PWM channel
+		return 0;
+	}
+
+	DC=(((T-off)*100)/T); //note integer division always rounds down
+
+	return DC; //DC ranges from 0-100, so we don't need to
+}
+
+uint32_t Calculate_PWM_Freq(uint32_t channel)
+{
+	uint32_t frequency=0;
+	uint32_t T=0;
+
+	if (!(PWM_In_EN>>channel)&1)
+	{
+		//TODO: error message for uninitialized channel
+		return 0;
+	}
+
+	switch(channel)
+	{
+	case 0:
+		T=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+		break;
+	case 3:
+
+		break;
+	case 4:
+
+		break;
+	default:
+		//TODO: error message here for trying to calculate PWM of invalid PWM channel
+		return 0;
+	}
+	frequency = (((HAL_RCC_GetHCLKFreq()*10)/(T*1000))+5)/10; //calculate frequency in .1 Hz, add .5 Hz, divide by 10 to get rounded value in Hz
+
+	//frequency can exist over too many orders of magnitude, and might want to be sent in one byte or multiple bytes, so we give option for a divider
+	return frequency; //TODO: divider
 }
 

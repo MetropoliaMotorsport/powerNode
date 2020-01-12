@@ -4,8 +4,9 @@
 //ID definition
 #define ID 0
 
-//debugging definitions
-#define TEST_PWN_NOT_INPUT 1
+//debugging definitions, only used for ID 0
+#define TEST_PWN_NOT_INPUT	0
+#define TEST_PWM_INPUT		1
 
 //function prototypes
 void Config_Setup(void);

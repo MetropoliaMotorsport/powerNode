@@ -6,8 +6,11 @@ extern FDCAN_HandleTypeDef hfdcan;
 extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_adc2;
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
+extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 
@@ -112,3 +115,19 @@ void TIM1_UP_TIM16_IRQHandler(void)
 	HAL_TIM_IRQHandler(&htim1);
 	HAL_TIM_IRQHandler(&htim16);
 }
+
+//it seems like the interrupts for PWM input are not called
+void TIM2_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim2);
+}
+
+/*void TIM4_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim4);
+}
+
+void TIM8_CC_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim8);
+}*/

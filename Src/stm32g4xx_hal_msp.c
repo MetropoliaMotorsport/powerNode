@@ -327,3 +327,83 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 	}
 
 }
+
+void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	if(htim_ic->Instance==TIM2)
+	{
+		__HAL_RCC_TIM2_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+
+		GPIO_InitStruct.Pin = GPIO_PIN_3;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+		HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM2_IRQn);
+	}
+	/*else if(htim_ic->Instance==TIM4)
+	{
+		__HAL_RCC_TIM4_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+
+		GPIO_InitStruct.Pin = GPIO_PIN_6;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+		HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM4_IRQn);
+	}
+	else if(htim_ic->Instance==TIM8)
+	{
+		__HAL_RCC_TIM8_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+
+		GPIO_InitStruct.Pin = GPIO_PIN_15;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF2_TIM8;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+		HAL_NVIC_SetPriority(TIM8_CC_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(TIM8_CC_IRQn);
+	}*/
+}
+
+void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
+{
+	if(htim_ic->Instance==TIM2)
+	{
+		__HAL_RCC_TIM2_CLK_DISABLE();
+
+		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3);
+
+		HAL_NVIC_DisableIRQ(TIM2_IRQn);
+	}
+	/*else if(htim_ic->Instance==TIM4)
+	{
+		__HAL_RCC_TIM4_CLK_DISABLE();
+
+		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
+
+		HAL_NVIC_DisableIRQ(TIM4_IRQn);
+	}
+	else if(htim_ic->Instance==TIM8)
+	{
+		__HAL_RCC_TIM8_CLK_DISABLE();
+
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_15);
+
+		HAL_NVIC_DisableIRQ(TIM8_CC_IRQn);
+
+	}*/
+}

@@ -132,6 +132,7 @@ extern const pinPort U7MULTI;
 #define CONFIG_CAN_TV_READING		135
 #define CONFIG_DEFAULT_DC			136
 #define CONFIG_PWM_PRESCALERS		137
+//TODO: configure EN for DIn, PWMOut, and PWMIn
 
 
 //global configuration variables
@@ -147,6 +148,8 @@ extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
 extern uint8_t PWM_Out_EN;
 extern uint16_t PWM_Prescalers[5];
 extern uint16_t PWM_Pulses[5];
+
+extern uint8_t PWM_In_EN;
 
 extern uint8_t Default_Switch_State;
 

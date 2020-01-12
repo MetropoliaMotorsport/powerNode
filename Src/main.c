@@ -1,4 +1,7 @@
 #include "main.h" //TODO: eventually add interupts to at least digital inputs, maybe pwm inputs as well?
+//TODO: maybe have a can message for requesting can messages? only 2 bytes?
+//TODO: maybe a can message for sampling some number of temperature/voltages as well?
+//TODO: message to configure limits definitely
 
 
 //static function prototypes
@@ -69,6 +72,8 @@ uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
 uint8_t PWM_Out_EN;
 uint16_t PWM_Prescalers[5];
 uint16_t PWM_Pulses[5];
+
+uint8_t PWM_In_EN;
 
 uint8_t Default_Switch_State;
 
@@ -199,16 +204,21 @@ int main(void)
 
 	//start everything that can generate interrupts after initialization is done
 	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
-	if(Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
+	if (Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
 	HAL_TIM_Base_Start_IT(&htim7);
+
+	//start pwm input channels if they are enabled
+	if ((PWM_In_EN>>0)&1) { HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); }
 
 	//this timer starts the adc, so start it last
 	HAL_TIM_Base_Start_IT(&htim15);
 
 
-
 	while(1)
 	{
+		volatile uint32_t a = Calculate_PWM_Freq(0);
+		volatile uint32_t b = Calculate_PWM_DC(0);
+
 		if(canErrorToTransmit && canSendErrorFlag)
 		{
 			Send_Error();
@@ -314,8 +324,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 
-//TODO: wouldn't be bad idea to set it up to do 4 or some number of conversions of each channel (calculated to never blow a fuse) before switching SEL pins, since this function seems to be taking a lot of time, but that could make the problem worse unless averaging is only done 1 in 4 of those times
-//TODO: better idea would be to maybe skip some temperature/voltage readings (if they were happening) and give a longer time to rest of mcu instead, possibly by starting timer 15 several times from inside itself instead of starting the adc, or just factoring in a longer delay time considering temperature and voltage are not being continously measured
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if (hadc->Instance == ADC1)
@@ -683,7 +691,7 @@ void Can_Send(uint8_t message)
 	}
 }
 
-//for can sync we must send from the interrupt in order to send fast enough, but this means only 2 (or sometimes 3) messages may be sent without discarding messages
+//for can sync we must send from the interrupt to ensure that we send the message quickly, but this means only 2 (or sometimes 3) messages may be sent without discarding messages
 void Can_Sync(void)
 {
 	for(uint32_t i=0; i<8; i++)
@@ -729,7 +737,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)
 		{
-			//TODO: PWM frequencies
 			if(CANRxData[0] == ID)
 			{
 				switch(CANRxData[1])
@@ -889,7 +896,7 @@ void Write_PWM(uint32_t DIO_channel, uint16_t pulse) //TODO: make sure the pwm s
 		/*htim.Init.Period = 255;
 		HAL_TIM_PWM_Init(&htim);*/
 		sConfigOC.OCMode = TIM_OCMODE_PWM1;
-		sConfigOC.Pulse = pulse; //TODO: set up defaults for this
+		sConfigOC.Pulse = pulse;
 		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 		sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 		if (HAL_TIM_PWM_ConfigChannel(&htim, &sConfigOC, channel) != HAL_OK)
@@ -1340,36 +1347,91 @@ static void MX_TIM17_Init(void)
 
 static void MX_TIM2_Init()
 {
-	TIM_OC_InitTypeDef sConfigOC = {0};
-
-	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = PWM_Prescalers[0];
-	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim2.Init.Period = 255;
-	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+	if (!(PWM_In_EN<<0)&1) //default if pin is not used as pwm input
 	{
-		Error_Handler();
-	}
+		TIM_OC_InitTypeDef sConfigOC = {0};
 
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = PWM_Pulses[0];
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	HAL_TIM_MspPostInit(&htim2);
-
-	if(PWM_Out_EN&(1<<0))
-	{
-		if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)
+		htim2.Instance = TIM2;
+		htim2.Init.Prescaler = PWM_Prescalers[0];
+		htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim2.Init.Period = 255;
+		htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
 		{
 			Error_Handler();
 		}
+
+		sConfigOC.OCMode = TIM_OCMODE_PWM1;
+		sConfigOC.Pulse = PWM_Pulses[0];
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+		sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+		if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		HAL_TIM_MspPostInit(&htim2);
+
+		if(PWM_Out_EN&(1<<0))
+		{
+			if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) != HAL_OK)
+			{
+				Error_Handler();
+			}
+		}
+	}
+	else //pin is used as pwm input pin
+	{
+		TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+		TIM_IC_InitTypeDef sConfigIC = {0};
+		TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+		htim2.Instance = TIM2;
+		htim2.Init.Prescaler = 999; //probably make this configurable, as 0 is way too fast at least for imd //TODO: use the same array as is normally used
+		htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim2.Init.Period = 65535;
+		htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
+		sSlaveConfig.InputTrigger = TIM_TS_TI2FP2;
+		sSlaveConfig.TriggerPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+		sSlaveConfig.TriggerPrescaler = TIM_ICPSC_DIV1;
+		sSlaveConfig.TriggerFilter = 0;
+		if (HAL_TIM_SlaveConfigSynchro(&htim2, &sSlaveConfig) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+		sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+		sConfigIC.ICFilter = 0;
+		if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+		if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+		sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+		if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+
 	}
 }
 

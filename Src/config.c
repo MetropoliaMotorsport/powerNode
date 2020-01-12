@@ -58,14 +58,21 @@ void Config_0(void)
 	warn_overcurrent_U7I1=1000;
 
 
-
-#if TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
+#if TEST_PWM_INPUT
 
 	Digital_In_EN = 0b00000000;
-	PWM_Out_EN =  0b00011111;
+	PWM_Out_EN = 0b00000000;
+	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
+	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
+	PWM_In_EN = 0b00011001; //not even going to try PB4 as PWM input, PB6 doesn't have option as PWM input
+
+#elif TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
+
+	Digital_In_EN = 0b00000000;
+	PWM_Out_EN = 0b00011111; //PB4 seems to work ok as an output though, maybe
 	PWM_Prescalers[0] = 32; PWM_Prescalers[1] = 32; PWM_Prescalers[2] = 32; PWM_Prescalers[3] = 32; PWM_Prescalers[4] = 32;
 	PWM_Pulses[0] = 64; PWM_Pulses[1] = 96; PWM_Pulses[2] = 128; PWM_Pulses[3] = 160; PWM_Pulses[4] = 204;
-
+	PWM_In_EN = 0b00000000;
 
 #else //in this case we test digital inputs
 
@@ -73,6 +80,7 @@ void Config_0(void)
 	PWM_Out_EN = 0b00000000;
 	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
 	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
+	PWM_In_EN = 0b00000000;
 
 #endif
 
