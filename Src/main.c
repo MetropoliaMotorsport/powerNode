@@ -773,6 +773,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 					Config_Temperature_Voltage_Reading((((uint16_t)CANRxData[2])<<8)+(((uint16_t)CANRxData[3])<<0), CANRxData[4], CANRxData[5]);
 					if ((RxHeader.DataLength>>16) < 6) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
+				case CONFIG_DEFAULT_DC:
+					Config_Default_DC(CANRxData[2], CANRxData);
+					if ((RxHeader.DataLength>>16) < (3+((CANRxData[2]>>4)&1))+((CANRxData[2]>>3)&1)+((CANRxData[2]>>2)&1)+((CANRxData[2]>>1)&1)+((CANRxData[2]>>0)&1)) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CONFIG_PWM_PRESCALERS:
+					Config_PWM_Prescalers(CANRxData[2], CANRxData);
+					if ((RxHeader.DataLength>>16) < (3+((CANRxData[2]>>4)&1))+((CANRxData[2]>>3)&1)+((CANRxData[2]>>2)&1)+((CANRxData[2]>>1)&1)+((CANRxData[2]>>0)&1)) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
 				default:
 					Set_Error(ERR_INVALID_COMMAND);
 					break;

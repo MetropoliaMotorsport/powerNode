@@ -130,6 +130,8 @@ extern const pinPort U7MULTI;
 #define CONFIG_CAN_INTERVAL			133
 #define CONFIG_CAN_SYNC_DELAY		134
 #define CONFIG_CAN_TV_READING		135
+#define CONFIG_DEFAULT_DC			136
+#define CONFIG_PWM_PRESCALERS		137
 
 
 //global configuration variables

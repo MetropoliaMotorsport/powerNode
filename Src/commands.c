@@ -85,6 +85,8 @@ void Switch_DC(uint8_t channelEN, uint8_t newDC[8])
 			pos++;
 		}
 	}
+
+	Acknowledge(CHANGE_DC);
 }
 
 
@@ -222,4 +224,34 @@ void Config_Temperature_Voltage_Reading(uint16_t interval, uint8_t tempBurst, ui
 	SampleTemperatureVoltagePeriod=interval;
 
 	Acknowledge(CONFIG_CAN_TV_READING);
+}
+
+void Config_Default_DC(uint8_t channelEN, uint8_t newDC[8])
+{
+	uint32_t pos=3; //start at pos 3 and use a length 8 array so that we can just pass rx data
+	for(uint32_t i=0; i<5; i++)
+	{
+		if ((1<<i) & channelEN)
+		{
+			PWM_Pulses[i]=newDC[pos];
+			pos++;
+		}
+	}
+
+	Acknowledge(CONFIG_DEFAULT_DC);
+}
+
+void Config_PWM_Prescalers(uint8_t channelEN, uint8_t newPrescalers[8])
+{
+	uint32_t pos=3; //start at pos 3 and use a length 8 array so that we can just pass rx data
+	for(uint32_t i=0; i<5; i++)
+	{
+		if ((1<<i) & channelEN)
+		{
+			PWM_Prescalers[i]=newPrescalers[pos];
+			pos++;
+		}
+	}
+
+	Acknowledge(CONFIG_PWM_PRESCALERS);
 }
