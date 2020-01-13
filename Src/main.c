@@ -1346,7 +1346,7 @@ static void MX_TIM17_Init(void)
 
 static void MX_TIM2_Init()
 {
-	if (!(PWM_In_EN>>0)&1) //default if pin is not used as pwm input
+	if (!((PWM_In_EN>>0)&1)) //default if pin is not used as pwm input
 	{
 		TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -1469,7 +1469,7 @@ static void MX_TIM3_Init()
 
 static void MX_TIM4_Init()
 {
-	if (!(PWM_In_EN>>0)&1) //default if pin is not used as pwm input
+	if (!((PWM_In_EN>>0)&1)) //default if pin is not used as pwm input
 	{
 		TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -1557,7 +1557,7 @@ static void MX_TIM4_Init()
 
 static void MX_TIM8_Init()
 {
-	if (!(PWM_In_EN>>4)&1) //default if pin is not used as a pwm input
+	if (!((PWM_In_EN>>4)&1)) //default if pin is not used as a pwm input
 	{
 		TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -1603,9 +1603,9 @@ static void MX_TIM8_Init()
 		TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
 		htim8.Instance = TIM8;
-		htim8.Init.Prescaler = 0;
+		htim8.Init.Prescaler = PWM_Prescalers[4];
 		htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-		htim8.Init.Period = 0;
+		htim8.Init.Period = 65535;
 		htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 		htim8.Init.RepetitionCounter = 0;
 		htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

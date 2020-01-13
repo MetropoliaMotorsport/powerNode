@@ -4,6 +4,7 @@
 //external handlers
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim8;
 
 
 uint32_t Parse_Current(uint32_t raw, uint32_t bytes)
@@ -70,7 +71,9 @@ uint32_t Calculate_PWM_DC(uint32_t channel)
 		DC=((on*100)/T);
 		break;
 	case 4:
-
+		T=HAL_TIM_ReadCapturedValue(&htim8, TIM_CHANNEL_1);
+		on=HAL_TIM_ReadCapturedValue(&htim8, TIM_CHANNEL_2);
+		DC=((on*100)/T);
 		break;
 	default:
 		//TODO: error message here for trying to calculate PWM of invalid PWM channel
@@ -101,7 +104,7 @@ uint32_t Calculate_PWM_Freq(uint32_t channel)
 		T=HAL_TIM_ReadCapturedValue(&htim4, TIM_CHANNEL_1);
 		break;
 	case 4:
-
+		T=HAL_TIM_ReadCapturedValue(&htim8, TIM_CHANNEL_1);
 		break;
 	default:
 		//TODO: error message here for trying to calculate PWM of invalid PWM channel
