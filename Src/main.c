@@ -230,22 +230,7 @@ int main(void)
 			{
 				if ((Can_Timed_Enable>>i)&0b1)
 				{
-					if(CanBuffer[CanBufferWritePos]!=255)
-					{
-						Set_Error(ERR_CAN_BUFFER_FULL);
-					}
-					//overwrite unsent messages
-					CanBuffer[CanBufferWritePos]=i;
-
-					if(CanBufferWritePos>=30)
-					{
-						CanBufferWritePos=0;
-					}
-					else
-					{
-						CanBufferWritePos++;
-					}
-					CanMessagesToSend++;
+					Buffer_Can_Message(i);
 				}
 			}
 			CanTimerFlag=0;
@@ -744,6 +729,30 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case CHANGE_DC:
 					Switch_DC(CANRxData[2], CANRxData);
 					if ((RxHeader.DataLength>>16) < (3+((CANRxData[2]>>4)&1))+((CANRxData[2]>>3)&1)+((CANRxData[2]>>2)&1)+((CANRxData[2]>>1)&1)+((CANRxData[2]>>0)&1)) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CAN_MESS0:
+					Buffer_Can_Message(0);
+					break;
+				case CAN_MESS1:
+					Buffer_Can_Message(1);
+					break;
+				case CAN_MESS2:
+					Buffer_Can_Message(2);
+					break;
+				case CAN_MESS3:
+					Buffer_Can_Message(3);
+					break;
+				case CAN_MESS4:
+					Buffer_Can_Message(4);
+					break;
+				case CAN_MESS5:
+					Buffer_Can_Message(5);
+					break;
+				case CAN_MESS6:
+					Buffer_Can_Message(6);
+					break;
+				case CAN_MESS7:
+					Buffer_Can_Message(7);
 					break;
 				case SAVE_CONFIGS:
 					Save_Config();

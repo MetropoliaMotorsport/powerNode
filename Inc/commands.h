@@ -5,14 +5,14 @@
 //config commands
 #define SWITCH_POWER				1
 #define CHANGE_DC					2
-#define CAN_MESS0					3 //TODO
+#define CAN_MESS0					3
 #define CAN_MESS1					4
 #define CAN_MESS2					5
 #define CAN_MESS3					6
 #define CAN_MESS4					7
 #define CAN_MESS5					8
 #define CAN_MESS6					9
-#define CAN_MESS7					10 //TODO
+#define CAN_MESS7					10
 #define SAMPLE_TEMP_VOLT			11 //TODO
 #define SAVE_CONFIGS				128
 #define CONFIG_MESSAGE				129
@@ -24,7 +24,7 @@
 #define CONFIG_CAN_TV_READING		135
 #define CONFIG_DEFAULT_DC			136
 #define CONFIG_PWM_PRESCALERS		137
-#define CONFIG_DIO					138 //TODO
+#define CONFIG_DIO					138
 
 //TODO: configure EN for DIn, PWMOut, and PWMIn
 
@@ -35,6 +35,7 @@ void Save_Config();
 
 void Switch_Power(uint8_t, uint8_t);
 void Switch_DC(uint8_t, uint8_t[8]);
+void Buffer_Can_Message(uint8_t);
 
 void Config_Message(uint8_t, uint8_t, uint16_t);
 void Config_Switch_Defaults(uint8_t, uint8_t);

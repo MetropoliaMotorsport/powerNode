@@ -89,6 +89,31 @@ void Switch_DC(uint8_t channelEN, uint8_t newDC[8])
 	Acknowledge(CHANGE_DC);
 }
 
+extern uint8_t CanBuffer[31];
+extern uint8_t CanMessagesToSend;
+extern uint8_t CanBufferReadPos;
+extern uint8_t CanBufferWritePos;
+
+void Buffer_Can_Message(uint8_t message)
+{
+	if(CanBuffer[CanBufferWritePos]!=255)
+	{
+		Set_Error(ERR_CAN_BUFFER_FULL);
+	}
+	//overwrite unsent messages
+	CanBuffer[CanBufferWritePos]=message;
+
+	if(CanBufferWritePos>=30)
+	{
+		CanBufferWritePos=0;
+	}
+	else
+	{
+		CanBufferWritePos++;
+	}
+	CanMessagesToSend++;
+}
+
 
 void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 {
