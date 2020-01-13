@@ -1,7 +1,4 @@
 #include "main.h" //TODO: eventually add interupts to at least digital inputs, maybe pwm inputs as well?
-//TODO: maybe have a can message for requesting can messages? only 2 bytes?
-//TODO: maybe a can message for sampling some number of temperature/voltages as well?
-//TODO: message to configure limits definitely
 
 
 //static function prototypes
@@ -786,6 +783,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case CONFIG_PWM_PRESCALERS:
 					Config_PWM_Prescalers(CANRxData[2], CANRxData);
 					if ((RxHeader.DataLength>>16) < (3+((CANRxData[2]>>4)&1))+((CANRxData[2]>>3)&1)+((CANRxData[2]>>2)&1)+((CANRxData[2]>>1)&1)+((CANRxData[2]>>0)&1)) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CONFIG_DIO:
+					Config_DIO_Pins(CANRxData[2], CANRxData[3], CANRxData[4], CANRxData[5]);
+					if ((RxHeader.DataLength>>16) < 6) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				default:
 					Set_Error(ERR_INVALID_COMMAND);

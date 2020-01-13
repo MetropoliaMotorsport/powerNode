@@ -255,3 +255,40 @@ void Config_PWM_Prescalers(uint8_t channelEN, uint8_t newPrescalers[8])
 
 	Acknowledge(CONFIG_PWM_PRESCALERS);
 }
+
+void Config_DIO_Pins(uint8_t EN, uint8_t new_Din_EN, uint8_t new_PWM_Out_EN, uint8_t new_PWM_In_EN)
+{
+	for(uint32_t i=0; i<5; i++)
+	{
+		if ((EN>>i)&1)
+		{
+			Digital_In_EN &= ~(1<<i);
+			PWM_Out_EN &= ~(1<<i);
+			PWM_In_EN &= ~(1<<i);
+
+			if ((new_Din_EN>>i)&1)
+			{
+				if (i != 1) //disable PB4 as input
+				{
+					Digital_In_EN |= (1<<i);
+				}
+			}
+			else if ((new_PWM_Out_EN>>i)&1)
+			{
+				if (1)
+				{
+					PWM_Out_EN |= (1<<i);
+				}
+			}
+			else if ((new_PWM_In_EN>>i)&1)
+			{
+				if ( (i!=1) && (i!=2) ) //disable PB4 as input, PB5 doesn't have functionality as PWM input
+				{
+					PWM_In_EN |= (1<<i);
+				}
+			}
+		}
+	}
+
+	Acknowledge(CONFIG_DIO);
+}

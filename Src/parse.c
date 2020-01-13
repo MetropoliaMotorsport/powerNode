@@ -54,7 +54,7 @@ uint32_t Calculate_PWM_DC(uint32_t channel)
 
 	if (!(PWM_In_EN>>channel)&1)
 	{
-		//TODO: error message for uninitialized channel
+		Set_Error(WARN_PWM_CHANNEL_UNINITIALIZED);
 		return 0;
 	}
 
@@ -76,7 +76,7 @@ uint32_t Calculate_PWM_DC(uint32_t channel)
 		DC=((on*100)/T);
 		break;
 	default:
-		//TODO: error message here for trying to calculate PWM of invalid PWM channel
+		Set_Error(WARN_PWM_INVALID_CHANNEL);
 		return 0;
 	}
 
@@ -91,7 +91,7 @@ uint32_t Calculate_PWM_Freq(uint32_t channel)
 
 	if (!(PWM_In_EN>>channel)&1)
 	{
-		//TODO: error message for uninitialized channel
+		Set_Error(WARN_PWM_CHANNEL_UNINITIALIZED);
 		return 0;
 	}
 
@@ -107,7 +107,7 @@ uint32_t Calculate_PWM_Freq(uint32_t channel)
 		T=HAL_TIM_ReadCapturedValue(&htim8, TIM_CHANNEL_1);
 		break;
 	default:
-		//TODO: error message here for trying to calculate PWM of invalid PWM channel
+		Set_Error(WARN_PWM_INVALID_CHANNEL);
 		return 0;
 	}
 	frequency = (((HAL_RCC_GetHCLKFreq()*10)/(T*(PWM_Prescalers[channel]+1)))+5)/10; //calculate frequency in .1 Hz, add .5 Hz, divide by 10 to get rounded value in Hz

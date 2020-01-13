@@ -76,6 +76,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 #define WARN_VOLT_MEASURE_OVERFLOW		226
 
 #define WARN_PWM_INVALID_CHANNEL		257
+#define WARN_PWM_CHANNEL_UNINITIALIZED	258
 
 //Set_Error(something);
 
@@ -118,21 +119,6 @@ extern const pinPort U7MULTI;
 #define CANID_CONFIG 0x700
 #define CANID_ERROR 0x600
 #define CANID_ACK	0x500
-
-//config commands
-#define SWITCH_POWER				1
-#define CHANGE_DC					2
-#define SAVE_CONFIGS				128
-#define CONFIG_MESSAGE				129
-#define CONFIG_SWITCHES_DEFAULT		130
-#define CONFIG_CAN_SYNC				131
-#define CONFIG_CAN_TIMED			132
-#define CONFIG_CAN_INTERVAL			133
-#define CONFIG_CAN_SYNC_DELAY		134
-#define CONFIG_CAN_TV_READING		135
-#define CONFIG_DEFAULT_DC			136
-#define CONFIG_PWM_PRESCALERS		137
-//TODO: configure EN for DIn, PWMOut, and PWMIn
 
 
 //global configuration variables

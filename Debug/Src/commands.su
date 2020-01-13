@@ -11,3 +11,4 @@ commands.c:193:6:Config_Can_Sync_Delay	16	static
 commands.c:200:6:Config_Temperature_Voltage_Reading	16	static
 commands.c:229:6:Config_Default_DC	24	static
 commands.c:244:6:Config_PWM_Prescalers	24	static
+commands.c:259:6:Config_DIO_Pins	32	static

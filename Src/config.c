@@ -88,7 +88,7 @@ void Config_0(void)
 	Default_Switch_State = 0b00000000;
 
 	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
-	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 1;
+	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
 
 	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ 2, 0, 2, 0, 2, 0, 2, 0 },
@@ -97,7 +97,7 @@ void Config_0(void)
 											{ 2, 0, 0, 0, 0, 0, 0, 0 },
 											{ 2, 0, 1, 1, 1, 2, 0, 1 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
-											{ 1, 0, 0, 0, 0, 0, 0, 0 }	};
+											{ 1, 2, 0, 2, 0, 2, 0, 0 }	};
 	uint8_t temp_Can_Config_Datas[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ MESS_U5I0, 0, MESS_U5I1, 0, MESS_U6I0, 0, MESS_U6I1, 0 },
 											{ MESS_U7I0, MESS_U7I1, MESS_U5T, MESS_U6T, MESS_U7T, 0, 0, 0 },
@@ -105,7 +105,7 @@ void Config_0(void)
 											{ MESS_U5V, 0, 0, 0, 0, 0, 0, 0 },
 											{ MESS_PWM0_Freq, 0, MESS_PWM0_DC, MESS_PWM3_Freq, MESS_PWM3_DC, MESS_PWM4_Freq, 0, MESS_PWM4_DC },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
-											{ MESS_DI, 0, 0, 0, 0, 0, 0, 0 }	};
+											{ MESS_DI, MESS_U5V, 0, MESS_U6V, 0, MESS_U7V, 0, 0 }	};
 	for(uint32_t i=0; i<8; i++)
 	{
 		for(uint32_t j=0; j<8; j++)
