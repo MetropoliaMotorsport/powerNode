@@ -114,6 +114,15 @@ void Buffer_Can_Message(uint8_t message)
 	CanMessagesToSend++;
 }
 
+extern uint32_t sample_temperature;
+extern uint32_t sample_voltage;
+
+void Sample_Temperature_Voltage(uint8_t temperature_samples, uint8_t voltage_samples)
+{
+	sample_temperature+=temperature_samples;
+	sample_voltage+=voltage_samples;
+}
+
 
 void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 {

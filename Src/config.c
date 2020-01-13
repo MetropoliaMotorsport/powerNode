@@ -122,8 +122,8 @@ void Config_0(void)
 	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
 	sample_voltage=0;
 	SampleTemperatureVoltagePeriod=10; //1ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
-	SampleTemperatureBurst=1;
-	SampleVoltageBurst=1;
+	SampleTemperatureBurst=0;
+	SampleVoltageBurst=0;
 }
 
 void Config_1(void)
