@@ -15,3 +15,5 @@ stm32g4xx_it.c:99:6:TIM7_IRQHandler	8	static
 stm32g4xx_it.c:104:6:TIM1_BRK_TIM15_IRQHandler	8	static
 stm32g4xx_it.c:110:6:TIM1_UP_TIM16_IRQHandler	8	static
 stm32g4xx_it.c:120:6:TIM2_IRQHandler	8	static
+stm32g4xx_it.c:125:6:TIM4_IRQHandler	8	static
+stm32g4xx_it.c:130:6:TIM8_CC_IRQHandler	8	static

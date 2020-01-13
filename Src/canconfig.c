@@ -104,6 +104,27 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		}
 		break;
 
+	//for these we have the same transmit regardless of how many bytes it will use; this means it is easy to overflow if one byte is used, but we want to send smaller frequencies (up to 255Hz) on one byte
+	//this also means there is no warning for wrong number of bytes though
+	case MESS_PWM0_Freq:
+		transmit=Calculate_PWM_Freq(0);
+		break;
+	case MESS_PWM0_DC:
+		transmit=Calculate_PWM_DC(0);
+		break;
+	case MESS_PWM3_Freq:
+		transmit=Calculate_PWM_Freq(3);
+		break;
+	case MESS_PWM3_DC:
+		transmit=Calculate_PWM_DC(3);
+		break;
+	case MESS_PWM4_Freq:
+		transmit=Calculate_PWM_Freq(4);
+		break;
+	case MESS_PWM4_DC:
+		transmit=Calculate_PWM_DC(4);
+		break;
+
 	default:
 		Set_Error(ERR_MESS_UNDEFINED);
 		break;

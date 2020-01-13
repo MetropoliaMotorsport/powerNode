@@ -3,6 +3,7 @@
 
 //external handlers
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim4;
 
 
 uint32_t Parse_Current(uint32_t raw, uint32_t bytes)
@@ -48,7 +49,7 @@ uint32_t Parse_Temperature(uint32_t raw)
 uint32_t Calculate_PWM_DC(uint32_t channel)
 {
 	uint32_t DC=0;
-	uint32_t T=0, off=0;
+	uint32_t T=0, off=0, on=0;
 
 	if (!(PWM_In_EN>>channel)&1)
 	{
@@ -61,9 +62,12 @@ uint32_t Calculate_PWM_DC(uint32_t channel)
 	case 0:
 		T=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
 		off=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+		DC=(((T-off)*100)/T); //note integer division always rounds down
 		break;
 	case 3:
-
+		T=HAL_TIM_ReadCapturedValue(&htim4, TIM_CHANNEL_1);
+		on=HAL_TIM_ReadCapturedValue(&htim4, TIM_CHANNEL_2);
+		DC=((on*100)/T);
 		break;
 	case 4:
 
@@ -73,9 +77,8 @@ uint32_t Calculate_PWM_DC(uint32_t channel)
 		return 0;
 	}
 
-	DC=(((T-off)*100)/T); //note integer division always rounds down
 
-	return DC; //DC ranges from 0-100, so we don't need to
+	return DC; //DC ranges from 0-100
 }
 
 uint32_t Calculate_PWM_Freq(uint32_t channel)
@@ -95,7 +98,7 @@ uint32_t Calculate_PWM_Freq(uint32_t channel)
 		T=HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
 		break;
 	case 3:
-
+		T=HAL_TIM_ReadCapturedValue(&htim4, TIM_CHANNEL_1);
 		break;
 	case 4:
 
@@ -104,9 +107,9 @@ uint32_t Calculate_PWM_Freq(uint32_t channel)
 		//TODO: error message here for trying to calculate PWM of invalid PWM channel
 		return 0;
 	}
-	frequency = (((HAL_RCC_GetHCLKFreq()*10)/(T*1000))+5)/10; //calculate frequency in .1 Hz, add .5 Hz, divide by 10 to get rounded value in Hz
+	frequency = (((HAL_RCC_GetHCLKFreq()*10)/(T*(PWM_Prescalers[channel]+1)))+5)/10; //calculate frequency in .1 Hz, add .5 Hz, divide by 10 to get rounded value in Hz
 
-	//frequency can exist over too many orders of magnitude, and might want to be sent in one byte or multiple bytes, so we give option for a divider
-	return frequency; //TODO: divider
+	//if frequency is higher than 255 Hz, two bytes must be used to send the frequency, frequency will almost surely not be over 65kHz
+	return frequency;
 }
 

@@ -17,8 +17,8 @@ static void MX_TIM7_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_TIM17_Init(void); //output only pwm timer next
+static void MX_TIM3_Init(void); //this has functionality for pwm input, but digital input doesn't even work, so probably pwm input won't work
 static void MX_TIM2_Init(void); //pwm io timers last
-static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 
@@ -196,9 +196,9 @@ int main(void)
 	MX_TIM16_Init(); //""  ""
 
 	MX_TIM17_Init();
+	MX_TIM3_Init();
 
 	MX_TIM2_Init();
-	MX_TIM3_Init();
 	MX_TIM4_Init();
 	MX_TIM8_Init();
 
@@ -209,6 +209,8 @@ int main(void)
 
 	//start pwm input channels if they are enabled
 	if ((PWM_In_EN>>0)&1) { HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); }
+	if ((PWM_In_EN>>3)&1) { HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2); HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1); }
+	if ((PWM_In_EN>>4)&1) { HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2); HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); }
 
 	//this timer starts the adc, so start it last
 	HAL_TIM_Base_Start_IT(&htim15);
@@ -216,9 +218,6 @@ int main(void)
 
 	while(1)
 	{
-		volatile uint32_t a = Calculate_PWM_Freq(0);
-		volatile uint32_t b = Calculate_PWM_DC(0);
-
 		if(canErrorToTransmit && canSendErrorFlag)
 		{
 			Send_Error();
@@ -1347,7 +1346,7 @@ static void MX_TIM17_Init(void)
 
 static void MX_TIM2_Init()
 {
-	if (!(PWM_In_EN<<0)&1) //default if pin is not used as pwm input
+	if (!(PWM_In_EN>>0)&1) //default if pin is not used as pwm input
 	{
 		TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -1388,7 +1387,7 @@ static void MX_TIM2_Init()
 		TIM_MasterConfigTypeDef sMasterConfig = {0};
 
 		htim2.Instance = TIM2;
-		htim2.Init.Prescaler = 999; //probably make this configurable, as 0 is way too fast at least for imd //TODO: use the same array as is normally used
+		htim2.Init.Prescaler = PWM_Prescalers[0];
 		htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
 		htim2.Init.Period = 65535;
 		htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1430,8 +1429,6 @@ static void MX_TIM2_Init()
 		{
 			Error_Handler();
 		}
-
-
 	}
 }
 
@@ -1472,33 +1469,86 @@ static void MX_TIM3_Init()
 
 static void MX_TIM4_Init()
 {
-	TIM_OC_InitTypeDef sConfigOC = {0};
-
-	htim4.Instance = TIM4;
-	htim4.Init.Prescaler = PWM_Prescalers[3];
-	htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim4.Init.Period = 255;
-	htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+	if (!(PWM_In_EN>>0)&1) //default if pin is not used as pwm input
 	{
-		Error_Handler();
+		TIM_OC_InitTypeDef sConfigOC = {0};
+
+		htim4.Instance = TIM4;
+		htim4.Init.Prescaler = PWM_Prescalers[3];
+		htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim4.Init.Period = 255;
+		htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigOC.OCMode = TIM_OCMODE_PWM1;
+		sConfigOC.Pulse = PWM_Pulses[3];
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+		sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+		if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		HAL_TIM_MspPostInit(&htim4);
+
+		if(PWM_Out_EN&(1<<3))
+		{
+			if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
+			{
+				Error_Handler();
+			}
+		}
 	}
-
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = PWM_Pulses[3];
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	else //pin is used as a pwm input
 	{
-		Error_Handler();
-	}
+		TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+		TIM_IC_InitTypeDef sConfigIC = {0};
+		TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-	HAL_TIM_MspPostInit(&htim4);
+		htim4.Instance = TIM4;
+		htim4.Init.Prescaler = 999;
+		htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim4.Init.Period = 65535;
+		htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_IC_Init(&htim4) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
-	if(PWM_Out_EN&(1<<3))
-	{
-		if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
+		sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
+		sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
+		sSlaveConfig.TriggerPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+		sSlaveConfig.TriggerPrescaler = TIM_ICPSC_DIV1;
+		sSlaveConfig.TriggerFilter = 0;
+		if (HAL_TIM_SlaveConfigSynchro(&htim4, &sSlaveConfig) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+		sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+		sConfigIC.ICFilter = 0;
+		if (HAL_TIM_IC_ConfigChannel(&htim4, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+		if (HAL_TIM_IC_ConfigChannel(&htim4, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+		sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+		if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
 		{
 			Error_Handler();
 		}
@@ -1507,37 +1557,100 @@ static void MX_TIM4_Init()
 
 static void MX_TIM8_Init()
 {
-	TIM_OC_InitTypeDef sConfigOC = {0};
-
-	htim8.Instance = TIM8;
-	htim8.Init.Prescaler = PWM_Prescalers[4];
-	htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim8.Init.Period = 255;
-	htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim8.Init.RepetitionCounter = 0;
-	htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
+	if (!(PWM_In_EN>>4)&1) //default if pin is not used as a pwm input
 	{
-		Error_Handler();
+		TIM_OC_InitTypeDef sConfigOC = {0};
+
+		htim8.Instance = TIM8;
+		htim8.Init.Prescaler = PWM_Prescalers[4];
+		htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim8.Init.Period = 255;
+		htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim8.Init.RepetitionCounter = 0;
+		htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigOC.OCMode = TIM_OCMODE_PWM1;
+		sConfigOC.Pulse = PWM_Pulses[4];
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+		sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+		sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+		sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+		if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		HAL_TIM_MspPostInit(&htim8);
+
+		if(PWM_Out_EN&(1<<4))
+		{
+			if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+			{
+				Error_Handler();
+			}
+		}
 	}
-
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = PWM_Pulses[4];
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	else //pin is used as a pwm input
 	{
-		Error_Handler();
-	}
+		TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+		TIM_IC_InitTypeDef sConfigIC = {0};
+		TIM_MasterConfigTypeDef sMasterConfig = {0};
+		TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
-	HAL_TIM_MspPostInit(&htim8);
+		htim8.Instance = TIM8;
+		htim8.Init.Prescaler = 0;
+		htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim8.Init.Period = 0;
+		htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+		htim8.Init.RepetitionCounter = 0;
+		htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+		if (HAL_TIM_IC_Init(&htim8) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
-	if(PWM_Out_EN&(1<<4))
-	{
-		if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+		sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
+		sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
+		sSlaveConfig.TriggerPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+		sSlaveConfig.TriggerPrescaler = TIM_ICPSC_DIV1;
+		sSlaveConfig.TriggerFilter = 0;
+		if (HAL_TIM_SlaveConfigSynchro(&htim8, &sSlaveConfig) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+		sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+		sConfigIC.ICFilter = 0;
+		if (HAL_TIM_IC_ConfigChannel(&htim8, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+		sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+		if (HAL_TIM_IC_ConfigChannel(&htim8, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+		sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+		sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+		if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		sBreakDeadTimeConfig.BreakAFMode = TIM_BREAK_AFMODE_INPUT;
+		sBreakDeadTimeConfig.Break2AFMode = TIM_BREAK_AFMODE_INPUT;
+		if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
 		{
 			Error_Handler();
 		}

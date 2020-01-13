@@ -347,7 +347,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 		HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
 		HAL_NVIC_EnableIRQ(TIM2_IRQn);
 	}
-	/*else if(htim_ic->Instance==TIM4)
+	else if(htim_ic->Instance==TIM4)
 	{
 		__HAL_RCC_TIM4_CLK_ENABLE();
 		__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -376,7 +376,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
 		HAL_NVIC_SetPriority(TIM8_CC_IRQn, 0, 0);
 		HAL_NVIC_EnableIRQ(TIM8_CC_IRQn);
-	}*/
+	}
 }
 
 void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
@@ -386,15 +386,13 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 		__HAL_RCC_TIM2_CLK_DISABLE();
 
 		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3);
-
 		HAL_NVIC_DisableIRQ(TIM2_IRQn);
 	}
-	/*else if(htim_ic->Instance==TIM4)
+	else if(htim_ic->Instance==TIM4)
 	{
 		__HAL_RCC_TIM4_CLK_DISABLE();
 
 		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
-
 		HAL_NVIC_DisableIRQ(TIM4_IRQn);
 	}
 	else if(htim_ic->Instance==TIM8)
@@ -402,8 +400,6 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 		__HAL_RCC_TIM8_CLK_DISABLE();
 
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_15);
-
 		HAL_NVIC_DisableIRQ(TIM8_CC_IRQn);
-
-	}*/
+	}
 }

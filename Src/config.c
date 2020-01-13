@@ -62,7 +62,7 @@ void Config_0(void)
 
 	Digital_In_EN = 0b00000000;
 	PWM_Out_EN = 0b00000000;
-	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
+	PWM_Prescalers[0] = 999; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 999; PWM_Prescalers[4] = 999;
 	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
 	PWM_In_EN = 0b00011001; //not even going to try PB4 as PWM input, PB6 doesn't have option as PWM input
 
@@ -88,14 +88,14 @@ void Config_0(void)
 	Default_Switch_State = 0b00000000;
 
 	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
-	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 3; Can_DLCs[6] = 3; Can_DLCs[7] = 1;
+	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 7; Can_DLCs[3] = 3; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 1;
 
 	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
 											{ 2, 0, 2, 0, 2, 0, 2, 0 },
 											{ 1, 1, 1, 1, 1, 0, 0, 0 },
 											{ 1, 1, 1, 0, 0, 0, 0, 0 },
 											{ 2, 0, 0, 0, 0, 0, 0, 0 },
-											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 2, 0, 1, 1, 1, 2, 0, 1 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 1, 0, 0, 0, 0, 0, 0, 0 }	};
 	uint8_t temp_Can_Config_Datas[8][8]={	{ 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -103,7 +103,7 @@ void Config_0(void)
 											{ MESS_U7I0, MESS_U7I1, MESS_U5T, MESS_U6T, MESS_U7T, 0, 0, 0 },
 											{ MESS_U5V, MESS_U6V, MESS_U7V, 0, 0, 0, 0, 0 },
 											{ MESS_U5V, 0, 0, 0, 0, 0, 0, 0 },
-											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ MESS_PWM0_Freq, 0, MESS_PWM0_DC, MESS_PWM3_Freq, MESS_PWM3_DC, MESS_PWM4_Freq, 0, MESS_PWM4_DC },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ MESS_DI, 0, 0, 0, 0, 0, 0, 0 }	};
 	for(uint32_t i=0; i<8; i++)
@@ -114,8 +114,8 @@ void Config_0(void)
 			Can_Config_Datas[i][j]=temp_Can_Config_Datas[i][j];
 		}
 	}
-	Can_Sync_Enable = 0b01000000;
-	Can_Timed_Enable = 0b10000000; //TODO: make these work without errors
+	Can_Sync_Enable = 0b00100000;
+	Can_Timed_Enable = 0b10000000;
 	Can_Interval=1000;
 	Can_Sync_Delay=0; //500 corresponds to 5ms delay
 
@@ -152,14 +152,14 @@ void Config_Write_Flash(void)
 
 	//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
 	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising&0xFF)<<16)+((Digital_In_Interrupt_Can_Falling&0xFF)<<24); //TODO: set this to be the things it should be for digital_in
-	//bytes: [unused], [unused], [enable rising edge switch power], [enable falling edge switch power]
+	//bytes: [x], [x], [enable rising edge switch power], [enable falling edge switch power]
 	data[DIGITAL_IN_1_POS]=(0)+(0)+((Digital_In_Interrupt_Power_Rising&0xFF)<<16)+((Digital_In_Interrupt_Power_Falling&0xFF)<<24);
 	//TODO: read other stuff from digital in back to flash, make it work in general
 	//bytes: [x], [x], [x], [x x U7/1 U7/0 U6/1 U6/0 U5/1 U5/0]
 	data[DEFAULT_SWITCH_STATE_POS]=Default_Switch_State&0xFF;
 
-	//bytes: [x], [x], [x], [pwm output enable]
-	data[PWM_EN_POS]=(PWM_Out_EN&0xFF);
+	//bytes: [x], [x], [pwm input enable], [pwm output enable]
+	data[PWM_EN_POS]=(PWM_Out_EN&0xFF)+((PWM_In_EN&0xFF)<<8);
 	//bytes: [pwm prescaler high], [pwm prescaler low], [pwm DC high], [pwm DC low]; note that prescaler=32 is ~20kHz, so probably will never be more than one byte; also DC is currently set up so 255 = 100% and 0 = 0%; so is only one byte
 	data[PWM_0_POS]=((PWM_Prescalers[0]&0xFFFF)<<16)+((PWM_Pulses[0]&0xFFFF)<<0);
 	data[PWM_1_POS]=((PWM_Prescalers[1]&0xFFFF)<<16)+((PWM_Pulses[1]&0xFFFF)<<0);
@@ -248,6 +248,8 @@ void Config_Read_Flash(void)
 	PWM_Prescalers[3] = ((PWM_3>>16)&0xFFFF);
 	PWM_Pulses[4] = ((PWM_4>>0)&0xFFFF);
 	PWM_Prescalers[4] = ((PWM_4>>16)&0xFFFF);
+
+	PWM_In_EN = ((PWM_EN>>8)&0b00011001); //ignore PB4 and PB5
 
 	uint32_t CanId[8] = {CAN_ID_0, CAN_ID_1, CAN_ID_2, CAN_ID_3, CAN_ID_4, CAN_ID_5, CAN_ID_6, CAN_ID_7};
 	for(uint32_t i=0; i<8; i++)

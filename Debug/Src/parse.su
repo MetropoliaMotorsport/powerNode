@@ -1,5 +1,5 @@
-parse.c:8:10:Parse_Current	24	static
-parse.c:26:10:Parse_Voltage	24	static
-parse.c:36:10:Parse_Temperature	24	static
-parse.c:48:10:Calculate_PWM_DC	32	static
-parse.c:81:10:Calculate_PWM_Freq	24	static
+parse.c:9:10:Parse_Current	24	static
+parse.c:27:10:Parse_Voltage	24	static
+parse.c:37:10:Parse_Temperature	24	static
+parse.c:49:10:Calculate_PWM_DC	32	static
+parse.c:84:10:Calculate_PWM_Freq	24	static

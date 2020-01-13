@@ -109,20 +109,20 @@ void TIM1_BRK_TIM15_IRQHandler(void)
 
 void TIM1_UP_TIM16_IRQHandler(void)
 {
-	//this will work becuase IRQHandler checks to see what event happened
+	//this will work because IRQHandler checks to see what event happened
 	//however, IRQHandler is not very efficient function for the things we are using here, code could be faster checking registers and calling callback function directly
 	//but no time for writing that now
 	HAL_TIM_IRQHandler(&htim1);
 	HAL_TIM_IRQHandler(&htim16);
 }
 
-//it seems like the interrupts for PWM input are not called
+//it seems like the interrupts for PWM inputs aren't a thing
 void TIM2_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim2);
 }
 
-/*void TIM4_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim4);
 }
@@ -130,4 +130,4 @@ void TIM2_IRQHandler(void)
 void TIM8_CC_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim8);
-}*/
+}
