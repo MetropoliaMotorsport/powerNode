@@ -11,3 +11,5 @@ stm32g4xx_hal_msp.c:290:6:HAL_TIM_PWM_MspInit	32	static
 stm32g4xx_hal_msp.c:310:6:HAL_TIM_PWM_MspDeInit	16	static
 stm32g4xx_hal_msp.c:331:6:HAL_TIM_IC_MspInit	64	static
 stm32g4xx_hal_msp.c:382:6:HAL_TIM_IC_MspDeInit	16	static
+stm32g4xx_hal_msp.c:407:6:HAL_LPTIM_MspInit	24	static
+stm32g4xx_hal_msp.c:418:6:HAL_LPTIM_MspDeInit	16	static

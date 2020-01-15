@@ -13,6 +13,7 @@ extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
+extern LPTIM_HandleTypeDef hlptim1;
 
 //external variables
 extern uint8_t CanTimerFlag;
@@ -130,4 +131,25 @@ void TIM4_IRQHandler(void)
 void TIM8_CC_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&htim8);
+}
+
+void LPTIM1_IRQHandler(void)
+{
+	HAL_LPTIM_IRQHandler(&hlptim1);
+}
+
+void EXTI3_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
 }

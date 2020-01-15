@@ -403,3 +403,24 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 		HAL_NVIC_DisableIRQ(TIM8_CC_IRQn);
 	}
 }
+
+void HAL_LPTIM_MspInit(LPTIM_HandleTypeDef* hlptim)
+{
+	if(hlptim->Instance==LPTIM1)
+	{
+		__HAL_RCC_LPTIM1_CLK_ENABLE();
+
+		HAL_NVIC_SetPriority(LPTIM1_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(LPTIM1_IRQn);
+	}
+}
+
+void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* hlptim)
+{
+	if(hlptim->Instance==LPTIM1)
+	{
+		__HAL_RCC_LPTIM1_CLK_DISABLE();
+
+		HAL_NVIC_DisableIRQ(LPTIM1_IRQn);
+	}
+}

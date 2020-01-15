@@ -6,7 +6,7 @@
 
 //debugging definitions, only used for ID 0
 #define TEST_PWN_NOT_INPUT	0
-#define TEST_PWM_INPUT		1
+#define TEST_PWM_INPUT		0
 
 //function prototypes
 void Config_Setup(void);

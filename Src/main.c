@@ -18,6 +18,7 @@ static void MX_TIM3_Init(void); //this has functionality for pwm input, but digi
 static void MX_TIM2_Init(void); //pwm io timers last
 static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
+static void MX_LPTIM1_Init(void);
 
 //type handlers
 FDCAN_HandleTypeDef hfdcan;
@@ -35,6 +36,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
+LPTIM_HandleTypeDef hlptim1;
 
 //definitions
 const pinPort LED = { .PORT=GPIOA, .PIN=GPIO_PIN_8 };
@@ -199,6 +201,8 @@ int main(void)
 	MX_TIM4_Init();
 	MX_TIM8_Init();
 
+	MX_LPTIM1_Init();
+
 	//start everything that can generate interrupts after initialization is done
 	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
 	if (Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
@@ -211,7 +215,6 @@ int main(void)
 
 	//this timer starts the adc, so start it last
 	HAL_TIM_Base_Start_IT(&htim15);
-
 
 	while(1)
 	{
@@ -301,6 +304,43 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	else
 	{
 		Error_Handler();
+	}
+}
+
+
+uint32_t counter;
+
+void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
+{
+	if (hlptim->Instance == LPTIM1)
+	{
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+
+		HAL_LPTIM_TimeOut_Stop_IT(&hlptim1);
+	}
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 13282, 13283);
+
+	switch (GPIO_Pin)
+	{
+	case (1<<3):
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		break;
+	case (1<<5):
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		break;
+	case (1<<6):
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		break;
+	case (1<<15):
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		break;
+	default:
+		//TODO: set error for undefined digital input callback
+	break;
 	}
 }
 
@@ -1208,7 +1248,7 @@ static void MX_GPIO_Init(void)
 	{
 		HAL_GPIO_WritePin(DIO3.PORT, DIO3.PIN, GPIO_PIN_RESET);
 		GPIO_InitStruct.Pin = DIO3.PIN;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO3.PORT, &GPIO_InitStruct);
 	}
@@ -1217,7 +1257,7 @@ static void MX_GPIO_Init(void)
 	{
 		HAL_GPIO_WritePin(DIO4.PORT, DIO4.PIN, GPIO_PIN_RESET);
 		GPIO_InitStruct.Pin = DIO4.PIN;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO4.PORT, &GPIO_InitStruct);
 	}
@@ -1226,7 +1266,7 @@ static void MX_GPIO_Init(void)
 	{
 		HAL_GPIO_WritePin(DIO5.PORT, DIO5.PIN, GPIO_PIN_RESET);
 		GPIO_InitStruct.Pin = DIO5.PIN;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO5.PORT, &GPIO_InitStruct);
 	}
@@ -1235,7 +1275,7 @@ static void MX_GPIO_Init(void)
 	{
 		HAL_GPIO_WritePin(DIO6.PORT, DIO6.PIN, GPIO_PIN_RESET);
 		GPIO_InitStruct.Pin = DIO6.PIN;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO6.PORT, &GPIO_InitStruct);
 	}
@@ -1244,10 +1284,21 @@ static void MX_GPIO_Init(void)
 	{
 		HAL_GPIO_WritePin(DIO15.PORT, DIO15.PIN, GPIO_PIN_RESET);
 		GPIO_InitStruct.Pin = DIO15.PIN;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO15.PORT, &GPIO_InitStruct);
 	}
+
+	//interrupts for PB3, PB5, PB6, PA15; PB4 will maybe have a different interrupt enable
+	HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+	HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+	//TODO: don't always call this
 }
 
 
@@ -1668,6 +1719,23 @@ static void MX_TIM8_Init()
 		{
 			Error_Handler();
 		}
+	}
+}
+
+static void MX_LPTIM1_Init(void)
+{
+	hlptim1.Instance = LPTIM1;
+	hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
+	hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV128;
+	hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+	hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+	hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
+	hlptim1.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+	hlptim1.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
+	hlptim1.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
+	if (HAL_LPTIM_Init(&hlptim1) != HAL_OK)
+	{
+		Error_Handler();
 	}
 }
 

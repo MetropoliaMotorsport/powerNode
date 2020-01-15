@@ -2,9 +2,6 @@
 #include "config.h"
 
 
-#define TEST_PWM_NOT_INPUT	1
-
-
 void Config_Setup(void)
 {
 	if(Flash_Read(FLASH_PAGE_63)==0xFFFFFFFF) //initialize the flash to avoid errors
@@ -66,7 +63,7 @@ void Config_0(void)
 	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
 	PWM_In_EN = 0b00011001; //not even going to try PB4 as PWM input, PB6 doesn't have option as PWM input
 
-#elif TEST_PWM_NOT_INPUT //in this case we are testing pwm outputs
+#elif TEST_PWN_NOT_INPUT //in this case we are testing pwm outputs
 
 	Digital_In_EN = 0b00000000;
 	PWM_Out_EN = 0b00011111; //PB4 seems to work ok as an output though, maybe
