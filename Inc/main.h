@@ -77,6 +77,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 
 #define WARN_PWM_INVALID_CHANNEL		257
 #define WARN_PWM_CHANNEL_UNINITIALIZED	258
+#define WARN_UNDEFINED_GPIO				259
 
 //Set_Error(something);
 

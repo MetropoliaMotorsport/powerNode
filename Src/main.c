@@ -1,4 +1,4 @@
-#include "main.h" //TODO: eventually add interupts to at least digital inputs, maybe pwm inputs as well?
+#include "main.h" //TODO: CONTINOUS TRANSMISSION OF CURRENT TRIP ERROR
 
 
 //static function prototypes
@@ -60,7 +60,7 @@ const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 
 //global configuration variables
 uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-uint8_t Digital_In_Interrupt_EN; //TODO
+uint8_t Digital_In_Interrupt_EN; //unused
 uint8_t Digital_In_Interrupt_Can_Rising; //TODO
 uint8_t Digital_In_Interrupt_Can_Falling; //TODO
 uint8_t Digital_In_Interrupt_Power_Rising; //TODO
@@ -172,6 +172,14 @@ uint8_t SampleVoltageBurst;
 //for these 255 means enable continuously while lower numbers mean to take that many samples
 uint32_t sample_temperature;
 uint32_t sample_voltage;
+
+uint32_t GPIO_States[5];
+uint32_t GPIO_Current_Interrupts;
+uint32_t GPIO_Interrupt[5]; //shouldn't be more interrupts pending than digital inputs, this is used to keep track of order
+uint32_t GPIO_Interrupt_Active[5]; //and this is used to keep track of if the interrupt is already active
+uint32_t GPIO_Interrupt_Write_Pos;
+uint32_t GPIO_Interrupt_Read_Pos;
+uint32_t GPIO_Timer_Ready = 1;
 
 
 int main(void)
@@ -308,39 +316,175 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 
-uint32_t counter;
-
+//TODO: this could be modified to not wait another ms if one input occurs halfway through the timer of another input HAL_LPTIM_ReadCounter(&lptim1)
 void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 {
 	if (hlptim->Instance == LPTIM1)
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		if (HAL_LPTIM_TimeOut_Stop_IT(&hlptim1) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
-		HAL_LPTIM_TimeOut_Stop_IT(&hlptim1);
+		uint32_t pinState;
+
+		switch(GPIO_Interrupt[GPIO_Interrupt_Read_Pos])
+		{
+		case 0:
+			pinState = HAL_GPIO_ReadPin(DIO3.PORT, DIO3.PIN);
+			break;
+		case 2:
+			pinState = HAL_GPIO_ReadPin(DIO5.PORT, DIO5.PIN);
+			break;
+		case 3:
+			pinState = HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN);
+			break;
+		case 4:
+			pinState = HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN);
+			break;
+		default:
+			Set_Error(WARN_UNDEFINED_GPIO);
+			break;
+		}
+
+		if(pinState != GPIO_States[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]])
+		{
+			GPIO_States[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]=pinState;
+			switch(pinState)
+			{
+			case 1: //rising edge detected
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+				/*if (Digital_In_Interrupt_Can_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }
+				if (Digital_In_Interrupt_Power_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }
+				if (Digital_In_Interrupt_PWM_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }*/
+
+				break;
+			case 0: //falling edge detected
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+				break;
+			default:
+				//should never reach this point
+				break;
+			}
+		}
+
+		/*
+		 * uint8_t Digital_In_Interrupt_Can_Rising; //TODO
+uint8_t Digital_In_Interrupt_Can_Falling; //TODO
+uint8_t Digital_In_Interrupt_Power_Rising; //TODO
+uint8_t Digital_In_Interrupt_Power_Falling; //TODO
+uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
+uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+		 */
+
+		GPIO_Current_Interrupts--;
+		GPIO_Interrupt_Active[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]=0;
+		GPIO_Interrupt_Read_Pos++;
+		if (GPIO_Interrupt_Read_Pos>=5) { GPIO_Interrupt_Read_Pos=0; }
+
+		if(GPIO_Current_Interrupts)
+		{
+			//start the timer again for the next channel
+			if (HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 13282, 13283) != HAL_OK) //~1ms debounce time
+			{
+				Error_Handler();
+			}
+		}
+		else
+		{
+			GPIO_Timer_Ready=1;
+		}
 	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 13282, 13283);
+	uint32_t wrote=0;
 
-	switch (GPIO_Pin)
+	if(GPIO_Current_Interrupts)
 	{
-	case (1<<3):
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		switch (GPIO_Pin)
+		{
+		case (1<<3):
+			if (!GPIO_Interrupt_Active[0])
+			{
+				GPIO_Interrupt_Active[0]=1;
+				GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=0;
+				wrote=1;
+			}
+			break;
+		case (1<<5):
+			if (!GPIO_Interrupt_Active[2])
+			{
+				GPIO_Interrupt_Active[2]=1;
+				GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=2;
+				wrote=1;
+			}
+			break;
+		case (1<<6):
+			if (!GPIO_Interrupt_Active[3])
+			{
+				GPIO_Interrupt_Active[3]=1;
+				GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=3;
+				wrote=1;
+			}
+			break;
+		case (1<<15):
+			if (!GPIO_Interrupt_Active[3])
+			{
+				GPIO_Interrupt_Active[3]=1;
+				GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=2;
+				wrote=1;
+			}
+			break;
+		default:
+			Set_Error(WARN_UNDEFINED_GPIO);
 		break;
-	case (1<<5):
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		}
+	}
+	else
+	{
+		wrote=1;
+
+		//this case should only execute when there are no pending GPIO interrupts
+		switch (GPIO_Pin)
+		{
+		case (1<<3):
+			GPIO_Interrupt_Active[0]=1;
+			GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=0;
+			break;
+		case (1<<5):
+			GPIO_Interrupt_Active[2]=1;
+			GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=2;
+			break;
+		case (1<<6):
+			GPIO_Interrupt_Active[3]=1;
+			GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=3;
+			break;
+		case (1<<15):
+			GPIO_Interrupt_Active[4]=1;
+			GPIO_Interrupt[GPIO_Interrupt_Write_Pos]=15;
+			break;
+		default:
+			Set_Error(WARN_UNDEFINED_GPIO);
 		break;
-	case (1<<6):
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		break;
-	case (1<<15):
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		break;
-	default:
-		//TODO: set error for undefined digital input callback
-	break;
+		}
+
+		if (GPIO_Timer_Ready)
+		{
+			GPIO_Timer_Ready=0;
+			if (HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 13282, 13283) != HAL_OK) //~1ms debounce time
+			{
+				Error_Handler();
+			}
+		}
+	}
+
+	if(wrote)
+	{
+		GPIO_Current_Interrupts++;
+		GPIO_Interrupt_Write_Pos++;
+		if (GPIO_Interrupt_Write_Pos>=5) { GPIO_Interrupt_Write_Pos=0; }
 	}
 }
 
@@ -1288,6 +1432,11 @@ static void MX_GPIO_Init(void)
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(DIO15.PORT, &GPIO_InitStruct);
 	}
+
+	if(Digital_In_EN && (1<<0)) { GPIO_States[0] = HAL_GPIO_ReadPin(DIO3.PORT, DIO3.PIN); }
+	if(Digital_In_EN && (1<<2)) { GPIO_States[0] = HAL_GPIO_ReadPin(DIO5.PORT, DIO5.PIN); }
+	if(Digital_In_EN && (1<<3)) { GPIO_States[0] = HAL_GPIO_ReadPin(DIO6.PORT, DIO6.PIN); }
+	if(Digital_In_EN && (1<<4)) { GPIO_States[0] = HAL_GPIO_ReadPin(DIO15.PORT, DIO15.PIN); }
 
 	//interrupts for PB3, PB5, PB6, PA15; PB4 will maybe have a different interrupt enable
 	HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
