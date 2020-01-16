@@ -14,3 +14,5 @@ commands.c:234:6:Config_Temperature_Voltage_Reading	16	static
 commands.c:263:6:Config_Default_DC	24	static
 commands.c:278:6:Config_PWM_Prescalers	24	static
 commands.c:293:6:Config_DIO_Pins	32	static
+commands.c:330:6:Config_Interrupt_Power	24	static
+commands.c:341:6:Config_Interrupt_Can	16	static

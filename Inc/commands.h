@@ -25,8 +25,9 @@
 #define CONFIG_DEFAULT_DC			136
 #define CONFIG_PWM_PRESCALERS		137
 #define CONFIG_DIO					138
-
-//TODO: configure EN for DIn, PWMOut, and PWMIn
+#define CONFIG_INTERRUPT_POWER		139
+#define CONFIG_INTERRUPT_CAN		140
+//TODO: configuration for pwm input, but PWM input currently not supported
 
 
 //function prototypes
@@ -48,5 +49,7 @@ void Config_Temperature_Voltage_Reading(uint16_t, uint8_t, uint8_t);
 void Config_Default_DC(uint8_t, uint8_t[8]);
 void Config_PWM_Prescalers(uint8_t, uint8_t[8]);
 void Config_DIO_Pins(uint8_t, uint8_t, uint8_t, uint8_t);
+void Config_Interrupt_Power(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
+void Config_Interrupt_Can(uint8_t, uint8_t, uint8_t);
 
 #endif

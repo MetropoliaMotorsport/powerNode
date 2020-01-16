@@ -1020,6 +1020,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 					Config_DIO_Pins(CANRxData[2], CANRxData[3], CANRxData[4], CANRxData[5]);
 					if ((RxHeader.DataLength>>16) < 6) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
+				case CONFIG_INTERRUPT_POWER:
+					Config_Interrupt_Power(CANRxData[2], CANRxData[3], CANRxData[4], CANRxData[5], CANRxData[6]);
+					if ((RxHeader.DataLength>>16) < 7) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CONFIG_INTERRUPT_CAN:
+					Config_Interrupt_Can(CANRxData[2], CANRxData[3], CANRxData[4]);
+					if ((RxHeader.DataLength>>16) < 5) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
 				default:
 					Set_Error(ERR_INVALID_COMMAND);
 					break;
@@ -1142,7 +1150,7 @@ void Write_PWM(uint32_t DIO_channel, uint16_t pulse) //TODO: make sure the pwm s
 	}
 	else
 	{
-		Set_Error(WARN_PWM_NOT_ENABLED):
+		Set_Error(WARN_PWM_NOT_ENABLED);
 	}
 }
 

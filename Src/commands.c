@@ -326,3 +326,22 @@ void Config_DIO_Pins(uint8_t EN, uint8_t new_Din_EN, uint8_t new_PWM_Out_EN, uin
 
 	Acknowledge(CONFIG_DIO);
 }
+
+void Config_Interrupt_Power(uint8_t gpio, uint8_t Power_High_Falling, uint8_t Power_High_Rising, uint8_t Power_Low_Falling, uint8_t Power_Low_Rising)
+{
+
+	Digital_In_Interrupt_Power_High_Falling[gpio]=Power_High_Falling;
+	Digital_In_Interrupt_Power_High_Rising[gpio]=Power_High_Rising;
+	Digital_In_Interrupt_Power_Low_Falling[gpio]=Power_Low_Falling;
+	Digital_In_Interrupt_Power_Low_Rising[gpio]=Power_Low_Rising;
+
+	Acknowledge(CONFIG_INTERRUPT_POWER);
+}
+
+void Config_Interrupt_Can(uint8_t gpio, uint8_t Can_Falling, uint8_t Can_Rising)
+{
+	Digital_In_Interrupt_Can_Falling[gpio]=Can_Falling;
+	Digital_In_Interrupt_Can_Rising[gpio]=Can_Rising;
+
+	Acknowledge(CONFIG_INTERRUPT_CAN);
+}
