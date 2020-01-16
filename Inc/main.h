@@ -78,6 +78,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 #define WARN_PWM_INVALID_CHANNEL		257
 #define WARN_PWM_CHANNEL_UNINITIALIZED	258
 #define WARN_UNDEFINED_GPIO				259
+#define WARN_PWM_NOT_ENABLED			260
 
 //Set_Error(something);
 
@@ -125,14 +126,14 @@ extern const pinPort U7MULTI;
 //global configuration variables
 extern uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
 extern uint8_t Digital_In_Interrupt_EN; //TODO
-extern uint8_t Digital_In_Interrupt_Can_Rising[5]; //TODO
-extern uint8_t Digital_In_Interrupt_Can_Falling[5]; //TODO
-extern uint8_t Digital_In_Interrupt_Power_High_Rising[5]; //TODO
-extern uint8_t Digital_In_Interrupt_Power_High_Falling[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Can_Rising[5];
+extern uint8_t Digital_In_Interrupt_Can_Falling[5];
+extern uint8_t Digital_In_Interrupt_Power_High_Rising[5];
+extern uint8_t Digital_In_Interrupt_Power_High_Falling[5];
+extern uint8_t Digital_In_Interrupt_Power_Low_Rising[5];
+extern uint8_t Digital_In_Interrupt_Power_Low_Falling[5];
 extern uint8_t Digital_In_Interrupt_PWM_Rising[5]; //TODO
 extern uint8_t Digital_In_Interrupt_PWM_Falling[5]; //TODO
-extern uint8_t Digital_In_Interrupt_Power_Low_Rising[5]; //TODO
-extern uint8_t Digital_In_Interrupt_Power_Low_Falling[5]; //TODO
 
 extern uint8_t PWM_Out_EN;
 extern uint16_t PWM_Prescalers[5];

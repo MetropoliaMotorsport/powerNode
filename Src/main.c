@@ -317,6 +317,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
+extern const pinPort *switches[];
 
 //TODO: this could be modified to not wait another ms if one input occurs halfway through the timer of another input HAL_LPTIM_ReadCounter(&lptim1)
 void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
@@ -355,31 +356,61 @@ void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 			switch(pinState)
 			{
 			case 1: //rising edge detected
-				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-				//GPIO_Interrupt[GPIO_Interrupt_Read_Pos]
-				//Digital_In_Interrupt_Can_Rising[5]
-				//Digital_In_Interrupt_Power_Rising[5]
-				//Digital_In_Interrupt_PWM_Rising[5]
 
+				for(uint32_t i=0; i<8; i++)
+				{
+					if (Digital_In_Interrupt_Can_Rising[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						Can_Send(i);
+					}
+				}
+
+				for(uint32_t i=0; i<6; i++)
+				{
+					if (Digital_In_Interrupt_Power_Low_Rising[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 0);
+					}
+					else if (Digital_In_Interrupt_Power_High_Rising[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 1);
+					}
+				}
+
+				//GPIO_Interrupt[GPIO_Interrupt_Read_Pos]
+				//Digital_In_Interrupt_PWM_Rising[5] //TODO
 
 				break;
 			case 0: //falling edge detected
-				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+
+				for(uint32_t i=0; i<8; i++)
+				{
+					if (Digital_In_Interrupt_Can_Falling[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						Buffer_Can_Message(i);
+					}
+				}
+
+				for(uint32_t i=0; i<6; i++)
+				{
+					if (Digital_In_Interrupt_Power_Low_Falling[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 0);
+					}
+					else if (Digital_In_Interrupt_Power_High_Falling[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
+					{
+						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 1);
+					}
+				}
+
+//TODO: PWM
+
 				break;
 			default:
 				//should never reach this point
 				break;
 			}
 		}
-
-		/*
-		 * uint8_t Digital_In_Interrupt_Can_Rising; //TODO
-uint8_t Digital_In_Interrupt_Can_Falling; //TODO
-uint8_t Digital_In_Interrupt_Power_Rising; //TODO
-uint8_t Digital_In_Interrupt_Power_Falling; //TODO
-uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
-uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
-		 */
 
 		GPIO_Current_Interrupts--;
 		GPIO_Interrupt_Active[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]=0;
@@ -1108,6 +1139,10 @@ void Write_PWM(uint32_t DIO_channel, uint16_t pulse) //TODO: make sure the pwm s
 		{
 			Error_Handler();
 		}
+	}
+	else
+	{
+		Set_Error(WARN_PWM_NOT_ENABLED):
 	}
 }
 
