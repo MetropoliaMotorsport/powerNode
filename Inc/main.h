@@ -121,8 +121,8 @@ extern const pinPort U7MULTI;
 
 
 //global configuration variables
-extern uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-extern uint8_t Digital_In_Interrupt_EN; //TODO
+extern uint8_t Digital_In_EN; //byte: [x][x][x][DIO15][DI6][DIO5][DIO4][DIO3]
+extern uint8_t Digital_In_Interrupt_EN;
 extern uint8_t Digital_In_Interrupt_Can_Rising[5];
 extern uint8_t Digital_In_Interrupt_Can_Falling[5];
 extern uint8_t Digital_In_Interrupt_Power_High_Rising[5];

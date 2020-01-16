@@ -6,6 +6,8 @@ extern FDCAN_HandleTypeDef hfdcan;
 
 
 uint32_t ack_k=0;
+uint32_t blnk_k=0;
+extern pinPort LED;
 
 void Acknowledge(uint8_t cmd)
 {
@@ -33,9 +35,13 @@ void Acknowledge(uint8_t cmd)
 
 	while(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) < 1)
 	{
-		//TODO: think if this is the best way to handle this
-		//Error_Handler();
-		//return;
+		//blinking at .5 Hz means something has gone wrong here, this should only happen during configuration so it is considered acceptable infinite loop location
+		blnk_k++;
+		if(blnk_k>340000000)
+		{
+			blnk_k=0;
+			HAL_GPIO_TogglePin(LED.PORT, LED.PIN);
+		}
 	}
 
 	if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &TxHeader, CANTxData) != HAL_OK)
