@@ -183,6 +183,18 @@ uint32_t GPIO_Interrupt_Write_Pos;
 uint32_t GPIO_Interrupt_Read_Pos;
 uint32_t GPIO_Timer_Ready = 1;
 
+uint8_t Check_I0_Flag; //note this is only for warning, max current is checked in the interrupt
+uint8_t Check_I1_Flag;
+uint8_t Check_T_Flag;
+uint8_t Check_V_Flag;
+
+uint8_t U5I0_active;
+uint8_t U5I1_active;
+uint8_t U6I0_active;
+uint8_t U6I1_active;
+uint8_t U7I0_active;
+uint8_t U7I1_active;
+
 
 int main(void)
 {
@@ -214,7 +226,7 @@ int main(void)
 	MX_LPTIM1_Init();
 
 	//start everything that can generate interrupts after initialization is done
-	HAL_TIM_Base_Start_IT(&htim1); //TODO: if regularly read voltage/temperature enabled
+	HAL_TIM_Base_Start_IT(&htim1);
 	if (Can_Timed_Enable) { HAL_TIM_Base_Start_IT(&htim6); }
 	HAL_TIM_Base_Start_IT(&htim7);
 
@@ -269,6 +281,31 @@ int main(void)
 			}
 		}
 
+		if (Check_I0_Flag)
+		{
+			Check_I0_Warn();
+
+			Check_I0_Flag=0;
+		}
+		if (Check_I1_Flag)
+		{
+			Check_I1_Warn();
+
+			Check_I1_Flag=0;
+		}
+		if (Check_T_Flag)
+		{
+			Check_T_Warn();
+
+			Check_T_Flag=0;
+		}
+		if (Check_V_Flag)
+		{
+			Check_V_Warn();
+
+			Check_V_Flag=0;
+		}
+
 //TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
 	}
 }
@@ -318,6 +355,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 extern const pinPort *switches[];
+extern uint8_t *actives[];
 
 //TODO: this could be modified to not wait another ms if one input occurs halfway through the timer of another input HAL_LPTIM_ReadCounter(&lptim1)
 void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
@@ -370,10 +408,12 @@ void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 					if (Digital_In_Interrupt_Power_Low_Rising[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
 					{
 						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 0);
+						*actives[i]=0;
 					}
 					else if (Digital_In_Interrupt_Power_High_Rising[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
 					{
 						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 1);
+						*actives[i]=1;
 					}
 				}
 
@@ -396,10 +436,12 @@ void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 					if (Digital_In_Interrupt_Power_Low_Falling[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
 					{
 						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 0);
+						*actives[i]=0;
 					}
 					else if (Digital_In_Interrupt_Power_High_Falling[GPIO_Interrupt[GPIO_Interrupt_Read_Pos]]>>i & 1)
 					{
 						HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, 1);
+						*actives[i]=1;
 					}
 				}
 
@@ -535,8 +577,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 		//we want the ability to not sample temperature and voltage as often as current, as sampling those heats up the switch
 		//we also want to make sure that both current channels are sampled
-		//TODO: change the constant 3 into however many switches are used; if only channel 0 is used then don't read current on channel 1
-		//TODO: set voltage and temperature interrupts from timer, make timer configurable
 		switch(adc_selection)
 		{
 		case 0: //we have just sampled current for channel 0, so sample current for channel 1
@@ -635,38 +675,11 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U6I0_raw+=U6I0[i];
 				U7I0_raw+=U7I0[i];
 			}
-			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5I0_real=U5I0_raw; U6I0_real=U6I0_raw; U7I0_real=U7I0_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE;
+			U5I0_real=Parse_Current(U5I0_raw, 2); U6I0_real=Parse_Current(U6I0_raw, 2); U7I0_real=Parse_Current(U7I0_raw, 2);
 
 			//TODO: check overcurrent and switch off immediately if too high
-
-			//TODO: probably move this to main because it isn't so important
-			//TODO: undercurrent warnings need to only happen when enabled, and logic for enabling them needs to exist
-			if (U5I0_real>warn_overcurrent_U5I0)
-			{
-				Set_Error(WARN_OVERCURR_U5I0);
-			}
-			if (U5I0_real<warn_undercurrent_U5I0)
-			{
-				Set_Error(WARN_UNDERCURR_U5I0);
-			}
-			if (U6I0_real>warn_overcurrent_U6I0)
-			{
-				Set_Error(WARN_OVERCURR_U6I0);
-			}
-			if (U6I0_real<warn_undercurrent_U6I0)
-			{
-				Set_Error(WARN_UNDERCURR_U6I0);
-			}
-			if (U7I0_real>warn_overcurrent_U7I0)
-			{
-				Set_Error(WARN_OVERCURR_U7I0);
-			}
-			if (U7I0_real<warn_undercurrent_U7I0)
-			{
-				Set_Error(WARN_UNDERCURR_U7I0);
-			}
-			//TODO: test all these limits when I have power supply and power trimmer
+			Check_I0_Flag=1;
 
 			break;
 		case 1:
@@ -689,37 +702,11 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U6I1_raw+=U6I1[i];
 				U7I1_raw+=U7I1[i];
 			}
-			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5I1_real=U5I1_raw; U6I1_real=U6I1_raw; U7I1_real=U7I1_raw; //TODO: warnings on over/undercurrent, overcurrent shutoff
+			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE;
+			U5I1_real=Parse_Current(U5I1_raw, 2); U6I1_real=Parse_Current(U6I1_raw, 2); U7I1_real=Parse_Current(U7I1_raw, 2);
 
 			//TODO: check overcurrent and switch off immediately if too high
-
-			//TODO: probably move this to main because it isn't so important
-			if (U5I1_real>warn_overcurrent_U5I1)
-			{
-				Set_Error(WARN_OVERCURR_U5I1);
-			}
-			if (U5I1_real<warn_undercurrent_U5I1)
-			{
-				Set_Error(WARN_UNDERCURR_U5I1);
-			}
-			if (U6I1_real>warn_overcurrent_U6I1)
-			{
-				Set_Error(WARN_OVERCURR_U6I1);
-			}
-			if (U6I1_real<warn_undercurrent_U6I1)
-			{
-				Set_Error(WARN_UNDERCURR_U6I1);
-			}
-			if (U7I1_real>warn_overcurrent_U7I1)
-			{
-				Set_Error(WARN_OVERCURR_U7I1);
-			}
-			if (U7I1_real<warn_undercurrent_U7I1)
-			{
-				Set_Error(WARN_UNDERCURR_U7I1);
-			}
-			//TODO: test all these limits when I have power supply and power trimmer
+			Check_I1_Flag=1;
 
 			break;
 		case 2:
@@ -735,42 +722,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				T_rolling_average_position++;
 			}
 
-			uint32_t U5T_raw=0; uint32_t U6T_raw=1; uint32_t U7T_raw=0;
-			for(uint32_t i=0; i<T_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
-			{
-				U5T_raw+=U5T[i];
-				U6T_raw+=U6T[i];
-				U7T_raw+=U7T[i];
-			}
-			U5T_raw/=T_ROLLING_AVERAGE; U6T_raw/=T_ROLLING_AVERAGE; U7T_raw/=T_ROLLING_AVERAGE; //TODO: calculated U5I0_calculated from U5I0_raw
-			U5T_real=Parse_Temperature(U5T_raw); U6T_real=Parse_Temperature(U6T_raw); U7T_real=Parse_Temperature(U7T_raw); //TODO: warnings on over/undercurrent, overcurrent shutoff
-
-			//TODO: probably move this to main because it isn't so important
-			if (U5T_real>warn_overtemperature_U5)
-			{
-				Set_Error(WARN_OVERTEMP_U5);
-			}
-			if (U5T_real<warn_undertemperature_U5)
-			{
-				Set_Error(WARN_UNDERTEMP_U5);
-			}
-			if (U6T_real>warn_overtemperature_U6)
-			{
-				Set_Error(WARN_OVERTEMP_U6);
-			}
-			if (U6T_real<warn_undertemperature_U6)
-			{
-				Set_Error(WARN_UNDERTEMP_U6);
-			}
-			if (U7T_real>warn_overtemperature_U7)
-			{
-				Set_Error(WARN_OVERTEMP_U7);
-			}
-			if (U7T_real<warn_undertemperature_U7)
-			{
-				Set_Error(WARN_UNDERTEMP_U7);
-			}
-			//TODO: test all these limits when I have power supply and power trimmer
+			Check_T_Flag=1;
 
 			break;
 		case 3:
@@ -786,42 +738,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				V_rolling_average_position++;
 			}
 
-			uint32_t U5V_raw=0; uint32_t U6V_raw=0; uint32_t U7V_raw=0; uint32_t U5GNDV_raw=0; uint32_t U6GNDV_raw=0; uint32_t U7GNDV_raw=0;
-			for(uint32_t i=0; i<V_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
-			{
-				U5V_raw+=U5V[i]; U5GNDV_raw+=U5GNDV[i];
-				U6V_raw+=U6V[i]; U6GNDV_raw+=U6GNDV[i];
-				U7V_raw+=U7V[i]; U7GNDV_raw+=U7GNDV[i];
-			}
-			U5V_raw/=V_ROLLING_AVERAGE; U6V_raw/=V_ROLLING_AVERAGE; U7V_raw/=V_ROLLING_AVERAGE; U5GNDV_raw/=V_ROLLING_AVERAGE; U6GNDV_raw/=V_ROLLING_AVERAGE; U7GNDV_raw/=V_ROLLING_AVERAGE;
-			U5V_real=Parse_Voltage(U5V_raw, U5GNDV_raw); U6V_real=Parse_Voltage(U6V_raw, U6GNDV_raw); U7V_real=Parse_Voltage(U7V_raw, U7GNDV_raw);
+			Check_V_Flag=1;
 
-			//TODO: probably move this to main because it isn't so important
-			if (U5V_real>warn_overvoltage_U5)
-			{
-				Set_Error(WARN_OVERVOLT_U5);
-			}
-			if (U5V_real<warn_undervoltage_U5)
-			{
-				Set_Error(WARN_UNDERVOLT_U5);
-			}
-			if (U6V_real>warn_overvoltage_U6)
-			{
-				Set_Error(WARN_OVERVOLT_U6);
-			}
-			if (U6V_real<warn_undervoltage_U6)
-			{
-				Set_Error(WARN_UNDERVOLT_U6);
-			}
-			if (U7V_real>warn_overvoltage_U7)
-			{
-				Set_Error(WARN_OVERVOLT_U7);
-			}
-			if (U7V_real<warn_undervoltage_U7)
-			{
-				Set_Error(WARN_UNDERVOLT_U7);
-			}
-			//TODO: test all these limits when I have power supply and power trimmer
 			break;
 		default:
 			Error_Handler();
@@ -1413,12 +1331,12 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_WritePin(LED.PORT, LED.PIN, 0);
 	HAL_GPIO_WritePin(SEL0.PORT, SEL0.PIN, 0);
 	HAL_GPIO_WritePin(SEL1.PORT, SEL1.PIN, 0);
-	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, (Default_Switch_State>>0)&0b1);
-	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, (Default_Switch_State>>1)&0b1);
-	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, (Default_Switch_State>>2)&0b1);
-	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, (Default_Switch_State>>3)&0b1);
-	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, (Default_Switch_State>>4)&0b1);
-	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, (Default_Switch_State>>5)&0b1);
+	HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, (Default_Switch_State>>0)&0b1); U5I0_active = (Default_Switch_State>>0)&0b1;
+	HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, (Default_Switch_State>>1)&0b1); U5I1_active = (Default_Switch_State>>0)&0b1;
+	HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, (Default_Switch_State>>2)&0b1); U6I0_active = (Default_Switch_State>>0)&0b1;
+	HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, (Default_Switch_State>>3)&0b1); U6I1_active = (Default_Switch_State>>0)&0b1;
+	HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, (Default_Switch_State>>4)&0b1); U7I0_active = (Default_Switch_State>>0)&0b1;
+	HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, (Default_Switch_State>>5)&0b1); U7I1_active = (Default_Switch_State>>0)&0b1;
 
 	//all outputs on portA assigned here
 	GPIO_InitStruct.Pin = LED.PIN|SEL0.PIN|U5IN0.PIN|U5IN1.PIN|U6IN0.PIN|U6IN1.PIN|U7IN0.PIN|U7IN1.PIN;

@@ -33,7 +33,7 @@ Src/main.o: ../Src/main.c ../Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_pwr.h ../Inc/config.h \
- ../Inc/commands.h ../Inc/canconfig.h ../Inc/parse.h
+ ../Inc/commands.h ../Inc/canconfig.h ../Inc/parse.h ../Inc/checks.h
 
 ../Inc/main.h:
 
@@ -112,3 +112,5 @@ Src/main.o: ../Src/main.c ../Inc/main.h \
 ../Inc/canconfig.h:
 
 ../Inc/parse.h:
+
+../Inc/checks.h:

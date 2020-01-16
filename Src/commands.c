@@ -60,6 +60,7 @@ void Save_Config()
 
 
 const pinPort *switches[] = {&U5IN0, &U5IN1, &U6IN0, &U6IN1, &U7IN0, &U7IN1};
+uint8_t *actives[] = {&U5I0_active, &U5I1_active, &U6I0_active, &U6I1_active, &U7I0_active, &U7I1_active};
 
 void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 {
@@ -68,6 +69,7 @@ void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 		if ((1<<i) & enableSwitching)
 		{
 			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
+			*actives[i]=newState;
 		}
 	}
 
