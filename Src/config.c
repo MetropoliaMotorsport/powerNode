@@ -81,6 +81,25 @@ void Config_0(void)
 
 #endif
 
+	uint32_t temp_Digital_In_Interrupt_Can_Falling[5]={ 0b00001000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Can_Rising[5]={ 0b00000100, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_High_Rising[5]={ 0b00000000, 0b00000000, 0b00111111, 0b00000000, 0b00111111 };
+	uint32_t temp_Digital_In_Interrupt_Power_High_Falling[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011110 };
+	uint32_t temp_Digital_In_Interrupt_PWM_Rising[5]={ 0b00000000, 0b00101010, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_PWM_Falling[5]={ 0b00000000, 0b00010101, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_Low_Rising[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_Low_Falling[5]={ 0b00000000, 0b00000000, 0b00111111, 0b00000000, 0b00111111 };
+	for(uint32_t i=0; i<5; i++)
+	{
+		Digital_In_Interrupt_Can_Falling[i]=temp_Digital_In_Interrupt_Can_Falling[i];
+		Digital_In_Interrupt_Can_Rising[i]=temp_Digital_In_Interrupt_Can_Rising[i];
+		Digital_In_Interrupt_Power_High_Falling[i]=temp_Digital_In_Interrupt_Power_High_Falling[i];
+		Digital_In_Interrupt_Power_High_Rising[i]=temp_Digital_In_Interrupt_Power_High_Rising[i];
+		Digital_In_Interrupt_PWM_Falling[i]=temp_Digital_In_Interrupt_PWM_Falling[i];
+		Digital_In_Interrupt_PWM_Rising[i]=temp_Digital_In_Interrupt_PWM_Rising[i];
+		Digital_In_Interrupt_Power_Low_Falling[i]=temp_Digital_In_Interrupt_Power_Low_Falling[i];
+		Digital_In_Interrupt_Power_Low_Rising[i]=temp_Digital_In_Interrupt_Power_Low_Rising[i];
+	}
 
 	Default_Switch_State = 0b00000000;
 
@@ -147,11 +166,21 @@ void Config_Write_Flash(void)
 	data[U7_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U7I0<<0)&0xFFFF)+((warn_overcurrent_U7I0<<16)&0xFFFF0000);
 	data[U7_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U7I1<<0)&0xFFFF)+((warn_overcurrent_U7I1<<16)&0xFFFF0000);
 
-	//bytes: [enable falling edge to can], [enable rising edge to can], [digital in interrupt enable], [digital in enable]
-	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising&0xFF)<<16)+((Digital_In_Interrupt_Can_Falling&0xFF)<<24); //TODO: set this to be the things it should be for digital_in
-	//bytes: [x], [x], [enable rising edge switch power], [enable falling edge switch power]
-	data[DIGITAL_IN_1_POS]=(0)+(0)+((Digital_In_Interrupt_Power_Rising&0xFF)<<16)+((Digital_In_Interrupt_Power_Falling&0xFF)<<24);
-	//TODO: read other stuff from digital in back to flash, make it work in general
+	//bytes: [x], [x], [digital in interrupt enable], [digital in enable]
+	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8);
+
+	//oh boy
+	data[DIGITAL_IN_1_POS+0]=((Digital_In_Interrupt_Can_Falling[0]&0xFF)<<0)+((Digital_In_Interrupt_Can_Falling[1]&0xFF)<<8)+((Digital_In_Interrupt_Can_Falling[2])<<16)+((Digital_In_Interrupt_Can_Falling[3]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+1]=((Digital_In_Interrupt_Can_Falling[4]&0xFF)<<0)+((Digital_In_Interrupt_Can_Rising[0]&0xFF)<<8)+((Digital_In_Interrupt_Can_Rising[1]&0xFF)<<16)+((Digital_In_Interrupt_Can_Rising[2]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+2]=((Digital_In_Interrupt_Can_Rising[3]&0xFF)<<0)+((Digital_In_Interrupt_Can_Rising[4]&0xFF)<<8)+((Digital_In_Interrupt_Power_High_Rising[0]&0xFF)<<16)+((Digital_In_Interrupt_Power_High_Rising[1]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+3]=((Digital_In_Interrupt_Power_High_Rising[2]&0xFF)<<0)+((Digital_In_Interrupt_Power_High_Rising[3]&0xFF)<<0)+((Digital_In_Interrupt_Power_High_Rising[4]&0xFF)<<16)+((Digital_In_Interrupt_Power_High_Falling[0]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+4]=((Digital_In_Interrupt_Power_High_Falling[1]&0xFF)<<0)+((Digital_In_Interrupt_Power_High_Falling[2]&0xFF)<<8)+((Digital_In_Interrupt_Power_High_Falling[3]&0xFF)<<16)+((Digital_In_Interrupt_Power_High_Falling[4]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+5]=((Digital_In_Interrupt_PWM_Rising[0]&0xFF)<<0)+((Digital_In_Interrupt_PWM_Rising[1]&0xFF)<<8)+((Digital_In_Interrupt_PWM_Rising[2]&0xFF)<<16)+((Digital_In_Interrupt_PWM_Rising[3]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+6]=((Digital_In_Interrupt_PWM_Rising[4]&0xFF)<<0)+((Digital_In_Interrupt_PWM_Falling[0]&0xFF)<<8)+((Digital_In_Interrupt_PWM_Falling[1]&0xFF)<<16)+((Digital_In_Interrupt_PWM_Falling[2]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+7]=((Digital_In_Interrupt_PWM_Falling[3]&0xFF)<<0)+((Digital_In_Interrupt_PWM_Falling[4]&0xFF)<<8)+((Digital_In_Interrupt_Power_Low_Rising[0]&0xFF)<<16)+((Digital_In_Interrupt_Power_Low_Rising[1]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+8]=((Digital_In_Interrupt_Power_Low_Rising[2]&0xFF)<<0)+((Digital_In_Interrupt_Power_Low_Rising[3]&0xFF)<<8)+((Digital_In_Interrupt_Power_Low_Rising[4]&0xFF)<<16)+((Digital_In_Interrupt_Power_Low_Falling[0]&0xFF)<<24);
+	data[DIGITAL_IN_1_POS+9]=((Digital_In_Interrupt_Power_Low_Falling[1]&0xFF)<<0)+((Digital_In_Interrupt_Power_Low_Falling[2]&0xFF)<<8)+((Digital_In_Interrupt_Power_Low_Falling[3]&0xFF)<<16)+((Digital_In_Interrupt_Power_Low_Falling[4]&0xFF)<<24);
+
 	//bytes: [x], [x], [x], [x x U7/1 U7/0 U6/1 U6/0 U5/1 U5/0]
 	data[DEFAULT_SWITCH_STATE_POS]=Default_Switch_State&0xFF;
 
@@ -233,6 +262,52 @@ void Config_Read_Flash(void)
 
 	Digital_In_EN = ((DIGITAL_IN_0>>0)&0b00011101); //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	Default_Switch_State=((DEFAULT_SWITCH_STATE>>0)&0b00111111);
+
+
+	//oh boy
+	Digital_In_Interrupt_Can_Falling[0]=((*(&DIGITAL_IN_1+0))>>0)&0xFF;
+	Digital_In_Interrupt_Can_Falling[1]=((*(&DIGITAL_IN_1+0))>>8)&0xFF;
+	Digital_In_Interrupt_Can_Falling[2]=((*(&DIGITAL_IN_1+0))>>16)&0xFF;
+	Digital_In_Interrupt_Can_Falling[3]=((*(&DIGITAL_IN_1+0))>>24)&0xFF;
+	Digital_In_Interrupt_Can_Falling[4]=((*(&DIGITAL_IN_1+1))>>0)&0xFF;
+	Digital_In_Interrupt_Can_Rising[0]=((*(&DIGITAL_IN_1+1))>>8)&0xFF;
+	Digital_In_Interrupt_Can_Rising[1]=((*(&DIGITAL_IN_1+1))>>16)&0xFF;
+	Digital_In_Interrupt_Can_Rising[2]=((*(&DIGITAL_IN_1+1))>>24)&0xFF;
+	Digital_In_Interrupt_Can_Rising[3]=((*(&DIGITAL_IN_1+2))>>0)&0xFF;
+	Digital_In_Interrupt_Can_Rising[4]=((*(&DIGITAL_IN_1+2))>>8)&0xFF;
+
+	Digital_In_Interrupt_Power_High_Rising[0]=((*(&DIGITAL_IN_1+2))>>16)&0xFF;
+	Digital_In_Interrupt_Power_High_Rising[1]=((*(&DIGITAL_IN_1+2))>>24)&0xFF;
+	Digital_In_Interrupt_Power_High_Rising[2]=((*(&DIGITAL_IN_1+3))>>0)&0xFF;
+	Digital_In_Interrupt_Power_High_Rising[3]=((*(&DIGITAL_IN_1+3))>>8)&0xFF;
+	Digital_In_Interrupt_Power_High_Rising[4]=((*(&DIGITAL_IN_1+3))>>16)&0xFF;
+	Digital_In_Interrupt_Power_High_Falling[0]=((*(&DIGITAL_IN_1+3))>>24)&0xFF;
+	Digital_In_Interrupt_Power_High_Falling[1]=((*(&DIGITAL_IN_1+4))>>0)&0xFF;
+	Digital_In_Interrupt_Power_High_Falling[2]=((*(&DIGITAL_IN_1+4))>>8)&0xFF;
+	Digital_In_Interrupt_Power_High_Falling[3]=((*(&DIGITAL_IN_1+4))>>16)&0xFF;
+	Digital_In_Interrupt_Power_High_Falling[4]=((*(&DIGITAL_IN_1+4))>>24)&0xFF;
+
+	Digital_In_Interrupt_PWM_Rising[0]=((*(&DIGITAL_IN_1+5))>>0)&0xFF;
+	Digital_In_Interrupt_PWM_Rising[1]=((*(&DIGITAL_IN_1+5))>>8)&0xFF;
+	Digital_In_Interrupt_PWM_Rising[2]=((*(&DIGITAL_IN_1+5))>>16)&0xFF;
+	Digital_In_Interrupt_PWM_Rising[3]=((*(&DIGITAL_IN_1+5))>>24)&0xFF;
+	Digital_In_Interrupt_PWM_Rising[4]=((*(&DIGITAL_IN_1+6))>>0)&0xFF;
+	Digital_In_Interrupt_PWM_Falling[0]=((*(&DIGITAL_IN_1+6))>>8)&0xFF;
+	Digital_In_Interrupt_PWM_Falling[1]=((*(&DIGITAL_IN_1+6))>>16)&0xFF;
+	Digital_In_Interrupt_PWM_Falling[2]=((*(&DIGITAL_IN_1+6))>>24)&0xFF;
+	Digital_In_Interrupt_PWM_Falling[3]=((*(&DIGITAL_IN_1+7))>>0)&0xFF;
+	Digital_In_Interrupt_PWM_Falling[4]=((*(&DIGITAL_IN_1+7))>>8)&0xFF;
+
+	Digital_In_Interrupt_Power_Low_Rising[0]=((*(&DIGITAL_IN_1+7))>>16)&0xFF;
+	Digital_In_Interrupt_Power_Low_Rising[1]=((*(&DIGITAL_IN_1+7))>>24)&0xFF;
+	Digital_In_Interrupt_Power_Low_Rising[2]=((*(&DIGITAL_IN_1+8))>>0)&0xFF;
+	Digital_In_Interrupt_Power_Low_Rising[3]=((*(&DIGITAL_IN_1+8))>>8)&0xFF;
+	Digital_In_Interrupt_Power_Low_Rising[4]=((*(&DIGITAL_IN_1+8))>>16)&0xFF;
+	Digital_In_Interrupt_Power_Low_Falling[0]=((*(&DIGITAL_IN_1+8))>>24)&0xFF;
+	Digital_In_Interrupt_Power_Low_Falling[1]=((*(&DIGITAL_IN_1+9))>>0)&0xFF;
+	Digital_In_Interrupt_Power_Low_Falling[2]=((*(&DIGITAL_IN_1+9))>>8)&0xFF;
+	Digital_In_Interrupt_Power_Low_Falling[3]=((*(&DIGITAL_IN_1+9))>>16)&0xFF;
+	Digital_In_Interrupt_Power_Low_Falling[4]=((*(&DIGITAL_IN_1+9))>>24)&0xFF;
 
 	PWM_Out_EN = ((PWM_EN>>0)&0b00011111);
 	PWM_Pulses[0] = ((PWM_0>>0)&0xFFFF);

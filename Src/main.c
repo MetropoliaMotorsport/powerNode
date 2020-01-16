@@ -61,12 +61,14 @@ const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 //global configuration variables
 uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
 uint8_t Digital_In_Interrupt_EN; //unused
-uint8_t Digital_In_Interrupt_Can_Rising; //TODO
-uint8_t Digital_In_Interrupt_Can_Falling; //TODO
-uint8_t Digital_In_Interrupt_Power_Rising; //TODO
-uint8_t Digital_In_Interrupt_Power_Falling; //TODO
-uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
-uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+uint8_t Digital_In_Interrupt_Can_Rising[5];
+uint8_t Digital_In_Interrupt_Can_Falling[5];
+uint8_t Digital_In_Interrupt_Power_High_Rising[5];
+uint8_t Digital_In_Interrupt_Power_High_Falling[5];
+uint8_t Digital_In_Interrupt_Power_Low_Rising[5];
+uint8_t Digital_In_Interrupt_Power_Low_Falling[5];
+uint8_t Digital_In_Interrupt_PWM_Rising[5];
+uint8_t Digital_In_Interrupt_PWM_Falling[5];
 
 uint8_t PWM_Out_EN;
 uint16_t PWM_Prescalers[5];
@@ -354,9 +356,11 @@ void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 			{
 			case 1: //rising edge detected
 				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-				/*if (Digital_In_Interrupt_Can_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }
-				if (Digital_In_Interrupt_Power_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }
-				if (Digital_In_Interrupt_PWM_Rising>>GPIO_Interrupt[GPIO_Interrupt_Read_Pos] & 1) {  }*/
+				//GPIO_Interrupt[GPIO_Interrupt_Read_Pos]
+				//Digital_In_Interrupt_Can_Rising[5]
+				//Digital_In_Interrupt_Power_Rising[5]
+				//Digital_In_Interrupt_PWM_Rising[5]
+
 
 				break;
 			case 0: //falling edge detected

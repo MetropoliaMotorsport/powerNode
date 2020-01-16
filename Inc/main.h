@@ -125,12 +125,14 @@ extern const pinPort U7MULTI;
 //global configuration variables
 extern uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
 extern uint8_t Digital_In_Interrupt_EN; //TODO
-extern uint8_t Digital_In_Interrupt_Can_Rising; //TODO
-extern uint8_t Digital_In_Interrupt_Can_Falling; //TODO
-extern uint8_t Digital_In_Interrupt_Power_Rising; //TODO
-extern uint8_t Digital_In_Interrupt_Power_Falling; //TODO
-extern uint8_t Digital_In_Interrupt_PWM_Rising; //TODO
-extern uint8_t Digital_In_Interrupt_PWM_Falling; //TODO
+extern uint8_t Digital_In_Interrupt_Can_Rising[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Can_Falling[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Power_High_Rising[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Power_High_Falling[5]; //TODO
+extern uint8_t Digital_In_Interrupt_PWM_Rising[5]; //TODO
+extern uint8_t Digital_In_Interrupt_PWM_Falling[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Power_Low_Rising[5]; //TODO
+extern uint8_t Digital_In_Interrupt_Power_Low_Falling[5]; //TODO
 
 extern uint8_t PWM_Out_EN;
 extern uint16_t PWM_Prescalers[5];
@@ -207,7 +209,7 @@ extern uint32_t U7V_real;
 #define DIGITAL_IN_0						(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_0_POS))
 #define DIGITAL_IN_1_POS					(DIGITAL_IN_0_POS+1)
 #define DIGITAL_IN_1						(*(uint32_t*)(FLASH_PAGE_63+0x4*DIGITAL_IN_1_POS))
-#define CAN_ID_0_POS						(DIGITAL_IN_1_POS+1)
+#define CAN_ID_0_POS						(DIGITAL_IN_1_POS+10)
 #define CAN_ID_0							(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_0_POS))
 #define CAN_ID_1_POS						(CAN_ID_0_POS+1)
 #define CAN_ID_1							(*(uint32_t*)(FLASH_PAGE_63+0x4*CAN_ID_1_POS))
