@@ -87,6 +87,7 @@ uint8_t Can_Timed_Enable;
 uint16_t Can_Interval;
 uint16_t Can_Sync_Delay;
 
+//voltage limits are in mV, temperature limits are in °C, current limits are in 100's of uAs
 uint16_t warn_undervoltage_U5;
 uint16_t warn_overvoltage_U5;
 uint16_t warn_undertemperature_U5;
@@ -676,7 +677,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I0_raw+=U7I0[i];
 			}
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE;
-			U5I0_real=Parse_Current(U5I0_raw, 2); U6I0_real=Parse_Current(U6I0_raw, 2); U7I0_real=Parse_Current(U7I0_raw, 2);
+			U5I0_real=Parse_Current(U5I0_raw); U6I0_real=Parse_Current(U6I0_raw); U7I0_real=Parse_Current(U7I0_raw);
 
 			//TODO: check overcurrent and switch off immediately if too high
 			Check_I0_Flag=1;
@@ -703,7 +704,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I1_raw+=U7I1[i];
 			}
 			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE;
-			U5I1_real=Parse_Current(U5I1_raw, 2); U6I1_real=Parse_Current(U6I1_raw, 2); U7I1_real=Parse_Current(U7I1_raw, 2);
+			U5I1_real=Parse_Current(U5I1_raw); U6I1_real=Parse_Current(U6I1_raw); U7I1_real=Parse_Current(U7I1_raw);
 
 			//TODO: check overcurrent and switch off immediately if too high
 			Check_I1_Flag=1;

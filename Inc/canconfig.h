@@ -24,7 +24,7 @@ void Set_Can_Bytes(uint32_t*, uint32_t);
 #define MESS_PWM3_DC	17
 #define MESS_PWM4_Freq	18
 #define MESS_PWM4_DC	19
-#define MESS_POWER		20 //always 1 byte //TODO: this after getting the long switch cleaner
-//TODO: power state
+#define MESS_POWER		20
+
 
 #endif

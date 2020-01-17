@@ -11,39 +11,129 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 	switch(Can_Config_Datas[message][*pos])
 	{
 	case MESS_U5I0:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U5I0_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U5I0_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U5I1:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U5I0_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U5I1_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U6I0:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U6I0_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U6I0_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U6I1:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U6I1_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U6I1_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U7I0:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U7I0_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U7I0_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U7I1:
-		transmit=1000;
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U7I1_real/1000); //transmit number in 100s of mA
+			break;
+		case 2:
+			transmit=U7I1_real; //transmit number in 100s of uA
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U5T:
-
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U5T_real); //transmit number in °C
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U6T:
-
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U6T_real); //transmit number in °C
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U7T:
-
+		switch(Can_Config_Bytes[message][*pos])
+		{
+		case 1:
+			transmit=(U7T_real); //transmit number in °C
+			break;
+		default:
+			Set_Error(ERR_MESS_INVALID_BYTES);
+			break;
+		}
 		break;
 
 	case MESS_U5V:
@@ -123,6 +213,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		break;
 	case MESS_PWM4_DC:
 		transmit=Calculate_PWM_DC(4);
+		break;
+
+	case MESS_POWER:
+		transmit=((U5I0_active&0x1)<<0)+((U5I1_active&0x1)<<1)+((U6I0_active&0x1)<<2)+((U6I1_active&0x1)<<3)+((U7I0_active&0x1)<<4)+((U7I1_active&0x1)<<5);
 		break;
 
 	default:

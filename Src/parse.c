@@ -7,22 +7,12 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim8;
 
 
-uint32_t Parse_Current(uint32_t raw, uint32_t bytes)
+uint32_t Parse_Current(uint32_t raw)
 {
 	uint32_t calculated=raw/10; //calculate current in 100's of uAs
 	//TODO: put actual calculation here instead of made up numbers
 
-
-	switch(bytes)
-	{
-	case 1:
-		return (calculated/1000); //return value in 100's of mAs
-	case 2:
-		return (calculated); //return value in 100's of uAs
-	default:
-		//TODO: don't define number of bytes here
-		return 0;
-	}
+	return calculated;
 }
 
 uint32_t Parse_Voltage(uint32_t raw, uint32_t raw_ground)
@@ -42,10 +32,6 @@ uint32_t Parse_Temperature(uint32_t raw)
 
 	return calculated;
 }
-
-/*
-		volatile uint32_t a = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
-		volatile uint32_t b = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);*/
 
 uint32_t Calculate_PWM_DC(uint32_t channel)
 {
