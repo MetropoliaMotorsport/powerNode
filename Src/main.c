@@ -1,4 +1,4 @@
-#include "main.h" //TODO: CONTINOUS TRANSMISSION OF CURRENT TRIP ERROR
+#include "main.h" //TODO: CONTINOUS TRANSMISSION OF CURRENT TRIP ERROR //TODO: detect overtemperature shutoff
 
 
 //static function prototypes

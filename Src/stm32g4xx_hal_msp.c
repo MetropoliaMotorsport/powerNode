@@ -107,7 +107,6 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 
 		HAL_DMA_DeInit(hadc->DMA_Handle);
 	}
-
 }
 
 

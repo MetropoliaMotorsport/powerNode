@@ -2,7 +2,6 @@
 #include "checks.h"
 
 
-			//TODO: test all these limits when I have power supply and power trimmer
 //global variables
 uint8_t U5I0_active_counter;
 uint8_t U5I1_active_counter;

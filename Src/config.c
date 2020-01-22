@@ -34,25 +34,27 @@ void Config_0(void)
 	warn_undertemperature_U5=0;
 	warn_overtemperature_U5=1023;
 	warn_undercurrent_U5I0=0;
-	warn_overcurrent_U5I0=1000;
+	warn_overcurrent_U5I0=7;
 	warn_undercurrent_U5I1=0;
-	warn_overcurrent_U5I1=1000;
+	warn_overcurrent_U5I1=7;
+
 	warn_undervoltage_U6=18000;
 	warn_overvoltage_U6=28000;
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=1000;
+	warn_overcurrent_U6I0=7;
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=1000;
+	warn_overcurrent_U6I1=7;
+
 	warn_undervoltage_U7=18000;
 	warn_overvoltage_U7=28000;
 	warn_undertemperature_U7=0;
 	warn_overtemperature_U7=1023;
 	warn_undercurrent_U7I0=0;
-	warn_overcurrent_U7I0=1000;
+	warn_overcurrent_U7I0=7;
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=1000;
+	warn_overcurrent_U7I1=7;
 
 
 #if TEST_PWM_INPUT
@@ -135,6 +137,7 @@ void Config_0(void)
 	Can_Interval=1000;
 	Can_Sync_Delay=0; //500 corresponds to 5ms delay
 
+	//please do not use temperature sampling for anything as it gives so unusable data
 	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
 	sample_voltage=0;
 	SampleTemperatureVoltagePeriod=10; //1ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot

@@ -9,10 +9,31 @@ extern TIM_HandleTypeDef htim8;
 
 uint32_t Parse_Current(uint32_t raw)
 {
-	uint32_t calculated=raw/10; //calculate current in 100's of uAs
-	//TODO: put actual calculation here instead of made up numbers
+	uint32_t calculated=0;
 
-	return calculated;
+	//current sense seems to be working very poorly, can not get any good equation, do not trust current for a lot
+	if (raw<30)
+	{
+		calculated = 0;
+	}
+	else if (raw<60)
+	{
+		calculated = 1;
+	}
+	else if (raw<65)
+	{
+		calculated = 3;
+	}
+	else if (raw<74)
+	{
+		calculated = 6;
+	}
+	else
+	{
+		calculated = 255;
+	}
+
+	return calculated; //this sort of corresponds to amps I think
 }
 
 uint32_t Parse_Voltage(uint32_t raw, uint32_t raw_ground)
@@ -25,10 +46,11 @@ uint32_t Parse_Voltage(uint32_t raw, uint32_t raw_ground)
 	return calculated;
 }
 
+//without the 1k ohm resistor this is totally useless, please do not use for anything
 uint32_t Parse_Temperature(uint32_t raw)
 {
-	uint32_t calculated=401-(raw*3791/5000); //calculate temperature in °C
-	//TODO: get some sort of line for this and check what it looks like in reality, datasheet only gives value for 1k ohm resistor
+	//uint32_t calculated=401-(raw*3791/5000); //calculate temperature in °C
+	uint32_t calculated=raw;
 
 	return calculated;
 }

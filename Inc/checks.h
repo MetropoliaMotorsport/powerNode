@@ -2,9 +2,9 @@
 #define CHECKS_H_
 
 //rolling average definitions
-#define I_ROLLING_AVERAGE 16
-#define T_ROLLING_AVERAGE 16
-#define V_ROLLING_AVERAGE 16
+#define I_ROLLING_AVERAGE 32
+#define T_ROLLING_AVERAGE 128
+#define V_ROLLING_AVERAGE 128
 
 
 //function prototypes

@@ -128,6 +128,7 @@ extern uint32_t sample_voltage;
 void Sample_Temperature_Voltage(uint8_t temperature_samples, uint8_t voltage_samples)
 {
 	sample_temperature+=temperature_samples;
+	if(temperature_samples){ Set_Error(ERROR_READ_TEMP); } //temperature sensors not working properly
 	sample_voltage+=voltage_samples;
 }
 

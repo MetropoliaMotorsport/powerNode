@@ -37,8 +37,8 @@ motorsport_PowerNode.list \
 all: motorsport_PowerNode.elf secondary-outputs
 
 # Tool invocations
-motorsport_PowerNode.elf: $(OBJS) $(USER_OBJS) C:\Users\primary\Desktop\Programming\stm32s\motorsport_powerNode\STM32G441KBTX_FLASH.ld
-	arm-none-eabi-gcc -o "motorsport_PowerNode.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\primary\Desktop\Programming\stm32s\motorsport_powerNode\STM32G441KBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="motorsport_PowerNode.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+motorsport_PowerNode.elf: $(OBJS) $(USER_OBJS) C:\Users\primary\Desktop\Programming\stm32s\motorsport_PowerNode\STM32G441KBTX_FLASH.ld
+	arm-none-eabi-gcc -o "motorsport_PowerNode.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\primary\Desktop\Programming\stm32s\motorsport_PowerNode\STM32G441KBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="motorsport_PowerNode.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
