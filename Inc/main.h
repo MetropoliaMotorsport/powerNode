@@ -61,25 +61,28 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 #define WARN_OVERCURR_U5I0				198
 #define WARN_UNDERCURR_U5I1				199
 #define WARN_OVERCURR_U5I1				200
-#define ERROR_OVERCURR_TRIP_U5			201 //tODO
-#define WARN_UNDERVOLT_U6				202
-#define WARN_OVERVOLT_U6				203
-#define WARN_UNDERTEMP_U6				204
-#define WARN_OVERTEMP_U6				205
-#define WARN_UNDERCURR_U6I0				206
-#define WARN_OVERCURR_U6I0				207
-#define WARN_UNDERCURR_U6I1				208
-#define WARN_OVERCURR_U6I1				209
-#define ERROR_OVERCURR_TRIP_U6			210 //tODO
-#define WARN_UNDERVOLT_U7				211
-#define WARN_OVERVOLT_U7				212
-#define WARN_UNDERTEMP_U7				213
-#define WARN_OVERTEMP_U7				214
-#define WARN_UNDERCURR_U7I0				215
-#define WARN_OVERCURR_U7I0				216
-#define WARN_UNDERCURR_U7I1				217
-#define WARN_OVERCURR_U7I1				218
-#define ERROR_OVERCURR_TRIP_U7			219 //tODO
+#define ERROR_OVERCURR_TRIP_U5_0		201
+#define ERROR_OVERCURR_TRIP_U5_1		202
+#define WARN_UNDERVOLT_U6				203
+#define WARN_OVERVOLT_U6				204
+#define WARN_UNDERTEMP_U6				205
+#define WARN_OVERTEMP_U6				206
+#define WARN_UNDERCURR_U6I0				207
+#define WARN_OVERCURR_U6I0				208
+#define WARN_UNDERCURR_U6I1				209
+#define WARN_OVERCURR_U6I1				210
+#define ERROR_OVERCURR_TRIP_U6_0		211
+#define ERROR_OVERCURR_TRIP_U6_1		212
+#define WARN_UNDERVOLT_U7				213
+#define WARN_OVERVOLT_U7				214
+#define WARN_UNDERTEMP_U7				215
+#define WARN_OVERTEMP_U7				216
+#define WARN_UNDERCURR_U7I0				217
+#define WARN_OVERCURR_U7I0				218
+#define WARN_UNDERCURR_U7I1				219
+#define WARN_OVERCURR_U7I1				220
+#define ERROR_OVERCURR_TRIP_U7_0		221
+#define ERROR_OVERCURR_TRIP_U7_1		222
 
 #define ERROR_READ_TEMP					224
 #define WARN_TEMP_MEASURE_OVERFLOW		225
@@ -166,7 +169,7 @@ extern uint16_t warn_undercurrent_U5I0;
 extern uint16_t warn_overcurrent_U5I0;
 extern uint16_t warn_undercurrent_U5I1;
 extern uint16_t warn_overcurrent_U5I1;
-extern uint16_t cutoff_overcurrent_U5; //TODO
+extern uint16_t cutoff_overcurrent_U5;
 extern uint16_t warn_undervoltage_U6;
 extern uint16_t warn_overvoltage_U6;
 extern uint16_t warn_undertemperature_U6;
@@ -175,7 +178,7 @@ extern uint16_t warn_undercurrent_U6I0;
 extern uint16_t warn_overcurrent_U6I0;
 extern uint16_t warn_undercurrent_U6I1;
 extern uint16_t warn_overcurrent_U6I1;
-extern uint16_t cutoff_overcurrent_U6; //TODO
+extern uint16_t cutoff_overcurrent_U6;
 extern uint16_t warn_undervoltage_U7;
 extern uint16_t warn_overvoltage_U7;
 extern uint16_t warn_undertemperature_U7;
@@ -184,7 +187,7 @@ extern uint16_t warn_undercurrent_U7I0;
 extern uint16_t warn_overcurrent_U7I0;
 extern uint16_t warn_undercurrent_U7I1;
 extern uint16_t warn_overcurrent_U7I1;
-extern uint16_t cutoff_overcurrent_U7; //TODO
+extern uint16_t cutoff_overcurrent_U7;
 
 extern uint32_t sample_temperature;
 extern uint32_t sample_voltage;

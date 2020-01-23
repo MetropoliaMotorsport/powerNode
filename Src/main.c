@@ -708,7 +708,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
 			}
 
-			//TODO: check overcurrent and switch off immediately if too high
+			Check_I0_Switch();
 			Check_I0_Flag=1;
 
 			break;
@@ -753,7 +753,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
 			}
 
-			//TODO: check overcurrent and switch off immediately if too high
+			Check_I1_Switch();
 			Check_I1_Flag=1;
 
 			break;
