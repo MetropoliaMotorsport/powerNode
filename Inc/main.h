@@ -41,9 +41,17 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef*);
 
 #define ERR_MODIFY_INVALID_MESSAGE	33
 #define ERR_MODIFY_INVALID_THING	34
+#define ERR_CLEAR_INVALID_ERROR		35
 
 #define ERR_MESS_INVALID_BYTES		97
 #define ERR_MESS_UNDEFINED			98
+
+#define U5I0_SWITCH_OFF				129
+#define U5I1_SWITCH_OFF				130
+#define U6I0_SWITCH_OFF				131
+#define U6I1_SWITCH_OFF				132
+#define U7I0_SWITCH_OFF				133
+#define U7I1_SWITCH_OFF				134
 
 #define WARN_UNDERVOLT_U5				193
 #define WARN_OVERVOLT_U5				194
@@ -199,6 +207,20 @@ extern uint32_t U7I0_real;
 extern uint32_t U7I1_real;
 extern uint32_t U7T_real;
 extern uint32_t U7V_real;
+
+extern uint8_t U5I0_active;
+extern uint8_t U5I1_active;
+extern uint8_t U6I0_active;
+extern uint8_t U6I1_active;
+extern uint8_t U7I0_active;
+extern uint8_t U7I1_active;
+
+extern uint8_t U5I0_error;
+extern uint8_t U5I1_error;
+extern uint8_t U6I0_error;
+extern uint8_t U6I1_error;
+extern uint8_t U7I0_error;
+extern uint8_t U7I1_error;
 
 
 //more details about what is stored in each word can be found in config.c

@@ -67,12 +67,13 @@ void Save_Config()
 
 const pinPort *switches[] = {&U5IN0, &U5IN1, &U6IN0, &U6IN1, &U7IN0, &U7IN1};
 uint8_t *actives[] = {&U5I0_active, &U5I1_active, &U6I0_active, &U6I1_active, &U7I0_active, &U7I1_active};
+uint8_t *errors[] = {&U5I0_error, &U5I1_error, &U6I0_error, &U6I1_error, &U7I0_error, &U7I1_error};
 
 void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 {
 	for(uint32_t i=0; i<5; i++)
 	{
-		if ((1<<i) & enableSwitching)
+		if (((1<<i) & enableSwitching) && errors[i])
 		{
 			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
 			*actives[i]=newState;
@@ -130,6 +131,36 @@ void Sample_Temperature_Voltage(uint8_t temperature_samples, uint8_t voltage_sam
 	sample_temperature+=temperature_samples;
 	if(temperature_samples){ Set_Error(ERROR_READ_TEMP); } //temperature sensors not working properly
 	sample_voltage+=voltage_samples;
+}
+
+void Clear_Error(uint8_t error)
+{
+	switch(error)
+	{
+	case 0:
+		U5I0_error=0;
+		break;
+	case 1:
+		U5I1_error=0;
+		break;
+	case 2:
+		U6I0_error=0;
+		break;
+	case 3:
+		U6I1_error=0;
+		break;
+	case 4:
+		U7I0_error=0;
+		break;
+	case 5:
+		U7I1_error=0;
+		break;
+	default:
+		Set_Error(ERR_CLEAR_INVALID_ERROR);
+		break;
+	}
+
+	Acknowledge(CLEAR_ERROR);
 }
 
 

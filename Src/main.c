@@ -1,4 +1,4 @@
-#include "main.h" //TODO: CONTINOUS TRANSMISSION OF CURRENT TRIP ERROR //TODO: detect overtemperature shutoff
+#include "main.h"
 
 
 //static function prototypes
@@ -59,8 +59,8 @@ const pinPort U7IN1 = { .PORT=GPIOA, .PIN=GPIO_PIN_3 };
 const pinPort U7MULTI = { .PORT=GPIOA, .PIN=GPIO_PIN_0 };
 
 //global configuration variables
-uint8_t Digital_In_EN; //byte: xxx[DIO15][DI6][DIO5][DIO4][DIO3]
-uint8_t Digital_In_Interrupt_EN; //unused
+uint8_t Digital_In_EN;
+uint8_t Digital_In_Interrupt_EN;
 uint8_t Digital_In_Interrupt_Can_Rising[5];
 uint8_t Digital_In_Interrupt_Can_Falling[5];
 uint8_t Digital_In_Interrupt_Power_High_Rising[5];
@@ -196,6 +196,13 @@ uint8_t U6I1_active;
 uint8_t U7I0_active;
 uint8_t U7I1_active;
 
+uint8_t U5I0_error;
+uint8_t U5I1_error;
+uint8_t U6I0_error;
+uint8_t U6I1_error;
+uint8_t U7I0_error;
+uint8_t U7I1_error;
+
 
 int main(void)
 {
@@ -307,7 +314,12 @@ int main(void)
 			Check_V_Flag=0;
 		}
 
-//TODO: test high side drivers again for realistic power of fans and pumps while in heatshrink
+		if (U5I0_error) { Set_Error(U5I0_SWITCH_OFF); }
+		if (U5I1_error) { Set_Error(U5I1_SWITCH_OFF); }
+		if (U6I0_error) { Set_Error(U6I0_SWITCH_OFF); }
+		if (U6I1_error) { Set_Error(U6I1_SWITCH_OFF); }
+		if (U7I0_error) { Set_Error(U7I0_SWITCH_OFF); }
+		if (U7I1_error) { Set_Error(U7I1_SWITCH_OFF); }
 	}
 }
 
@@ -679,6 +691,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE;
 			U5I0_real=Parse_Current(U5I0_raw); U6I0_real=Parse_Current(U6I0_raw); U7I0_real=Parse_Current(U7I0_raw);
 
+			//error states
+			if (U5I0_active && U5I0_raw>560)
+			{
+				U5I0_error=1;
+				HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
+			}
+			if (U6I0_active && U6I0_raw>560)
+			{
+				U6I0_error=1;
+				HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
+			}
+			if (U7I0_active && U7I0_raw>560)
+			{
+				U7I0_error=1;
+				HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
+			}
+
 			//TODO: check overcurrent and switch off immediately if too high
 			Check_I0_Flag=1;
 
@@ -705,6 +734,24 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			}
 			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE;
 			U5I1_real=Parse_Current(U5I1_raw); U6I1_real=Parse_Current(U6I1_raw); U7I1_real=Parse_Current(U7I1_raw);
+
+
+			//error states
+			if (U5I1_active && U5I1_raw>560)
+			{
+				U5I1_error=1;
+				HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
+			}
+			if (U6I1_active && U6I1_raw>560)
+			{
+				U6I1_error=1;
+				HAL_GPIO_WritePin(U6IN1.PORT, U6IN0.PIN, 0);
+			}
+			if (U7I1_active && U7I1_raw>560)
+			{
+				U7I1_error=1;
+				HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
+			}
 
 			//TODO: check overcurrent and switch off immediately if too high
 			Check_I1_Flag=1;
@@ -895,6 +942,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 				case SAMPLE_TEMP_VOLT:
 					Sample_Temperature_Voltage(CANRxData[2], CANRxData[3]);
 					if ((RxHeader.DataLength>>16) < 4) { Set_Error(ERR_COMMAND_SHORT); }
+					break;
+				case CLEAR_ERROR:
+					Clear_Error(CANRxData[2]);
+					if ((RxHeader.DataLength>>16) < 3) { Set_Error(ERR_COMMAND_SHORT); }
 					break;
 				case SAVE_CONFIGS:
 					Save_Config();

@@ -14,6 +14,7 @@
 #define CAN_MESS6					9
 #define CAN_MESS7					10
 #define SAMPLE_TEMP_VOLT			11
+#define CLEAR_ERROR					12
 #define SAVE_CONFIGS				128
 #define CONFIG_MESSAGE				129
 #define CONFIG_SWITCHES_DEFAULT		130
@@ -38,6 +39,7 @@ void Switch_Power(uint8_t, uint8_t);
 void Switch_DC(uint8_t, uint8_t[8]);
 void Buffer_Can_Message(uint8_t);
 void Sample_Temperature_Voltage(uint8_t, uint8_t);
+void Clear_Error(uint8_t);
 
 void Config_Message(uint8_t, uint8_t, uint16_t);
 void Config_Switch_Defaults(uint8_t, uint8_t);

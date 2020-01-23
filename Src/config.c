@@ -169,7 +169,7 @@ void Config_Write_Flash(void)
 	data[U7_CURRENT_WARNING_LIMIT_I0_POS]=((warn_undercurrent_U7I0<<0)&0xFFFF)+((warn_overcurrent_U7I0<<16)&0xFFFF0000);
 	data[U7_CURRENT_WARNING_LIMIT_I1_POS]=((warn_undercurrent_U7I1<<0)&0xFFFF)+((warn_overcurrent_U7I1<<16)&0xFFFF0000);
 
-	//bytes: [x], [x], [digital in interrupt enable], [digital in enable]
+	//bytes: [x], [x], [digital in interrupt enable], [digital in enable] ([x][x][x][DIO15][DI6][DIO5][DIO4][DIO3])
 	data[DIGITAL_IN_0_POS]=(Digital_In_EN&0xFF)+((Digital_In_Interrupt_EN&0xFF)<<8);
 
 	//oh boy
