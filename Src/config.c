@@ -56,6 +56,13 @@ void Config_0(void)
 	warn_undercurrent_U7I1=0;
 	warn_overcurrent_U7I1=7;
 
+	cutoff_overcurrent_U5I0 = 1000;
+	cutoff_overcurrent_U5I1 = 1000;
+	cutoff_overcurrent_U6I0 = 1000;
+	cutoff_overcurrent_U6I1 = 1000;
+	cutoff_overcurrent_U7I0 = 1000;
+	cutoff_overcurrent_U7I1 = 1000;
+
 
 #if TEST_PWM_INPUT
 

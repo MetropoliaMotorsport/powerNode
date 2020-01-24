@@ -96,7 +96,8 @@ uint16_t warn_undercurrent_U5I0;
 uint16_t warn_overcurrent_U5I0;
 uint16_t warn_undercurrent_U5I1;
 uint16_t warn_overcurrent_U5I1;
-uint16_t cutoff_overcurrent_U5; //TODO
+uint16_t cutoff_overcurrent_U5I0;
+uint16_t cutoff_overcurrent_U5I1;
 uint16_t warn_undervoltage_U6;
 uint16_t warn_overvoltage_U6;
 uint16_t warn_undertemperature_U6;
@@ -105,7 +106,8 @@ uint16_t warn_undercurrent_U6I0;
 uint16_t warn_overcurrent_U6I0;
 uint16_t warn_undercurrent_U6I1;
 uint16_t warn_overcurrent_U6I1;
-uint16_t cutoff_overcurrent_U6; //TODO
+uint16_t cutoff_overcurrent_U6I0;
+uint16_t cutoff_overcurrent_U6I1;
 uint16_t warn_undervoltage_U7;
 uint16_t warn_overvoltage_U7;
 uint16_t warn_undertemperature_U7;
@@ -114,7 +116,8 @@ uint16_t warn_undercurrent_U7I0;
 uint16_t warn_overcurrent_U7I0;
 uint16_t warn_undercurrent_U7I1;
 uint16_t warn_overcurrent_U7I1;
-uint16_t cutoff_overcurrent_U7; //TODO
+uint16_t cutoff_overcurrent_U7I0;
+uint16_t cutoff_overcurrent_U7I1;
 //probably several here for which switch to switch and on or off and which pwm out to change and too what
 
 //global variables
@@ -650,20 +653,25 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		{
 			slaveConvertedValue[i]=(ADCDualConvertedValues[i]>>16)&0xFFFF;
 			masterConvertedValue[i]=ADCDualConvertedValues[i]&0xFFFF;
-			if(masterConvertedValue[i]>slaveConvertedValue[i])
+			/*if(masterConvertedValue[i]>slaveConvertedValue[i])
 			{
 				convertedValue[i]=masterConvertedValue[i]-slaveConvertedValue[i];
 			}
 			else //this should only happen due to error in reading at low voltages
 			{
 				convertedValue[i]=0;
-			}
+			}*/
+			convertedValue[i]=masterConvertedValue[i]; //at least for current this seems much more stable and ground voltage is almost constant anyways, so this gives much better reading for current it seems (though it shouoldn't, not sure why)
 		}
 
 		if (HAL_ADCEx_MultiModeStop_DMA(&hadc1) != HAL_OK)
 		{
 			Error_Handler();
 		}
+
+		//initialie all values to avoid incorrect huge values being read
+		uint32_t U5I0_raw=0; uint32_t U6I0_raw=0; uint32_t U7I0_raw=0;
+		uint32_t U5I1_raw=0; uint32_t U6I1_raw=1; uint32_t U7I1_raw=0;
 
 		//if not all switches are used this still does not take too much time and it is fine to write some extra 0s to variables
 		switch(sampled)
@@ -681,7 +689,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				I0_rolling_average_position++;
 			}
 
-			uint32_t U5I0_raw=0; uint32_t U6I0_raw=0; uint32_t U7I0_raw=0;
 			for(uint32_t i=0; i<I_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
 			{
 				U5I0_raw+=U5I0[i];
@@ -689,23 +696,26 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I0_raw+=U7I0[i];
 			}
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE;
-			U5I0_real=Parse_Current(U5I0_raw); U6I0_real=Parse_Current(U6I0_raw); U7I0_real=Parse_Current(U7I0_raw);
+			U5I0_real=Parse_Current(U5I0_raw, 0); U6I0_real=Parse_Current(U6I0_raw, 2); U7I0_real=Parse_Current(U7I0_raw, 4);
 
 			//error states
 			if (U5I0_active && U5I0_raw>560)
 			{
 				U5I0_error=1;
 				HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
+				U5I0_active=0;
 			}
 			if (U6I0_active && U6I0_raw>560)
 			{
 				U6I0_error=1;
 				HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
+				U6I0_active=0;
 			}
 			if (U7I0_active && U7I0_raw>560)
 			{
 				U7I0_error=1;
 				HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
+				U7I0_active=0;
 			}
 
 			Check_I0_Switch();
@@ -725,7 +735,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				I1_rolling_average_position++;
 			}
 
-			uint32_t U5I1_raw=0; uint32_t U6I1_raw=1; uint32_t U7I1_raw=0;
 			for(uint32_t i=0; i<I_ROLLING_AVERAGE; i++) //this has possibility to overflow if ROLLING_AVERAGE > 2^(32-10) (reading 10 bit value)
 			{
 				U5I1_raw+=U5I1[i];
@@ -733,7 +742,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I1_raw+=U7I1[i];
 			}
 			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE;
-			U5I1_real=Parse_Current(U5I1_raw); U6I1_real=Parse_Current(U6I1_raw); U7I1_real=Parse_Current(U7I1_raw);
+			U5I1_real=Parse_Current(U5I1_raw, 1); U6I1_real=Parse_Current(U6I1_raw, 3); U7I1_real=Parse_Current(U7I1_raw, 5);
 
 
 			//error states
@@ -741,16 +750,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			{
 				U5I1_error=1;
 				HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
+				U5I1_active=0;
 			}
 			if (U6I1_active && U6I1_raw>560)
 			{
 				U6I1_error=1;
 				HAL_GPIO_WritePin(U6IN1.PORT, U6IN0.PIN, 0);
+				U6I1_active=0;
 			}
 			if (U7I1_active && U7I1_raw>560)
 			{
 				U7I1_error=1;
 				HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
+				U7I1_active=0;
 			}
 
 			Check_I1_Switch();
@@ -1172,8 +1184,8 @@ static void MX_ADC1_Init(void)
 	ADC_ChannelConfTypeDef sConfig = {0};
 
 	hadc1.Instance = ADC1;
-	hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-	hadc1.Init.Resolution = ADC_RESOLUTION_10B;
+	hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV8;
+	hadc1.Init.Resolution = ADC_RESOLUTION_12B;
 	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc1.Init.GainCompensation = 0;
 	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -1237,8 +1249,8 @@ static void MX_ADC2_Init(void)
 	ADC_ChannelConfTypeDef sConfig = {0};
 
 	hadc2.Instance = ADC2;
-	hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-	hadc2.Init.Resolution = ADC_RESOLUTION_10B;
+	hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV8;
+	hadc2.Init.Resolution = ADC_RESOLUTION_12B;
 	hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc2.Init.GainCompensation = 0;
 	hadc2.Init.ScanConvMode = ADC_SCAN_ENABLE;

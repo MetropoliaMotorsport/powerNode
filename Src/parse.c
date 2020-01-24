@@ -7,30 +7,36 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim8;
 
 
-uint32_t Parse_Current(uint32_t raw)
+//it is required to calibrate all current senses at two points
+uint32_t Parse_Current(uint32_t raw, uint32_t channel)
 {
 	uint32_t calculated=0;
 
-	//current sense seems to be working very poorly, can not get any good equation, do not trust current for a lot
-	if (raw<30)
+	switch(channel)
 	{
-		calculated = 0;
-	}
-	else if (raw<60)
-	{
-		calculated = 1;
-	}
-	else if (raw<65)
-	{
-		calculated = 3;
-	}
-	else if (raw<74)
-	{
-		calculated = 6;
-	}
-	else
-	{
-		calculated = 255;
+#if ID==0 //TODO: calibrations for all nodes here
+	/*case 0:
+
+		break;
+	case 1:
+
+		break;
+	case 2:
+
+		break;
+	case 3:
+
+		break;
+	case 4:
+
+		break;
+	case 5:
+
+		break;*/
+#endif
+	default:
+		calculated=raw;
+		break;
 	}
 
 	return calculated; //this sort of corresponds to amps I think
@@ -40,7 +46,7 @@ uint32_t Parse_Voltage(uint32_t raw, uint32_t raw_ground)
 {
 	//voltage should be raw*4 after voltage divider, but component is not working with tolerances, voltage divider is 130 and 82 which is 106/41, voltage is raw*3.3/(2^10), V to mV is *1000;
 	//approximate value from raw->Vcc based on measured values is (95*raw/2)-1645; note that this formula is not taken from reality, it is probably approximating a logarithimic formula but datasheet doesn't give enough details; is low enough precision that overflow is not a problem to consider at all
-	uint32_t calculated=(((95*raw)/2)-1645)+((raw_ground*825)/256); //calculate current in mV
+	uint32_t calculated=((((95*raw)/2)-1645)+((raw_ground*825)/256))/4; //calculate current in mV
 	//TODO: check that this function works properly for the second board assembled as well sometime
 
 	return calculated;
