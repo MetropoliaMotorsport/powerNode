@@ -14,10 +14,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U5I0_real/1000); //transmit number in 100s of mA
+			transmit=(U5I0_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U5I0_real; //transmit number in 100s of uA
+			transmit=U5I0_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);
@@ -29,10 +29,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U5I0_real/1000); //transmit number in 100s of mA
+			transmit=(U5I0_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U5I1_real; //transmit number in 100s of uA
+			transmit=U5I1_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);
@@ -44,10 +44,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U6I0_real/1000); //transmit number in 100s of mA
+			transmit=(U6I0_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U6I0_real; //transmit number in 100s of uA
+			transmit=U6I0_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);
@@ -59,10 +59,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U6I1_real/1000); //transmit number in 100s of mA
+			transmit=(U6I1_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U6I1_real; //transmit number in 100s of uA
+			transmit=U6I1_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);
@@ -74,10 +74,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U7I0_real/1000); //transmit number in 100s of mA
+			transmit=(U7I0_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U7I0_real; //transmit number in 100s of uA
+			transmit=U7I0_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);
@@ -89,10 +89,10 @@ void Set_Can_Bytes(uint32_t *pos, uint32_t message)
 		switch(Can_Config_Bytes[message][*pos])
 		{
 		case 1:
-			transmit=(U7I1_real/1000); //transmit number in 100s of mA
+			transmit=(U7I1_real/100); //transmit number in 100s of mA
 			break;
 		case 2:
-			transmit=U7I1_real; //transmit number in 100s of uA
+			transmit=U7I1_real; //transmit number in mA
 			break;
 		default:
 			Set_Error(ERR_MESS_INVALID_BYTES);

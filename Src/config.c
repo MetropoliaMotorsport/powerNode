@@ -29,39 +29,39 @@ void Config_Setup(void)
 void Config_0(void)
 {
 	//TODO: check that these work properly
-	warn_undervoltage_U5=18000;
+	warn_undervoltage_U5=18000; //in mV
 	warn_overvoltage_U5=28000;
-	warn_undertemperature_U5=0;
+	warn_undertemperature_U5=0; //please don't use, working poorly in hardware
 	warn_overtemperature_U5=1023;
 	warn_undercurrent_U5I0=0;
-	warn_overcurrent_U5I0=7;
+	warn_overcurrent_U5I0=1000; //in mA
 	warn_undercurrent_U5I1=0;
-	warn_overcurrent_U5I1=7;
+	warn_overcurrent_U5I1=1000;
 
 	warn_undervoltage_U6=18000;
 	warn_overvoltage_U6=28000;
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=7;
+	warn_overcurrent_U6I0=1000;
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=7;
+	warn_overcurrent_U6I1=1000;
 
 	warn_undervoltage_U7=18000;
 	warn_overvoltage_U7=28000;
 	warn_undertemperature_U7=0;
 	warn_overtemperature_U7=1023;
 	warn_undercurrent_U7I0=0;
-	warn_overcurrent_U7I0=7;
+	warn_overcurrent_U7I0=1000;
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=7;
+	warn_overcurrent_U7I1=1000;
 
-	cutoff_overcurrent_U5I0 = 1000;
-	cutoff_overcurrent_U5I1 = 1000;
-	cutoff_overcurrent_U6I0 = 1000;
-	cutoff_overcurrent_U6I1 = 1000;
-	cutoff_overcurrent_U7I0 = 1000;
-	cutoff_overcurrent_U7I1 = 1000;
+	cutoff_overcurrent_U5I0 = 2000; //in mA
+	cutoff_overcurrent_U5I1 = 2000;
+	cutoff_overcurrent_U6I0 = 2000;
+	cutoff_overcurrent_U6I1 = 2000;
+	cutoff_overcurrent_U7I0 = 2000;
+	cutoff_overcurrent_U7I1 = 2000;
 
 
 #if TEST_PWM_INPUT
@@ -110,7 +110,7 @@ void Config_0(void)
 		Digital_In_Interrupt_PWM_Rising[i]=temp_Digital_In_Interrupt_PWM_Rising[i];
 	}
 
-	Default_Switch_State = 0b00000000;
+	Default_Switch_State = 0b00100001;
 
 	Can_IDs[0] = 0x0F; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
 	Can_DLCs[0] = 8; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;

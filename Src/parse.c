@@ -12,32 +12,8 @@ uint32_t Parse_Current(uint32_t raw, uint32_t channel)
 {
 	uint32_t calculated=0;
 
-	switch(channel)
-	{
-#if ID==0 //TODO: calibrations for all nodes here
-	/*case 0:
-
-		break;
-	case 1:
-
-		break;
-	case 2:
-
-		break;
-	case 3:
-
-		break;
-	case 4:
-
-		break;
-	case 5:
-
-		break;*/
-#endif
-	default:
-		calculated=raw;
-		break;
-	}
+	//else value is so low current must be 0
+	if(raw>177) { calculated = ((579*raw)/20)-5100; } //calculate in mA; .028954*raw-5.100056 for A
 
 	return calculated; //this sort of corresponds to amps I think
 }
