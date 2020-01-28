@@ -29,7 +29,7 @@ void Config_Setup(void)
 void Config_0(void)
 {
 	//TODO: check that these work properly
-	warn_undervoltage_U5=18000; //in mV
+	warn_undervoltage_U5=22000; //in mV
 	warn_overvoltage_U5=28000;
 	warn_undertemperature_U5=0; //please don't use, working poorly in hardware
 	warn_overtemperature_U5=1023;
@@ -38,7 +38,7 @@ void Config_0(void)
 	warn_undercurrent_U5I1=0;
 	warn_overcurrent_U5I1=1000;
 
-	warn_undervoltage_U6=18000;
+	warn_undervoltage_U6=22000;
 	warn_overvoltage_U6=28000;
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
@@ -47,7 +47,7 @@ void Config_0(void)
 	warn_undercurrent_U6I1=0;
 	warn_overcurrent_U6I1=1000;
 
-	warn_undervoltage_U7=18000;
+	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
 	warn_undertemperature_U7=0;
 	warn_overtemperature_U7=1023;

@@ -21731,9 +21731,9 @@ void Config_0(void)
  8007c5e:	b0cd      	sub	sp, #308	; 0x134
  8007c60:	af00      	add	r7, sp, #0
 	//TODO: check that these work properly
-	warn_undervoltage_U5=18000; //in mV
+	warn_undervoltage_U5=22000; //in mV
  8007c62:	4b6d      	ldr	r3, [pc, #436]	; (8007e18 <Config_0+0x1bc>)
- 8007c64:	f244 6250 	movw	r2, #18000	; 0x4650
+ 8007c64:	f245 52f0 	movw	r2, #22000	; 0x55f0
  8007c68:	801a      	strh	r2, [r3, #0]
 	warn_overvoltage_U5=28000;
  8007c6a:	4b6c      	ldr	r3, [pc, #432]	; (8007e1c <Config_0+0x1c0>)
@@ -21764,9 +21764,9 @@ void Config_0(void)
  8007c96:	f44f 727a 	mov.w	r2, #1000	; 0x3e8
  8007c9a:	801a      	strh	r2, [r3, #0]
 
-	warn_undervoltage_U6=18000;
+	warn_undervoltage_U6=22000;
  8007c9c:	4b66      	ldr	r3, [pc, #408]	; (8007e38 <Config_0+0x1dc>)
- 8007c9e:	f244 6250 	movw	r2, #18000	; 0x4650
+ 8007c9e:	f245 52f0 	movw	r2, #22000	; 0x55f0
  8007ca2:	801a      	strh	r2, [r3, #0]
 	warn_overvoltage_U6=28000;
  8007ca4:	4b65      	ldr	r3, [pc, #404]	; (8007e3c <Config_0+0x1e0>)
@@ -21797,9 +21797,9 @@ void Config_0(void)
  8007cd0:	f44f 727a 	mov.w	r2, #1000	; 0x3e8
  8007cd4:	801a      	strh	r2, [r3, #0]
 
-	warn_undervoltage_U7=18000;
+	warn_undervoltage_U7=22000;
  8007cd6:	4b60      	ldr	r3, [pc, #384]	; (8007e58 <Config_0+0x1fc>)
- 8007cd8:	f244 6250 	movw	r2, #18000	; 0x4650
+ 8007cd8:	f245 52f0 	movw	r2, #22000	; 0x55f0
  8007cdc:	801a      	strh	r2, [r3, #0]
 	warn_overvoltage_U7=28000;
  8007cde:	4b5f      	ldr	r3, [pc, #380]	; (8007e5c <Config_0+0x200>)
