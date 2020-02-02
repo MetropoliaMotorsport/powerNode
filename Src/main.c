@@ -170,6 +170,7 @@ uint8_t CanBufferReadPos;
 uint8_t CanBufferWritePos;
 
 uint8_t CanTimerFlag;
+uint8_t CanSyncFlag;
 
 uint16_t SampleTemperatureVoltagePeriod;
 uint8_t SampleTemperatureBurst;
@@ -260,6 +261,12 @@ int main(void)
 			}
 		}
 
+		if (CanSyncFlag)
+		{
+			Can_Sync();
+			CanSyncFlag=0;
+		}
+
 		if(CanTimerFlag)
 		{
 			for(uint32_t i=0; i<8; i++)
@@ -340,7 +347,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	else if (htim->Instance == TIM16)
 	{
 		HAL_TIM_Base_Stop_IT(&htim16);
-		Can_Sync();
+		CanSyncFlag=1;
 	}
 	else if (htim->Instance == TIM1)
 	{
@@ -910,7 +917,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 			}
 			else
 			{
-				Can_Sync();
+				CanSyncFlag = 1;
 			}
 		}
 		else if (RxHeader.Identifier == CANID_CONFIG)
