@@ -252,6 +252,12 @@ int main(void)
 
 	while(1)
 	{
+		if (CanSyncFlag)
+		{
+			Can_Sync();
+			CanSyncFlag=0;
+		}
+
 		if(canErrorToTransmit && canSendErrorFlag)
 		{
 			Send_Error();
@@ -259,12 +265,6 @@ int main(void)
 			{
 				canSendErrorFlag=0;
 			}
-		}
-
-		if (CanSyncFlag)
-		{
-			Can_Sync();
-			CanSyncFlag=0;
 		}
 
 		if(CanTimerFlag)
