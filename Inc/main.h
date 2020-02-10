@@ -127,9 +127,9 @@ extern const pinPort U7MULTI;
 
 //can id definitions
 #define CANID_SYNC 0x80
-#define CANID_CONFIG 0x700
+#define CANID_CONFIG 0x601
 #define CANID_ERROR 0x600
-#define CANID_ACK	0x500
+#define CANID_ACK	0x602
 
 
 //global configuration variables
