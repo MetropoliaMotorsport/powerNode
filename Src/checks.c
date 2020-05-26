@@ -214,7 +214,7 @@ void Check_I0_Switch()
 		U6I0_active=0;
 		Set_Error(ERROR_OVERCURR_TRIP_U6_0);
 	}
-	if ((U7I0_real>cutoff_overcurrent_U7I0) && (U6I1_active) && U7I0_active_counter>I_ROLLING_AVERAGE)
+	if ((U7I0_real>cutoff_overcurrent_U7I0) && (U7I0_active) && U7I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		U7I0_error=1;
 		HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
