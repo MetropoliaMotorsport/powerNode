@@ -76,7 +76,7 @@ void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 		if (((1<<i) & enableSwitching) && errors[i])
 		{
 			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
-			*actives[i]=newState;
+			*actives[i]=((1<<i)&newState)>>i;
 		}
 	}
 
