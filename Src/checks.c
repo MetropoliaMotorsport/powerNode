@@ -13,7 +13,7 @@ uint8_t U7I1_active_counter;
 void Check_I0_Warn()
 {
 	//for currents calculation is done in the interrupt
-	if (U5I0_real>warn_overcurrent_U5I0)
+	if ((U5I0_real>warn_overcurrent_U5I0) && (U5I0_active) && U5I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U5I0);
 	}
@@ -30,7 +30,7 @@ void Check_I0_Warn()
 		U5I0_active_counter=0;
 	}
 
-	if (U6I0_real>warn_overcurrent_U6I0)
+	if ((U6I0_real>warn_overcurrent_U6I0) && (U6I0_active) && U6I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U6I0);
 	}
@@ -47,7 +47,7 @@ void Check_I0_Warn()
 		U6I0_active_counter=0;
 	}
 
-	if (U7I0_real>warn_overcurrent_U7I0)
+	if ((U7I0_real>warn_overcurrent_U7I0) && (U7I0_active) && U7I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U7I0);
 	}
@@ -68,7 +68,7 @@ void Check_I0_Warn()
 void Check_I1_Warn()
 {
 	//for currents calculation is done in the interrupt
-	if (U5I1_real>warn_overcurrent_U5I1)
+	if ((U5I1_real>warn_overcurrent_U5I1) && (U5I1_active) && U5I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U5I1);
 	}
@@ -85,7 +85,7 @@ void Check_I1_Warn()
 		U5I1_active_counter=0;
 	}
 
-	if (U6I1_real>warn_overcurrent_U6I1)
+	if ((U6I1_real>warn_overcurrent_U6I1) && (U6I1_active) && U6I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U6I1);
 	}
@@ -102,7 +102,7 @@ void Check_I1_Warn()
 		U6I1_active_counter=0;
 	}
 
-	if (U7I1_real>warn_overcurrent_U7I1)
+	if ((U7I1_real>warn_overcurrent_U7I1) && (U7I1_active) && U7I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		Set_Error(WARN_OVERCURR_U7I1);
 	}
@@ -200,19 +200,19 @@ void Check_V_Warn()
 void Check_I0_Switch()
 {
 	//for currents calculation is done in the interrupt
-	if (U5I0_real>cutoff_overcurrent_U5I0)
+	if ((U5I0_real>cutoff_overcurrent_U5I0) && (U5I0_active) && U5I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		U5I0_error=1;
 		HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
 		Set_Error(ERROR_OVERCURR_TRIP_U5_0);
 	}
-	if (U6I0_real>cutoff_overcurrent_U6I0)
+	if ((U6I0_real>cutoff_overcurrent_U6I0) && (U6I0_active) && U6I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		U6I0_error=1;
 		HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
 		Set_Error(ERROR_OVERCURR_TRIP_U6_0);
 	}
-	if (U7I0_real>cutoff_overcurrent_U7I0)
+	if ((U7I0_real>cutoff_overcurrent_U7I0) && (U6I1_active) && U7I0_active_counter>I_ROLLING_AVERAGE)
 	{
 		U7I0_error=1;
 		HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
@@ -223,19 +223,19 @@ void Check_I0_Switch()
 void Check_I1_Switch()
 {
 	//for currents calculation is done in the interrupt
-	if (U5I1_real>cutoff_overcurrent_U5I1)
+	if ((U5I1_real>cutoff_overcurrent_U5I1) && (U5I1_active) && U5I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		U5I1_error=1;
 		HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
 		Set_Error(ERROR_OVERCURR_TRIP_U5_1);
 	}
-	if (U6I1_real>cutoff_overcurrent_U6I1)
+	if ((U6I1_real>cutoff_overcurrent_U6I1) && (U6I1_active) && U6I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		U6I1_error=1;
 		HAL_GPIO_WritePin(U6IN1.PORT, U6IN1.PIN, 0);
 		Set_Error(ERROR_OVERCURR_TRIP_U6_1);
 	}
-	if (U7I1_real>cutoff_overcurrent_U7I1)
+	if ((U7I1_real>cutoff_overcurrent_U7I1) && (U7I1_active) && U7I1_active_counter>I_ROLLING_AVERAGE)
 	{
 		U7I1_error=1;
 		HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);

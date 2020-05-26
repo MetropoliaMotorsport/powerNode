@@ -201,7 +201,7 @@ void Config_33(void)
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 4000;
 	cutoff_overcurrent_U7I0 = 1200;
-	cutoff_overcurrent_U7I1 = 0; //!!!
+	cutoff_overcurrent_U7I1 = 999; //!!!
 
 	//[x][x][x][BOTS][BSPD before delay][BSPD after delay][x][Inertia Switch]
 	Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -306,7 +306,7 @@ void Config_34(void)
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 3000;
 	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 0; //!!!
+	cutoff_overcurrent_U7I1 = 999; //!!!
 
 	//[x][x][x][Shutdown Button][Shutdown Button][Shutdown Button][x][x]
 	Digital_In_EN = 0b00011100; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -411,7 +411,7 @@ void Config_35(void)
 	cutoff_overcurrent_U6I0 = 2700;
 	cutoff_overcurrent_U6I1 = 2700;
 	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 0; //!!!
+	cutoff_overcurrent_U7I1 = 999; //!!!
 
 	//[x][x][x][x][x][x][x][x]
 	Digital_In_EN = 0b00000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -512,11 +512,11 @@ void Config_36(void)
 	warn_overcurrent_U7I1=0; //Accumulator Fans //!!!
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
-	cutoff_overcurrent_U5I1 = 0; //!!!
+	cutoff_overcurrent_U5I1 = 999; //!!!
 	cutoff_overcurrent_U6I0 = 1060;
 	cutoff_overcurrent_U6I1 = 1060;
-	cutoff_overcurrent_U7I0 = 0; //!!!
-	cutoff_overcurrent_U7I1 = 0; //!!!
+	cutoff_overcurrent_U7I0 = 999; //!!!
+	cutoff_overcurrent_U7I1 = 999; //!!!
 
 	Digital_In_EN = 0b00000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	PWM_Out_EN = 0b00000000;
@@ -595,16 +595,16 @@ void Config_37(void)
 	warn_undercurrent_U5I0=0;
 	warn_overcurrent_U5I0=4095; //in mA //!assembled
 	warn_undercurrent_U5I1=0;
-	warn_overcurrent_U5I1=0; //!assembled
+	warn_overcurrent_U5I1=4095; //!assembled
 
 	warn_undervoltage_U6=22000;
 	warn_overvoltage_U6=28000;
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=560; //!assembled
+	warn_overcurrent_U6I0=4095; //!assembled
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=560; //!assembled
+	warn_overcurrent_U6I1=4095; //!assembled
 
 	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
