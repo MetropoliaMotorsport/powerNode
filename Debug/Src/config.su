@@ -1,7 +1,11 @@
 config.c:5:6:Config_Setup	8	static
-config.c:29:6:Config_0	320	static
-config.c:155:6:Config_1	4	static
-config.c:161:6:Config_Write_Flash	2104	static
-config.c:246:6:Config_Read_Flash	72	static
-config.c:370:6:Flash_Write	64	static,ignoring_inline_asm
-config.c:423:10:Flash_Read	16	static
+config.c:45:6:Config_0	320	static
+config.c:170:6:Config_33	312	static
+config.c:275:6:Config_34	312	static
+config.c:380:6:Config_35	312	static
+config.c:485:6:Config_36	312	static
+config.c:589:6:Config_37	312	static
+config.c:695:6:Config_Write_Flash	2104	static
+config.c:780:6:Config_Read_Flash	72	static
+config.c:904:6:Flash_Write	64	static,ignoring_inline_asm
+config.c:957:10:Flash_Read	16	static

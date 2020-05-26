@@ -2,7 +2,7 @@
 #define CONFIG_H_
 
 //ID definition
-#define ID 0
+#define ID 37
 
 //debugging definitions, only used for ID 0
 #define TEST_PWN_NOT_INPUT	0
@@ -12,7 +12,12 @@
 void Config_Setup(void);
 
 void Config_0(void);
-void Config_1(void);
+void Config_33(void);
+void Config_34(void);
+void Config_35(void);
+void Config_36(void);
+void Config_37(void);
+
 
 void Config_Write_Flash(void);
 void Config_Read_Flash(void);

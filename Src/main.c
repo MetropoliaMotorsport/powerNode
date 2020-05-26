@@ -214,6 +214,8 @@ int main(void)
 
 	SystemClock_Config();
 
+	MX_GPIO_Init();
+
 	Config_Setup();
 
 	MX_GPIO_Init();
