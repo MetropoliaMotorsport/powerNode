@@ -591,6 +591,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 
 
+//externs needed for here
+extern uint8_t U5I0_active_counter;
+extern uint8_t U5I1_active_counter;
+extern uint8_t U6I0_active_counter;
+extern uint8_t U6I1_active_counter;
+extern uint8_t U7I0_active_counter;
+extern uint8_t U7I1_active_counter;
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if (hadc->Instance == ADC1)
@@ -708,19 +716,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			U5I0_real=Parse_Current(U5I0_raw, 0); U6I0_real=Parse_Current(U6I0_raw, 2); U7I0_real=Parse_Current(U7I0_raw, 4);
 
 			//error states
-			if (U5I0_active && U5I0_raw>560)
+			if (U5I0_active && U5I0_raw>560 && U5I0_active_counter>I_ROLLING_AVERAGE)
 			{
 				U5I0_error=1;
 				HAL_GPIO_WritePin(U5IN0.PORT, U5IN0.PIN, 0);
 				U5I0_active=0;
 			}
-			if (U6I0_active && U6I0_raw>560)
+			if (U6I0_active && U6I0_raw>560 && U6I0_active_counter>I_ROLLING_AVERAGE)
 			{
 				U6I0_error=1;
 				HAL_GPIO_WritePin(U6IN0.PORT, U6IN0.PIN, 0);
 				U6I0_active=0;
 			}
-			if (U7I0_active && U7I0_raw>560)
+			if (U7I0_active && U7I0_raw>560 && U7I0_active_counter>I_ROLLING_AVERAGE)
 			{
 				U7I0_error=1;
 				HAL_GPIO_WritePin(U7IN0.PORT, U7IN0.PIN, 0);
@@ -755,19 +763,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 
 			//error states
-			if (U5I1_active && U5I1_raw>560)
+			if (U5I1_active && U5I1_raw>560 && U5I1_active_counter>I_ROLLING_AVERAGE)
 			{
 				U5I1_error=1;
 				HAL_GPIO_WritePin(U5IN1.PORT, U5IN1.PIN, 0);
 				U5I1_active=0;
 			}
-			if (U6I1_active && U6I1_raw>560)
+			if (U6I1_active && U6I1_raw>560 && U6I1_active_counter>I_ROLLING_AVERAGE)
 			{
 				U6I1_error=1;
 				HAL_GPIO_WritePin(U6IN1.PORT, U6IN0.PIN, 0);
 				U6I1_active=0;
 			}
-			if (U7I1_active && U7I1_raw>560)
+			if (U7I1_active && U7I1_raw>560 && U7I1_active_counter>I_ROLLING_AVERAGE)
 			{
 				U7I1_error=1;
 				HAL_GPIO_WritePin(U7IN1.PORT, U7IN1.PIN, 0);
