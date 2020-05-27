@@ -214,8 +214,6 @@ int main(void)
 
 	SystemClock_Config();
 
-	MX_GPIO_Init();
-
 	Config_Setup();
 
 	MX_GPIO_Init();
@@ -713,7 +711,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I0_raw+=U7I0[i];
 			}
 			U5I0_raw/=I_ROLLING_AVERAGE; U6I0_raw/=I_ROLLING_AVERAGE; U7I0_raw/=I_ROLLING_AVERAGE;
-			U5I0_real=Parse_Current(U5I0_raw, 0); U6I0_real=Parse_Current(U6I0_raw, 2); U7I0_real=Parse_Current(U7I0_raw, 4);
+			U5I0_real=Parse_Current(U5I0_raw, 0, U5I0_active); U6I0_real=Parse_Current(U6I0_raw, 2, U6I1_active); U7I0_real=Parse_Current(U7I0_raw, 4, U7I0_active);
 
 			//error states
 			if (U5I0_active && U5I0_raw>560 && U5I0_active_counter>I_ROLLING_AVERAGE)
@@ -759,7 +757,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 				U7I1_raw+=U7I1[i];
 			}
 			U5I1_raw/=I_ROLLING_AVERAGE; U6I1_raw/=I_ROLLING_AVERAGE; U7I1_raw/=I_ROLLING_AVERAGE;
-			U5I1_real=Parse_Current(U5I1_raw, 1); U6I1_real=Parse_Current(U6I1_raw, 3); U7I1_real=Parse_Current(U7I1_raw, 5);
+			U5I1_real=Parse_Current(U5I1_raw, 1, U5I1_active); U6I1_real=Parse_Current(U6I1_raw, 3, U6I1_active); U7I1_real=Parse_Current(U7I1_raw, 5, U7I1_active);
 
 
 			//error states

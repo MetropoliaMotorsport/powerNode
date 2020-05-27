@@ -8,12 +8,12 @@ extern TIM_HandleTypeDef htim8;
 
 
 //it is required to calibrate all current senses at two points
-uint32_t Parse_Current(uint32_t raw, uint32_t channel)
+uint32_t Parse_Current(uint32_t raw, uint32_t channel, uint32_t active)
 {
 	uint32_t calculated=0;
 
 	//else value is so low current must be 0
-	if(raw>177) { calculated = ((579*raw)/20)-5100; } //calculate in mA; .028954*raw-5.100056 for A
+	if(raw>177 && active) { calculated = ((579*raw)/20)-5100; } //calculate in mA; .028954*raw-5.100056 for A
 
 	return calculated; //this sort of corresponds to amps I think
 }
