@@ -71,7 +71,7 @@ uint8_t *errors[] = {&U5I0_error, &U5I1_error, &U6I0_error, &U6I1_error, &U7I0_e
 
 void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 {
-	for(uint32_t i=0; i<5; i++)
+	for(uint32_t i=0; i<6; i++)
 	{
 		if (((1<<i) & enableSwitching) && errors[i])
 		{
