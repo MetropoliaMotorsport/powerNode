@@ -194,7 +194,7 @@ void Config_33(void)
 	warn_undercurrent_U7I0=0;
 	warn_overcurrent_U7I0=700; //telementry power
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=0; //2x analog nodes, tire pressure sensor //!!!
+	warn_overcurrent_U7I1=999; //2x analog nodes, tire pressure sensor //!!!
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
