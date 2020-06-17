@@ -302,6 +302,12 @@ extern uint8_t U7I1_error;
 #define PWM_4								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_4_POS))
 #define PWM_EN_POS							(PWM_4_POS+1)
 #define PWM_EN								(*(uint32_t*)(FLASH_PAGE_63+0x4*PWM_EN_POS))
+#define U5_CURRENT_SHUTOFF_POS				(PWM_EN_POS+1)
+#define U5_CURRENT_SHUTOFF					(*(uint32_t*)(FLASH_PAGE_63+0x4*U5_CURRENT_SHUTOFF_POS))
+#define U6_CURRENT_SHUTOFF_POS				(U5_CURRENT_SHUTOFF_POS+1)
+#define U6_CURRENT_SHUTOFF					(*(uint32_t*)(FLASH_PAGE_63+0x4*U6_CURRENT_SHUTOFF_POS))
+#define U7_CURRENT_SHUTOFF_POS				(U6_CURRENT_SHUTOFF_POS+1)
+#define U7_CURRENT_SHUTOFF					(*(uint32_t*)(FLASH_PAGE_63+0x4*U7_CURRENT_SHUTOFF_POS))
 
 
 //flash page definitions

@@ -744,16 +744,6 @@ void Config_Write_Flash(void)
 		data[CanPos[i]]=(0)+((Can_DLCs[i]&0xFF)<<16)+(Can_IDs[i]&0xFFFF);
 	}
 
-	//bytes: [unused], [can dlc], [can id high], [can id low] x8 //any can id outside the valid range of 0 to 2047 should be treated as disabled
-	/*data[CAN_ID_0_POS]=(0)+(Can_DLCs[0]<<16)+(Can_IDs[0]&0xFFFF);
-	data[CAN_ID_1_POS]=(0)+(Can_DLCs[1]<<16)+(Can_IDs[1]&0xFFFF);
-	data[CAN_ID_2_POS]=(0)+(Can_DLCs[2]<<16)+(Can_IDs[2]&0xFFFF);
-	data[CAN_ID_3_POS]=(0)+(Can_DLCs[3]<<16)+(Can_IDs[3]&0xFFFF);
-	data[CAN_ID_4_POS]=(0)+(Can_DLCs[4]<<16)+(Can_IDs[4]&0xFFFF);
-	data[CAN_ID_5_POS]=(0)+(Can_DLCs[5]<<16)+(Can_IDs[5]&0xFFFF);
-	data[CAN_ID_6_POS]=(0)+(Can_DLCs[6]<<16)+(Can_IDs[6]&0xFFFF);
-	data[CAN_ID_7_POS]=(0)+(Can_DLCs[7]<<16)+(Can_IDs[7]&0xFFFF);*/
-
 	for(uint32_t i=0; i<8; i++)
 	{
 		//byte: [bytes of specific data]
@@ -773,6 +763,11 @@ void Config_Write_Flash(void)
 	data[TV_BURST_POS]=((sample_temperature&0xFF)<<0)+((sample_voltage&0xFF)<<8)+((SampleTemperatureBurst&0xFF)<<16)+((SampleVoltageBurst&0xFF)<<24);
 	//bytes: [x], [x], [temperature/voltage sampling interval (.1 ms) high], [temperature/voltage sampling interval (.1 ms) low]
 	data[TV_BURST_TIMING_POS]=((SampleTemperatureVoltagePeriod&0xFFFF)<<0);
+
+	data[U5_CURRENT_SHUTOFF_POS]=((cutoff_overcurrent_U5I0&0xFFFF)<<0)+((cutoff_overcurrent_U5I1<<16)&0xFFFF0000);
+	data[U6_CURRENT_SHUTOFF_POS]=((cutoff_overcurrent_U6I0&0xFFFF)<<0)+((cutoff_overcurrent_U6I1<<16)&0xFFFF0000);
+	data[U7_CURRENT_SHUTOFF_POS]=((cutoff_overcurrent_U7I0&0xFFFF)<<0)+((cutoff_overcurrent_U7I1<<16)&0xFFFF0000);
+
 
 	Flash_Write(FLASH_PAGE_63, 63, data, 512);
 }
@@ -898,6 +893,13 @@ void Config_Read_Flash(void)
 	SampleTemperatureBurst = (TV_BURST>>16)&0xFF;
 	SampleVoltageBurst = (TV_BURST>>24)&0xFF;
 	SampleTemperatureVoltagePeriod= (TV_BURST_TIMING>>0)&0xFFFF;
+
+	cutoff_overcurrent_U5I0 = (U5_CURRENT_SHUTOFF>>0)&0xFFFF;
+	cutoff_overcurrent_U5I1 = (U5_CURRENT_SHUTOFF>>16)&0xFFFF;
+	cutoff_overcurrent_U6I0 = (U6_CURRENT_SHUTOFF>>0)&0xFFFF;
+	cutoff_overcurrent_U6I1 = (U6_CURRENT_SHUTOFF>>16)&0xFFFF;
+	cutoff_overcurrent_U7I0 = (U7_CURRENT_SHUTOFF>>0)&0xFFFF;
+	cutoff_overcurrent_U7I1 = (U7_CURRENT_SHUTOFF>>16)&0xFFFF;
 }
 
 
