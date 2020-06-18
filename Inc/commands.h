@@ -32,7 +32,7 @@
 
 
 //function prototypes
-void Acknowledge(uint8_t);
+void Acknowledge(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
 void Save_Config();
 
 void Switch_Power(uint8_t, uint8_t);

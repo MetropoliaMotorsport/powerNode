@@ -9,7 +9,7 @@ uint32_t ack_k=0;
 uint32_t blnk_k=0;
 extern pinPort LED;
 
-void Acknowledge(uint8_t cmd)
+void Acknowledge(uint8_t cmd, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4)
 {
 	FDCAN_TxHeaderTypeDef TxHeader;
 
@@ -18,12 +18,12 @@ void Acknowledge(uint8_t cmd)
 
 	CANTxData[0]=ID;
 	CANTxData[1]=cmd;
-	CANTxData[2]=(ack_k>>24)*0xFF;
-	CANTxData[3]=(ack_k>>16)*0xFF;
-	CANTxData[4]=(ack_k>>8)*0xFF;
-	CANTxData[5]=ack_k&0xFF;
-	CANTxData[6]=cmd;
-	CANTxData[7]=0xFF;
+	CANTxData[2]=d1;
+	CANTxData[3]=d2;
+	CANTxData[4]=d3;
+	CANTxData[5]=d4;
+	CANTxData[6]=ack_k&0xFF;
+	CANTxData[7]=cmd;
 
 	TxHeader.IdType = FDCAN_STANDARD_ID;
 	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
@@ -61,7 +61,7 @@ void Save_Config()
 
 	Config_Read_Flash();
 
-	Acknowledge(SAVE_CONFIGS);
+	Acknowledge(SAVE_CONFIGS, 0, 0, 0, 0);
 }
 
 
@@ -71,16 +71,23 @@ uint8_t *errors[] = {&U5I0_error, &U5I1_error, &U6I0_error, &U6I1_error, &U7I0_e
 
 void Switch_Power(uint8_t enableSwitching, uint8_t newState)
 {
+	uint8_t activeTotal = 0;
+
 	for(uint32_t i=0; i<6; i++)
 	{
 		if (((1<<i) & enableSwitching) && !(*errors[i]))
 		{
 			HAL_GPIO_WritePin(switches[i]->PORT, switches[i]->PIN, ((1<<i)&newState)>>i);
 			*actives[i]=((1<<i)&newState)>>i;
+
+			if (*actives[i] == 1)
+			{
+				activeTotal+=(1<<i);
+			}
 		}
 	}
 
-	Acknowledge(SWITCH_POWER);
+	Acknowledge(SWITCH_POWER, enableSwitching, newState, 0, activeTotal);
 }
 
 void Switch_DC(uint8_t channelEN, uint8_t newDC[8])
@@ -95,7 +102,7 @@ void Switch_DC(uint8_t channelEN, uint8_t newDC[8])
 		}
 	}
 
-	Acknowledge(CHANGE_DC);
+	Acknowledge(CHANGE_DC, 0, 0, 0, 0);
 }
 
 extern uint8_t CanBuffer[31];
@@ -160,7 +167,7 @@ void Clear_Error(uint8_t error)
 		break;
 	}
 
-	Acknowledge(CLEAR_ERROR);
+	Acknowledge(CLEAR_ERROR, 0, 0, 0, 0);
 }
 
 
@@ -194,7 +201,7 @@ void Config_Message(uint8_t message, uint8_t change, uint16_t data)
 		return;
 	}
 
-	Acknowledge(CONFIG_MESSAGE);
+	Acknowledge(CONFIG_MESSAGE, 0, 0, 0, 0);
 }
 
 void Config_Switch_Defaults(uint8_t enableChanges, uint8_t newState)
@@ -214,7 +221,7 @@ void Config_Switch_Defaults(uint8_t enableChanges, uint8_t newState)
 		}
 	}
 
-	Acknowledge(CONFIG_SWITCHES_DEFAULT);
+	Acknowledge(CONFIG_SWITCHES_DEFAULT, 0, 0, 0, 0);
 }
 
 void Config_Can_Sync(uint8_t enableChanges, uint8_t newState)
@@ -234,7 +241,7 @@ void Config_Can_Sync(uint8_t enableChanges, uint8_t newState)
 		}
 	}
 
-	Acknowledge(CONFIG_CAN_SYNC);
+	Acknowledge(CONFIG_CAN_SYNC, 0, 0, 0, 0);
 }
 
 void Config_Can_Timed(uint8_t enableChanges, uint8_t newState)
@@ -254,21 +261,21 @@ void Config_Can_Timed(uint8_t enableChanges, uint8_t newState)
 		}
 	}
 
-	Acknowledge(CONFIG_CAN_TIMED);
+	Acknowledge(CONFIG_CAN_TIMED, 0, 0, 0, 0);
 }
 
 void Config_Can_Interval(uint16_t newInterval)
 {
 	Can_Interval=newInterval;
 
-	Acknowledge(CONFIG_CAN_INTERVAL);
+	Acknowledge(CONFIG_CAN_INTERVAL, 0, 0, 0, 0);
 }
 
 void Config_Can_Sync_Delay(uint16_t newDelay)
 {
 	Can_Sync_Delay=newDelay;
 
-	Acknowledge(CONFIG_CAN_SYNC_DELAY);
+	Acknowledge(CONFIG_CAN_SYNC_DELAY, 0, 0, 0, 0);
 }
 
 void Config_Temperature_Voltage_Reading(uint16_t interval, uint8_t tempBurst, uint8_t voltBurst)
@@ -297,7 +304,7 @@ void Config_Temperature_Voltage_Reading(uint16_t interval, uint8_t tempBurst, ui
 
 	SampleTemperatureVoltagePeriod=interval;
 
-	Acknowledge(CONFIG_CAN_TV_READING);
+	Acknowledge(CONFIG_CAN_TV_READING, 0, 0, 0, 0);
 }
 
 void Config_Default_DC(uint8_t channelEN, uint8_t newDC[8])
@@ -312,7 +319,7 @@ void Config_Default_DC(uint8_t channelEN, uint8_t newDC[8])
 		}
 	}
 
-	Acknowledge(CONFIG_DEFAULT_DC);
+	Acknowledge(CONFIG_DEFAULT_DC, 0, 0, 0, 0);
 }
 
 void Config_PWM_Prescalers(uint8_t channelEN, uint8_t newPrescalers[8])
@@ -327,7 +334,7 @@ void Config_PWM_Prescalers(uint8_t channelEN, uint8_t newPrescalers[8])
 		}
 	}
 
-	Acknowledge(CONFIG_PWM_PRESCALERS);
+	Acknowledge(CONFIG_PWM_PRESCALERS, 0, 0, 0, 0);
 }
 
 void Config_DIO_Pins(uint8_t EN, uint8_t new_Din_EN, uint8_t new_PWM_Out_EN, uint8_t new_PWM_In_EN)
@@ -364,7 +371,7 @@ void Config_DIO_Pins(uint8_t EN, uint8_t new_Din_EN, uint8_t new_PWM_Out_EN, uin
 		}
 	}
 
-	Acknowledge(CONFIG_DIO);
+	Acknowledge(CONFIG_DIO, 0, 0, 0, 0);
 }
 
 void Config_Interrupt_Power(uint8_t gpio, uint8_t Power_High_Falling, uint8_t Power_High_Rising, uint8_t Power_Low_Falling, uint8_t Power_Low_Rising)
@@ -375,7 +382,7 @@ void Config_Interrupt_Power(uint8_t gpio, uint8_t Power_High_Falling, uint8_t Po
 	Digital_In_Interrupt_Power_Low_Falling[gpio]=Power_Low_Falling;
 	Digital_In_Interrupt_Power_Low_Rising[gpio]=Power_Low_Rising;
 
-	Acknowledge(CONFIG_INTERRUPT_POWER);
+	Acknowledge(CONFIG_INTERRUPT_POWER, 0, 0, 0, 0);
 }
 
 void Config_Interrupt_Can(uint8_t gpio, uint8_t Can_Falling, uint8_t Can_Rising)
@@ -383,5 +390,5 @@ void Config_Interrupt_Can(uint8_t gpio, uint8_t Can_Falling, uint8_t Can_Rising)
 	Digital_In_Interrupt_Can_Falling[gpio]=Can_Falling;
 	Digital_In_Interrupt_Can_Rising[gpio]=Can_Rising;
 
-	Acknowledge(CONFIG_INTERRUPT_CAN);
+	Acknowledge(CONFIG_INTERRUPT_CAN, 0, 0, 0, 0);
 }
