@@ -250,6 +250,8 @@ int main(void)
 	//this timer starts the adc, so start it last
 	HAL_TIM_Base_Start_IT(&htim15);
 
+	Can_Sync();
+
 	while(1)
 	{
 		if (CanSyncFlag)
