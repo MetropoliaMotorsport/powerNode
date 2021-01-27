@@ -194,14 +194,14 @@ void Config_33(void)
 	warn_undercurrent_U7I0=0;
 	warn_overcurrent_U7I0=700; //telementry power
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=999; //2x analog nodes, tire pressure sensor //!!!
+	warn_overcurrent_U7I1=640; //2x analog nodes, tire pressure sensor (probably no tire pressure sensor)
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 4000;
 	cutoff_overcurrent_U7I0 = 1200;
-	cutoff_overcurrent_U7I1 = 999; //!!!
+	cutoff_overcurrent_U7I1 = 1140;
 
 	//[x][x][x][BOTS][BSPD before delay][BSPD after delay][x][Inertia Switch]
 	Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -299,14 +299,14 @@ void Config_34(void)
 	warn_undercurrent_U7I0=0;
 	warn_overcurrent_U7I0=610; //ECU
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=0; //3x analog nodes, brake pressure sensor, IMU, AIM //!!!
+	warn_overcurrent_U7I1=951; //3x analog nodes, 2x brake pressure sensor, IMU, AIM
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 3000;
 	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 999; //!!!
+	cutoff_overcurrent_U7I1 = 1451;
 
 	//[x][x][x][Shutdown Button][Shutdown Button][Shutdown Button][x][x]
 	Digital_In_EN = 0b00011100; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -402,16 +402,16 @@ void Config_35(void)
 	warn_undertemperature_U7=0;
 	warn_overtemperature_U7=1023;
 	warn_undercurrent_U7I0=0;
-	warn_overcurrent_U7I0=0; //pump //!!!
+	warn_overcurrent_U7I0=3100; //pump
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=0; //pump //!!!
+	warn_overcurrent_U7I1=3100; //pump
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 2700;
 	cutoff_overcurrent_U6I1 = 2700;
-	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 999; //!!!
+	cutoff_overcurrent_U7I0 = 3600;
+	cutoff_overcurrent_U7I1 = 3600;
 
 	//[x][x][x][x][x][x][x][x]
 	Digital_In_EN = 0b00000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -491,7 +491,7 @@ void Config_36(void)
 	warn_undercurrent_U5I0=0;
 	warn_overcurrent_U5I0=4095; //in mA //!assembled
 	warn_undercurrent_U5I1=0;
-	warn_overcurrent_U5I1=0; //brakelight //!!!
+	warn_overcurrent_U5I1=668; //brakelight
 
 	warn_undervoltage_U6=22000;
 	warn_overvoltage_U6=28000;
@@ -507,16 +507,16 @@ void Config_36(void)
 	warn_undertemperature_U7=0;
 	warn_overtemperature_U7=1023;
 	warn_undercurrent_U7I0=0;
-	warn_overcurrent_U7I0=0; //Accumualtor PCBs //!!!
+	warn_overcurrent_U7I0=600; //Accumualtor PCBs
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=0; //Accumulator Fans //!!!
+	warn_overcurrent_U7I1=2723; //Accumulator Fans
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
-	cutoff_overcurrent_U5I1 = 999; //!!!
+	cutoff_overcurrent_U5I1 = 1168;
 	cutoff_overcurrent_U6I0 = 1060;
 	cutoff_overcurrent_U6I1 = 1060;
-	cutoff_overcurrent_U7I0 = 999; //!!!
-	cutoff_overcurrent_U7I1 = 999; //!!!
+	cutoff_overcurrent_U7I0 = 1100;
+	cutoff_overcurrent_U7I1 = 3223;
 
 	Digital_In_EN = 0b00000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	PWM_Out_EN = 0b00000000;
