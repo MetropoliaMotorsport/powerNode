@@ -167,7 +167,7 @@ void Clear_Error(uint8_t error)
 		break;
 	}
 
-	Acknowledge(CLEAR_ERROR, 0, 0, 0, 0);
+	Acknowledge(CLEAR_ERROR, error, 0, 0, 0);
 }
 
 
