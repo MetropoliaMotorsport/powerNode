@@ -208,6 +208,37 @@ uint8_t U7I0_error;
 uint8_t U7I1_error;
 
 
+uint8_t CheckCanError( void )
+{
+	FDCAN_ProtocolStatusTypeDef CAN1Status;
+
+	static uint8_t offcan1 = 0;
+
+	HAL_FDCAN_GetProtocolStatus(&hfdcan, &CAN1Status);
+
+	static uint8_t offcan = 0;
+
+	if ( !offcan1 && CAN1Status.BusOff) // detect passive error instead and try to stay off bus till clears?
+	{
+		  HAL_FDCAN_Stop(&hfdcan);
+		  Set_Error(ERR_CANOFFLINE);
+		  // set LED.
+		  offcan = 1;
+		  return 0;
+	}
+
+	// use the senderrorflag to only try once a second to get back onbus.
+	if ( CAN1Status.BusOff && canSendErrorFlag )
+	{
+		if (HAL_FDCAN_Start(&hfdcan) == HAL_OK)
+		{
+			offcan = 0;
+		}
+	}
+
+	return offcan;
+}
+
 int main(void)
 {
 	HAL_Init();
@@ -254,49 +285,52 @@ int main(void)
 
 	while(1)
 	{
-		if (CanSyncFlag)
+		if ( ! CheckCanError() ) // don't try to do anything canbus related if it's offline.
 		{
-			Can_Sync();
-			CanSyncFlag=0;
-		}
-
-		if(canErrorToTransmit && canSendErrorFlag)
-		{
-			Send_Error();
-			if(!canErrorToTransmit)
+			if (CanSyncFlag)
 			{
-				canSendErrorFlag=0;
+				Can_Sync();
+				CanSyncFlag=0;
 			}
-		}
 
-		if(CanTimerFlag)
-		{
-			for(uint32_t i=0; i<8; i++)
+			if(canErrorToTransmit && canSendErrorFlag)
 			{
-				if ((Can_Timed_Enable>>i)&0b1)
+				Send_Error();
+				if(!canErrorToTransmit)
 				{
-					Buffer_Can_Message(i);
+					canSendErrorFlag=0;
 				}
 			}
-			CanTimerFlag=0;
-		}
 
-		if (CanMessagesToSend)
-		{
-			//only put one thing to the fifo at a time so that sync message can be put to the front of the fifo
-			if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 2)
+			if(CanTimerFlag)
 			{
-				Can_Send(CanBuffer[CanBufferReadPos]);
-
-				CanBuffer[CanBufferReadPos]=255;
-				CanMessagesToSend--;
-				if(CanBufferReadPos>=30)
+				for(uint32_t i=0; i<8; i++)
 				{
-					CanBufferReadPos=0;
+					if ((Can_Timed_Enable>>i)&0b1)
+					{
+						Buffer_Can_Message(i);
+					}
 				}
-				else
+				CanTimerFlag=0;
+			}
+
+			if (CanMessagesToSend)
+			{
+				//only put one thing to the fifo at a time so that sync message can be put to the front of the fifo
+				if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan) > 2)
 				{
-					CanBufferReadPos++;
+					Can_Send(CanBuffer[CanBufferReadPos]);
+
+					CanBuffer[CanBufferReadPos]=255;
+					CanMessagesToSend--;
+					if(CanBufferReadPos>=30)
+					{
+						CanBufferReadPos=0;
+					}
+					else
+					{
+						CanBufferReadPos++;
+					}
 				}
 			}
 		}

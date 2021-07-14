@@ -393,9 +393,9 @@ void Config_35(void)
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=2200; //2x fans
+	warn_overcurrent_U6I0=2600; //2x fans
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=2200; //2x fans
+	warn_overcurrent_U6I1=2600; //2x fans
 
 	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
@@ -408,8 +408,8 @@ void Config_35(void)
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
-	cutoff_overcurrent_U6I0 = 2700;
-	cutoff_overcurrent_U6I1 = 2700;
+	cutoff_overcurrent_U6I0 = 3200;
+	cutoff_overcurrent_U6I1 = 3200;
 	cutoff_overcurrent_U7I0 = 3600;
 	cutoff_overcurrent_U7I1 = 3600;
 
