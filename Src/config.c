@@ -649,7 +649,7 @@ void Config_37(void)
 		Digital_In_Interrupt_PWM_Rising[i]=temp_Digital_In_Interrupt_PWM_Rising[i];
 	}
 
-	Default_Switch_State = 0b00000000;
+	Default_Switch_State = 0b00100000;
 
 	Can_IDs[0] = 1714; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
 	Can_DLCs[0] = 3; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
