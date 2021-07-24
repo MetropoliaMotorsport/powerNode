@@ -1,6 +1,0 @@
-checks.c:13:6:Check_I0_Warn	8	static
-checks.c:68:6:Check_I1_Warn	8	static
-checks.c:123:6:Check_T_Warn	24	static
-checks.c:161:6:Check_V_Warn	40	static
-checks.c:200:6:Check_I0_Switch	8	static
-checks.c:226:6:Check_I1_Switch	8	static
