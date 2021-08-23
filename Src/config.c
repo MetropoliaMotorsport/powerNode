@@ -299,14 +299,14 @@ void Config_34(void)
 	warn_undercurrent_U7I0=0;
 	warn_overcurrent_U7I0=610; //ECU
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=951; //3x analog nodes, 2x brake pressure sensor, IMU, AIM
+	warn_overcurrent_U7I1=1451; //3x analog nodes, 2x brake pressure sensor, IMU, AIM // 951
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 3000;
 	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 1451;
+	cutoff_overcurrent_U7I1 = 2000; // 1451
 
 	//[x][x][x][Shutdown Button][Shutdown Button][Shutdown Button][x][x]
 	Digital_In_EN = 0b00011100; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
@@ -602,9 +602,9 @@ void Config_37(void)
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=4095; //!assembled
+	warn_overcurrent_U6I0=668; //brakelight
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=4095; //!assembled
+	warn_overcurrent_U6I1=560; //buzzers
 
 	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
@@ -652,9 +652,9 @@ void Config_37(void)
 	Default_Switch_State = 0b00100000;
 
 	Can_IDs[0] = 1714; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
-	Can_DLCs[0] = 3; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
+	Can_DLCs[0] = 5; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
 
-	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 0, 0, 0, 0, 0 },
+	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 1, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -662,7 +662,7 @@ void Config_37(void)
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
-	uint8_t temp_Can_Config_Datas[8][8]={	{ MESS_DI, MESS_U7I0, MESS_U7I1, 0, 0, 0, 0, 0 },
+	uint8_t temp_Can_Config_Datas[8][8]={	{ MESS_DI, MESS_U7I0, MESS_U7I1, MESS_U6I0, MESS_U6I1, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
