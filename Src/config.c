@@ -299,14 +299,14 @@ void Config_34(void)
 	warn_undercurrent_U7I0=0;
 	warn_overcurrent_U7I0=610; //ECU
 	warn_undercurrent_U7I1=0;
-	warn_overcurrent_U7I1=1451; //3x analog nodes, 2x brake pressure sensor, IMU, AIM // 951
+	warn_overcurrent_U7I1=2000; //3x analog nodes, 2x brake pressure sensor, IMU, AIM // 951
 
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 4000;
 	cutoff_overcurrent_U6I1 = 3000;
 	cutoff_overcurrent_U7I0 = 1110;
-	cutoff_overcurrent_U7I1 = 2000; // 1451
+	cutoff_overcurrent_U7I1 = 2500; // 1451
 
 	//[x][x][x][Shutdown Button][Shutdown Button][Shutdown Button][x][x]
 	Digital_In_EN = 0b00011100; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
