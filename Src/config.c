@@ -622,8 +622,8 @@ void Config_37(void)
 	cutoff_overcurrent_U7I0 = 1005;
 	cutoff_overcurrent_U7I1 = 1400;
 
-	//[x][x][x][TS_OFF][AIR- sense][AIR+ sense][x][PRE sense]
-	Digital_In_EN = 0b00011101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+	//[x][x][IMD][TS_OFF][AIR- sense][AIR+ sense][x][PRE sense]
+	Digital_In_EN = 0b00111101; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
 	PWM_Out_EN = 0b00000000;
 	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
 	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
