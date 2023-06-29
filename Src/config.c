@@ -586,6 +586,116 @@ void Config_36(void)
 	SampleVoltageBurst=0;
 }
 
+#ifdef HPF2023
+void Config_37(void)
+{
+	warn_undervoltage_U5=22000; //in mV
+	warn_overvoltage_U5=28000;
+	warn_undertemperature_U5=0; //please don't use, working poorly in hardware
+	warn_overtemperature_U5=1023;
+	warn_undercurrent_U5I0=0;
+	warn_overcurrent_U5I0=668; //in mA ////brakelight
+	warn_undercurrent_U5I1=0;
+	warn_overcurrent_U5I1=560; // buzzers
+
+	warn_undervoltage_U6=22000;
+	warn_overvoltage_U6=28000;
+	warn_undertemperature_U6=0;
+	warn_overtemperature_U6=1023;
+	warn_undercurrent_U6I0=0;
+	warn_overcurrent_U6I0=2500; // inverters
+	warn_undercurrent_U6I1=0;
+	warn_overcurrent_U6I1=560;
+
+	warn_undervoltage_U7=22000;
+	warn_overvoltage_U7=28000;
+	warn_undertemperature_U7=0;
+	warn_overtemperature_U7=1023;
+	warn_undercurrent_U7I0=0;
+	warn_overcurrent_U7I0=4095;
+	warn_undercurrent_U7I1=0;
+	warn_overcurrent_U7I1=4095;
+
+	cutoff_overcurrent_U5I0 = 4000; //in mA
+	cutoff_overcurrent_U5I1 = 4000;
+	cutoff_overcurrent_U6I0 = 4000;
+	cutoff_overcurrent_U6I1 = 4000;
+	cutoff_overcurrent_U7I0 = 4000;
+	cutoff_overcurrent_U7I1 = 4000;
+
+	//[x][x][x][TS_OFF][IMD][AIR+ sense][x][PRE sense]
+	Digital_In_EN = 0b0000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
+	PWM_Out_EN = 0b00000000;
+	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 0; PWM_Prescalers[3] = 0; PWM_Prescalers[4] = 0;
+	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 0; PWM_Pulses[3] = 0; PWM_Pulses[4] = 0;
+	PWM_In_EN = 0b00000000;
+
+	uint32_t temp_Digital_In_Interrupt_Can_Falling[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Can_Rising[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_High_Rising[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_High_Falling[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_PWM_Rising[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_PWM_Falling[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_Low_Rising[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	uint32_t temp_Digital_In_Interrupt_Power_Low_Falling[5]={ 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 };
+	for(uint32_t i=0; i<5; i++)
+	{
+		Digital_In_Interrupt_Can_Falling[i]=temp_Digital_In_Interrupt_Can_Falling[i];
+		Digital_In_Interrupt_Can_Rising[i]=temp_Digital_In_Interrupt_Can_Rising[i];
+		Digital_In_Interrupt_Power_High_Falling[i]=temp_Digital_In_Interrupt_Power_High_Falling[i];
+		Digital_In_Interrupt_Power_High_Rising[i]=temp_Digital_In_Interrupt_Power_High_Rising[i];
+		Digital_In_Interrupt_Power_Low_Falling[i]=temp_Digital_In_Interrupt_Power_Low_Falling[i];
+		Digital_In_Interrupt_Power_Low_Rising[i]=temp_Digital_In_Interrupt_Power_Low_Rising[i];
+		Digital_In_Interrupt_PWM_Falling[i]=temp_Digital_In_Interrupt_PWM_Falling[i];
+		Digital_In_Interrupt_PWM_Rising[i]=temp_Digital_In_Interrupt_PWM_Rising[i];
+	}
+
+
+	Default_Switch_State = 0b00000000; // inverters not powered on startup
+//	Default_Switch_State = 0b00000100; // inverters powered on startup
+
+	Can_IDs[0] = 1714; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
+	Can_DLCs[0] = 5; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
+
+	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
+	uint8_t temp_Can_Config_Datas[8][8]={	{ MESS_U6I1, MESS_U6I0, MESS_U5I1, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 },
+											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
+	for(uint32_t i=0; i<8; i++)
+	{
+		for(uint32_t j=0; j<8; j++)
+		{
+			Can_Config_Bytes[i][j]=temp_Can_Config_Bytes[i][j];
+			Can_Config_Datas[i][j]=temp_Can_Config_Datas[i][j];
+		}
+	}
+	Can_Sync_Enable = 0b00000001;
+	Can_Timed_Enable = 0b00000000;
+	Can_Interval=1000;
+	Can_Sync_Delay=0; //500 corresponds to 5ms delay
+
+	//please do not use temperature sampling for anything as it gives so unusable data
+	sample_temperature=0; //these are only saved to allow configuration of continous temperature/voltage reading
+	sample_voltage=0;
+	SampleTemperatureVoltagePeriod=10; //1ms is a good compromise for now with temperature and whatnot, can test higher numbers if too hot
+	SampleTemperatureBurst=0;
+	SampleVoltageBurst=0;
+}
+
+#else
+
 void Config_37(void)
 {
 	warn_undervoltage_U5=22000; //in mV
@@ -690,7 +800,7 @@ void Config_37(void)
 	SampleTemperatureBurst=0;
 	SampleVoltageBurst=0;
 }
-
+#endif
 
 void Config_Write_Flash(void)
 {

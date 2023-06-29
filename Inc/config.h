@@ -1,8 +1,10 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#define HPF2023
+
 //ID definition
-#define ID 37
+#define ID 35
 
 //debugging definitions, only used for ID 0
 #define TEST_PWN_NOT_INPUT	0
