@@ -384,18 +384,18 @@ void Config_35(void)
 	warn_undertemperature_U5=0; //please don't use, working poorly in hardware
 	warn_overtemperature_U5=1023;
 	warn_undercurrent_U5I0=0;
-	warn_overcurrent_U5I0=4095; //in mA //!assembled
+	warn_overcurrent_U5I0=2600; //in mA //2x fans
 	warn_undercurrent_U5I1=0;
-	warn_overcurrent_U5I1=4095; //!assembled
+	warn_overcurrent_U5I1=2600; //2x fans
 
 	warn_undervoltage_U6=22000;
 	warn_overvoltage_U6=28000;
 	warn_undertemperature_U6=0;
 	warn_overtemperature_U6=1023;
 	warn_undercurrent_U6I0=0;
-	warn_overcurrent_U6I0=2600; //2x fans
+	warn_overcurrent_U6I0=4000;
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=2600; //2x fans
+	warn_overcurrent_U6I1=4000; // not used, faulty?
 
 	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
@@ -415,7 +415,7 @@ void Config_35(void)
 
 	//[x][x][x][x][x][x][x][x]
 	Digital_In_EN = 0b00000000; //bit for PB4 is 0 to ensure it isn't used as PB4 seemed to have hardware problems
-	PWM_Out_EN = 0b00001100; //[x][x][x][x][right fan PWM][left fan PWM][x][x]
+	PWM_Out_EN = 0b00000011; //[x][x][x][x][right fan PWM][left fan PWM][x][x]
 	PWM_Prescalers[0] = 0; PWM_Prescalers[1] = 0; PWM_Prescalers[2] = 32; PWM_Prescalers[3] = 32; PWM_Prescalers[4] = 0;
 	PWM_Pulses[0] = 0; PWM_Pulses[1] = 0; PWM_Pulses[2] = 256; PWM_Pulses[3] = 256; PWM_Pulses[4] = 0;
 	PWM_In_EN = 0b00000000;
