@@ -605,7 +605,7 @@ void Config_37(void)
 	warn_undercurrent_U6I0=0;
 	warn_overcurrent_U6I0=2500; // inverters
 	warn_undercurrent_U6I1=0;
-	warn_overcurrent_U6I1=560;
+	warn_overcurrent_U6I1=900; // TSAL
 
 	warn_undervoltage_U7=22000;
 	warn_overvoltage_U7=28000;
@@ -619,7 +619,7 @@ void Config_37(void)
 	cutoff_overcurrent_U5I0 = 4000; //in mA
 	cutoff_overcurrent_U5I1 = 4000;
 	cutoff_overcurrent_U6I0 = 4000;
-	cutoff_overcurrent_U6I1 = 4000;
+	cutoff_overcurrent_U6I1 = 1400;
 	cutoff_overcurrent_U7I0 = 4000;
 	cutoff_overcurrent_U7I1 = 4000;
 
@@ -651,13 +651,13 @@ void Config_37(void)
 	}
 
 
-	Default_Switch_State = 0b00000000; // inverters not powered on startup
-//	Default_Switch_State = 0b00000100; // inverters powered on startup
+	Default_Switch_State = 0b00001000; // inverters not powered on startup. TSAL powered.
+//	Default_Switch_State = 0b00001100; // inverters powered on startup
 
 	Can_IDs[0] = 1714; Can_IDs[1] = 0x10; Can_IDs[2] = 0x11; Can_IDs[3] = 0x12; Can_IDs[4] = 0x13; Can_IDs[5] = 0x14; Can_IDs[6] = 0x15; Can_IDs[7] = 0x16;
-	Can_DLCs[0] = 5; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
+	Can_DLCs[0] = 4; Can_DLCs[1] = 8; Can_DLCs[2] = 3; Can_DLCs[3] = 1; Can_DLCs[4] = 2; Can_DLCs[5] = 8; Can_DLCs[6] = 3; Can_DLCs[7] = 7;
 
-	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 0, 0, 0, 0, 0 },
+	uint8_t temp_Can_Config_Bytes[8][8]={	{ 1, 1, 1, 1, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -665,7 +665,7 @@ void Config_37(void)
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 }	};
-	uint8_t temp_Can_Config_Datas[8][8]={	{ MESS_U6I1, MESS_U6I0, MESS_U5I1, 0, 0, 0, 0, 0 },
+	uint8_t temp_Can_Config_Datas[8][8]={	{ MESS_U6I1, MESS_U6I0, MESS_U5I1, MESS_U5I0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
 											{ 0, 0, 0, 0, 0, 0, 0, 0 },
